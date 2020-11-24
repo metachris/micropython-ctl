@@ -5,7 +5,7 @@
     ],
     "jsRules": {},
     "rules": {
-      "no-console": true,
+      "no-console": false,
       "object-literal-sort-keys": false,
       "no-implicit-dependencies": false,
       "no-submodule-imports": false

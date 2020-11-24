@@ -8,7 +8,7 @@ Basic functions:
 - `connect(hostname, password)`
 - `disconnect()`
 - `websocketSendData(data: string | ArrayBuffer)` ... just send plain socket data
-- `replRunCommand(cmd: string)` ... run a Python command (should also lude multi-line "paste", note that original webrepl doesn't send ge clipboards)
+- `runReplCommand(cmd: string)` ... run a Python command (should also lude multi-line "paste", note that original webrepl doesn't send ge clipboards)
 
 webrepl protocol commands:
 - `GET_VER()`
@@ -20,18 +20,28 @@ helper:
 
 ### States
 
-* [Websocket](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/readyState):
+* [WebsocketState](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/readyState):
   * `CONNECTING` (0)
   * `OPEN` (1)
   * `CLOSING` (2)
   * `CLOSED` (3)
 
-* Repl:
+* ReplState:
   * `CONNECTING`
   * `ASKING_FOR_PASSWORD`
   * `INVALID_PASSWORD`
   * `OPEN`
   * `CLOSED`
+
+* ReplMode:
+  * `TERMINAL` (raw io, default)
+  * `WAITING_RESPONSE_COMMAND` (waiting for response after a REPL command was sent with `runReplCommand(cmd)`)
+  * `WAITING_RESPONSE_GETVER`
+  * `WAITING_RESPONSE_GETFILE_INIT`
+  * `WAITING_RESPONSE_GETFILE_CONTENT`
+  * `WAITING_RESPONSE_GETFILE_END`
+  * `WAITING_RESPONSE_PUTFILE_INIT`
+  * `WAITING_RESPONSE_PUTFILE_END`
 
 ### Events
 

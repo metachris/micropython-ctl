@@ -6,7 +6,7 @@ const password = 'test'
 
 const run = async () => {
   try {
-    const webrepl = new WebREPL()
+    const webrepl = new WebREPL({ attachStateToWindow: true })
     await webrepl.connect(host, password)
   } catch (e) {
     // probably invalid password, but could also invalid host or another websocket error
@@ -17,3 +17,5 @@ const run = async () => {
     }
   }
 }
+
+run()
