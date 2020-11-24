@@ -1,3 +1,5 @@
+import WebSocket from 'ws'
+
 import { InvalidPassword } from './errors'
 
 export enum WebSocketState {
@@ -9,8 +11,7 @@ export enum WebSocketState {
 
 export enum WebReplState {
   CONNECTING = 'CONNECTING',
-  ASKING_FOR_PASSWORD = 'ASKING_FOR_PASSWORD',
-  INVALID_PASSWORD = 'INVALID_PASSWORD',
+  // ASKING_FOR_PASSWORD = 'ASKING_FOR_PASSWORD',
   OPEN = 'OPEN',
   CLOSED = 'CLOSED',
 }
@@ -27,9 +28,12 @@ export interface WebReplOptions {
 
 export interface IWebReplState {
   ws: WebSocket | null
-  wsState: WebSocketState
+  // wsState: WebSocketState
   replState: WebReplState
   replMode: WebReplMode // only if replState is connected
+
+  replPassword: string
+  inputBuffer: string
 }
 
 export interface WindowWithWebRepl extends Window {
@@ -39,21 +43,20 @@ export interface WindowWithWebRepl extends Window {
 declare const window: WindowWithWebRepl;
 
 export class WebREPL {
-  options: WebReplOptions | null
   state: IWebReplState
 
   getInitState(): IWebReplState {
     return {
       ws: null,
-      wsState: WebSocketState.CLOSED,
+      // wsState: WebSocketState.CLOSED,
       replState: WebReplState.CLOSED,
-      replMode: WebReplMode.TERMINAL
+      replMode: WebReplMode.TERMINAL,
+      inputBuffer: '',
+      replPassword: ''
     }
   }
 
   constructor(options?: WebReplOptions) {
-    this.options = options || null
-
     // State init, either local only or also on a window instance (for code hot reloading)
     if (options?.attachStateToWindow) {
       this.attachStateToWindow(options.attachStateToWindow)
@@ -104,5 +107,59 @@ export class WebREPL {
       console.warn("webrepl: Cannot connect, already active ws connection", this.state.ws)
       return
     }
+
+    const uri = `ws://${host}:8266`
+    console.log('ws connect', uri)
+    this.state.replState = WebReplState.CONNECTING
+    this.state.replPassword = password
+
+    this.state.ws = new WebSocket(uri)
+    this.state.ws.binaryType = 'arraybuffer'
+
+    this.state.ws.onerror = (err) => console.log(`WebSocket error`, err)
+    this.state.ws.onclose = () => {
+      console.log(`WebSocket onclose`)
+      this.state.replState = WebReplState.CLOSED
+    }
+    this.state.ws.onopen = () => {
+      console.log(`WebSocket connected`)
+    }
+    this.state.ws.onmessage = (event) => this.onWebsocketMessage(event)
   }
+
+  private onWebsocketMessage(event: WebSocket.MessageEvent) {
+    console.log(`onWebsocketMessage: isArrayBuffer: ${event.data instanceof ArrayBuffer}`, event.data)
+    const dataTrimmed = event.data.toString().trim()
+    console.log(`dataTrimmed: '${dataTrimmed}'`)
+
+    // check if needing to input password
+    if (this.state.replState === WebReplState.CONNECTING) {
+      if (dataTrimmed === 'Password:') {
+        this.state.ws!.send(this.state.replPassword + '\r')
+        return
+
+      } else if (dataTrimmed === 'Access denied') {
+        this.state.ws!.close()  // just to be sure. micropy already closes the connection
+        throw new InvalidPassword('REPL password invalid')
+
+      } else if (dataTrimmed.startsWith('WebREPL connected')) {
+        this.state.replState = WebReplState.OPEN
+        this.state.replMode = WebReplMode.TERMINAL
+        this.state.inputBuffer = ''
+        return
+      }
+    }
+
+    // All messages received after here have a successful, open REPL+WS connection.
+    // From here on comes the plain REPL output
+    if (dataTrimmed === '>>>') {
+      console.log('end of data,', this.state.inputBuffer)
+    } else {
+      this.state.inputBuffer += event.data.toString()
+    }
+  }
+
+  // replSendCommand() {
+  //   this.
+  // }
 }
