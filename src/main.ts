@@ -131,12 +131,13 @@ export class WebREPL {
   }
 
   private onWebsocketMessage(event: WebSocket.MessageEvent) {
-    // Do nothing if websocket is already closing
-    // if (this.state.ws?.readyState === WebSocket.CLOSING) return
+    const data = event.data.toString()
+    const dataTrimmed = data.trim()
 
-    console.log(`onWebsocketMessage: isArrayBuffer: ${event.data instanceof ArrayBuffer}`, event.data, event.data)
-    const dataTrimmed = event.data.toString().trim()
-    // console.log(`dataTrimmed: '${dataTrimmed}'`)
+    // do nothing if special final bytes on closing a ws connection
+    if (this.state.ws!.readyState === WebSocket.CLOSING && data.length === 2 && data.charCodeAt(0) === 65533 && data.charCodeAt(1) === 0) return
+
+    console.log(`onWebsocketMessage:${event.data instanceof ArrayBuffer ? ' [ArrayBuffer]' : ''}${data.endsWith('\n') ? ' [End:\\n]' : ''}`, data.length, data)
 
     // check if needing to input password
     if (this.state.replState === WebReplState.CONNECTING) {
@@ -158,13 +159,8 @@ export class WebREPL {
     }
 
     // All messages received after here have a successful, open REPL+WS connection.
-    const data = event.data.toString()
-
     // Handle plain terminal io
     if (this.state.replMode === WebReplMode.TERMINAL) {
-      // do nothing if special final bytes on closing a ws connection
-      if (this.state.ws!.readyState === WebSocket.CLOSING && data.length === 2 && data.charCodeAt(0) === 65533 && data.charCodeAt(1) === 0) return
-
       // handle terminal message
       console.log('term:', data, data.length)
       return

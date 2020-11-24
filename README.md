@@ -7,7 +7,6 @@ Goal: easy to use, async WebREPL. For websites and Node.js apps.
 Basic functions:
 - `connect(hostname, password)`
 - `disconnect()`
-- `websocketSendData(data: string | ArrayBuffer)` ... just send plain socket data
 - `runReplCommand(cmd: string)` ... run a Python command (should also lude multi-line "paste", note that original webrepl doesn't send ge clipboards)
 
 webrepl protocol commands:
@@ -18,20 +17,7 @@ webrepl protocol commands:
 helper:
 - `listFiles()`
 
-### States
-
-* [WebsocketState](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/readyState):
-  * `CONNECTING` (0)
-  * `OPEN` (1)
-  * `CLOSING` (2)
-  * `CLOSED` (3)
-
-* ReplState:
-  * `CONNECTING`
-  * `ASKING_FOR_PASSWORD`
-  * `INVALID_PASSWORD`
-  * `OPEN`
-  * `CLOSED`
+### Modes
 
 * ReplMode:
   * `TERMINAL` (raw io, default)
