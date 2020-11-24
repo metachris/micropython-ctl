@@ -15,13 +15,21 @@
     {
       "type": "npm",
       "script": "test",
-      "group": {
-        "kind": "test",
-        "isDefault": true
-      },
+      "group": "test",
       "problemMatcher": [],
       "label": "npm: test",
       "detail": "jest"
+    },
+    {
+      "type": "npm",
+      "script": "runExample",
+      "problemMatcher": [],
+      "label": "npm: runExample",
+      "detail": "ts-node examples/basic.ts",
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      }
     }
   ]
 }
