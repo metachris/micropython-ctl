@@ -10,13 +10,15 @@
     "clean": "rm -rf dist build lib",
     "lint": "tslint -c tslint.json 'src/**/*.ts' 'test/**/*.ts'",
     "build": "tsc -p tsconfig.json",
-    "test": "jest"
+    "test": "jest",
+    "runExample": "ts-node examples/basic.ts"
   },
   "devDependencies": {
     "@types/jest": "^26.0.15",
     "@types/node": "^14.14.9",
     "jest": "^26.6.3",
     "ts-jest": "^26.4.4",
+    "ts-node": "^9.0.0",
     "tslint": "^6.1.3",
     "typescript": "^4.1.2"
   }

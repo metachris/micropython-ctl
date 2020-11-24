@@ -12,6 +12,7 @@ test('throws correct errors ', () => {
   const t = () => {
     throw new InvalidPassword('xxx')
   }
+  expect(t).toThrow(Error);
   expect(t).toThrow(InvalidPassword);
   expect(t).not.toThrow(BarError);
 });
