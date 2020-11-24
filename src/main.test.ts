@@ -1,6 +1,17 @@
 import { assert } from "console";
+import { InvalidPassword } from './errors'
 
-// Don't do this!
-test('the data is peanut butter', () => {
-  assert(1 === 1)
+test('throws correct errors ', () => {
+  class BarError extends Error {
+    constructor(m: string) {
+        super(m);
+        Object.setPrototypeOf(this, BarError.prototype);
+    }
+  }
+
+  const t = () => {
+    throw new InvalidPassword('xxx')
+  }
+  expect(t).toThrow(InvalidPassword);
+  expect(t).not.toThrow(BarError);
 });

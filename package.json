@@ -4,6 +4,7 @@
   "description": "MicroPython WebREPL in TypeScript for browsers and Node.js",
   "main": "./lib/main.js",
   "types": "./lib/main.d.ts",
+  "author": "Chris Hager <chris@linuxuser.at>",
   "license": "MIT",
   "scripts": {
     "clean": "rm -rf dist build lib",
