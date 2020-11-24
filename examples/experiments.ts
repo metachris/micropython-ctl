@@ -12,22 +12,32 @@ const webrepl = new WebREPL()
 webrepl.onclose = () => process.exit(0)
 
 // Keystroke capture for interactive REPL
-let maybeQuit = false
+let specialMode = false
 readline.emitKeypressEvents(process.stdin);
 process.stdin.setRawMode(true);
 process.stdin.on('keypress', async (str, key) => {
   // console.log(str, key)
 
-  // can force quit with ^] and ^D (same as in SSH)
-  if (maybeQuit && key.sequence === '\u0004' && key.ctrl) {
-    process.exit(0)
+  // Enter special mode with ^] (force quit with ^] and ^D)
+  const wasSpecialMode = specialMode
+  specialMode = key.sequence === '\u001d'
+
+  if (wasSpecialMode) {
+    if (key.sequence === '\u0004' && key.ctrl) {
+      process.exit(0)
+
+    } else if (key.sequence === 'w') {
+      console.log(webrepl.state.ws)
+
+    } else if (key.sequence === 'l') {
+      const cmd = 'import os; os.listdir()'
+      console.log(cmd)
+      const output = await webrepl.runReplCommand(cmd)
+      console.log(output)
+    }
+
+    return
   }
-
-  // on Ctrl+], remember that user might want to force quit
-  maybeQuit = key.sequence === '\u001d'
-
-  // Dirty helper: do something on pressing {
-  if (key.sequence === '{') return console.log(webrepl.state.ws)
 
   // Send key to webrepl
   if (webrepl.state.replMode === WebReplMode.TERMINAL) {
