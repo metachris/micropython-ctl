@@ -1,6 +1,6 @@
 import WebSocket from 'ws'
-
 import { InvalidPassword } from './errors'
+export { InvalidPassword }
 
 export enum WebReplState {
   CONNECTING = 'CONNECTING',
@@ -26,21 +26,25 @@ export interface IWebReplState {
 
   replPromise: Promise<string> | null;  // helper to await command executions
   replPromiseResolve: (value: string | PromiseLike<string>) => void;
+  replPromiseReject: (value: string | PromiseLike<string>) => void;
 
   lastCommand: string
   inputBuffer: string
 }
 
 export interface WindowWithWebRepl extends Window {
+  [x: string]: any;
+  testWindow: any;
   webReplState: IWebReplState | undefined
 }
 
 declare const window: WindowWithWebRepl;
 
 export class WebREPL {
+  onclose: () => void
   state: IWebReplState
 
-  getInitState(): IWebReplState {
+  private getInitState(): IWebReplState {
     return {
       ws: null,
       replState: WebReplState.CLOSED,
@@ -50,7 +54,8 @@ export class WebREPL {
       lastCommand: '',
       replPromise: null,
       // tslint:disable-next-line: no-empty
-      replPromiseResolve: () => {}
+      replPromiseResolve: () => {},
+      replPromiseReject: () => {}
     }
   }
 
@@ -107,26 +112,28 @@ export class WebREPL {
     }
 
     const uri = `ws://${host}:8266`
-    console.log('ws connect', uri)
+    // console.log('connect', uri)
     this.state.replState = WebReplState.CONNECTING
     this.state.replPassword = password
 
     this.state.ws = new WebSocket(uri)
     this.state.ws.binaryType = 'arraybuffer'
 
+    // this.state.ws.onopen = () => console.log(`WebSocket connected`)
+    this.state.ws.onmessage = (event) => this.onWebsocketMessage(event)
     this.state.ws.onerror = (err) => console.log(`WebSocket error`, err)
     this.state.ws.onclose = () => {
-      console.log(`WebSocket onclose`)
+      // console.log(`WebSocket onclose`)
       this.state.replState = WebReplState.CLOSED
       this.state.replPromiseResolve('') // release the 'close' async event
+      if (this.onclose) this.onclose()
     }
-    this.state.ws.onopen = () => {
-      console.log(`WebSocket connected`)
-    }
-    this.state.ws.onmessage = (event) => this.onWebsocketMessage(event)
 
     // create and return a new promise, which is fulfilled only after connecting to repl
-    this.state.replPromise = new Promise((resolve) => this.state.replPromiseResolve = resolve)
+    this.state.replPromise = new Promise((resolve, reject) => {
+      this.state.replPromiseResolve = resolve
+      this.state.replPromiseReject = reject
+    })
     return this.state.replPromise
   }
 
@@ -137,7 +144,7 @@ export class WebREPL {
     // do nothing if special final bytes on closing a ws connection
     if (this.state.ws!.readyState === WebSocket.CLOSING && data.length === 2 && data.charCodeAt(0) === 65533 && data.charCodeAt(1) === 0) return
 
-    console.log(`onWebsocketMessage:${event.data instanceof ArrayBuffer ? ' [ArrayBuffer]' : ''}${data.endsWith('\n') ? ' [End:\\n]' : ''}`, data.length, data)
+    // console.log(`onWebsocketMessage:${event.data instanceof ArrayBuffer ? ' [ArrayBuffer]' : ''}${data.endsWith('\n') ? ' [End:\\n]' : ''}${data.length < 3 ? ' [char0:' + data.charCodeAt(0) + ']'  : ''}`, data.length, data)
 
     // check if needing to input password
     if (this.state.replState === WebReplState.CONNECTING) {
@@ -147,7 +154,8 @@ export class WebREPL {
 
       } else if (dataTrimmed === 'Access denied') {
         this.state.ws!.close()  // just to be sure. micropy already closes the connection
-        throw new InvalidPassword('REPL password invalid')
+        this.state.replPromiseReject('REPL password invalid')
+        return
 
       } else if (dataTrimmed.startsWith('WebREPL connected')) {
         this.state.replState = WebReplState.OPEN
@@ -162,7 +170,8 @@ export class WebREPL {
     // Handle plain terminal io
     if (this.state.replMode === WebReplMode.TERMINAL) {
       // handle terminal message
-      console.log('term:', data, data.length)
+      // console.log('term:', data, data.length)
+      process.stdout.write(data)
       return
     }
 
@@ -202,6 +211,14 @@ export class WebREPL {
     this.state.ws.send(sanitizedCommand)
     this.state.replPromise = new Promise((resolve) => this.state.replPromiseResolve = resolve)
     return this.state.replPromise
+  }
+
+  wsSendData(data: string | ArrayBuffer) {
+    if (!this.state.ws || this.state.ws.readyState !== WebSocket.OPEN) {
+      throw new Error('wsSendData: No open websocket')
+    }
+    // console.log('wsSendData', data)
+    this.state.ws.send(data)
   }
 
   async close() {

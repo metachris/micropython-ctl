@@ -25,7 +25,7 @@
       "script": "runExample",
       "problemMatcher": [],
       "label": "npm: runExample",
-      "detail": "ts-node examples/basic.ts",
+      "detail": "ts-node examples/experiments.ts",
       "group": {
         "kind": "test",
         "isDefault": true

@@ -11,7 +11,7 @@
     "lint": "tslint -c tslint.json 'src/**/*.ts' 'test/**/*.ts'",
     "build": "tsc -p tsconfig.json",
     "test": "jest",
-    "runExample": "ts-node examples/basic.ts"
+    "runExample": "ts-node examples/experiments.ts"
   },
   "devDependencies": {
     "@types/jest": "^26.0.15",

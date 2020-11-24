@@ -1,6 +1,6 @@
-import { assert } from "console";
 import { InvalidPassword } from './errors'
 import { WebREPL, WindowWithWebRepl, WebReplState } from "./main";
+import WebSocket from 'ws'
 
 test('throws correct errors ', () => {
   class BarError extends Error {
@@ -38,9 +38,9 @@ test('attaching state to window for code hot reloading', () => {
   const webrepl2 = new WebREPL({ attachStateToWindow: testWindow })
   expect(webrepl2.state.replState).toEqual(WebReplState.OPEN)
 
-  webrepl2.state.replState = WebReplState.ASKING_FOR_PASSWORD
-  expect(testWindow.webReplState!.replState).toEqual(WebReplState.ASKING_FOR_PASSWORD)
-  expect(webrepl.state.replState).toEqual(WebReplState.ASKING_FOR_PASSWORD)
+  webrepl2.state.replState = WebReplState.CLOSED
+  expect(testWindow.webReplState!.replState).toEqual(WebReplState.CLOSED)
+  expect(webrepl.state.replState).toEqual(WebReplState.CLOSED)
 
   webrepl.state.replState = WebReplState.CONNECTING
   expect(testWindow.webReplState!.replState).toEqual(WebReplState.CONNECTING)
