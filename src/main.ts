@@ -34,6 +34,9 @@ export interface IWebReplState {
 
   replPassword: string
   inputBuffer: string
+
+  replPromise: Promise<string> | null;  // helper to await command executions
+  replPromiseResolve: (value: string | PromiseLike<string>) => void;
 }
 
 export interface WindowWithWebRepl extends Window {
@@ -52,7 +55,9 @@ export class WebREPL {
       replState: WebReplState.CLOSED,
       replMode: WebReplMode.TERMINAL,
       inputBuffer: '',
-      replPassword: ''
+      replPassword: '',
+      replPromise: null,
+      replPromiseResolve: () => {}
     }
   }
 
@@ -120,17 +125,22 @@ export class WebREPL {
     this.state.ws.onclose = () => {
       console.log(`WebSocket onclose`)
       this.state.replState = WebReplState.CLOSED
+      this.state.replPromiseResolve('') // release the 'close' async event
     }
     this.state.ws.onopen = () => {
       console.log(`WebSocket connected`)
     }
     this.state.ws.onmessage = (event) => this.onWebsocketMessage(event)
+
+    // create and return a new promise, which is fulfilled only after connecting to repl
+    this.state.replPromise = new Promise((resolve) => this.state.replPromiseResolve = resolve)
+    return this.state.replPromise
   }
 
   private onWebsocketMessage(event: WebSocket.MessageEvent) {
-    console.log(`onWebsocketMessage: isArrayBuffer: ${event.data instanceof ArrayBuffer}`, event.data)
+    console.log(`onWebsocketMessage: isArrayBuffer: ${event.data instanceof ArrayBuffer}`, event.data, event.data)
     const dataTrimmed = event.data.toString().trim()
-    console.log(`dataTrimmed: '${dataTrimmed}'`)
+    // console.log(`dataTrimmed: '${dataTrimmed}'`)
 
     // check if needing to input password
     if (this.state.replState === WebReplState.CONNECTING) {
@@ -146,6 +156,7 @@ export class WebREPL {
         this.state.replState = WebReplState.OPEN
         this.state.replMode = WebReplMode.TERMINAL
         this.state.inputBuffer = ''
+        this.state.replPromiseResolve('')
         return
       }
     }
@@ -153,13 +164,35 @@ export class WebREPL {
     // All messages received after here have a successful, open REPL+WS connection.
     // From here on comes the plain REPL output
     if (dataTrimmed === '>>>') {
-      console.log('end of data,', this.state.inputBuffer)
+      // console.log('end of data,', this.state.inputBuffer)
+      this.state.replPromiseResolve(this.state.inputBuffer)
     } else {
       this.state.inputBuffer += event.data.toString()
     }
   }
 
-  // replSendCommand() {
-  //   this.
-  // }
+  async runReplCommand(command: string) {
+    if (!this.state.ws || this.state.ws.readyState !== WebSocket.OPEN) {
+      throw new Error('runReplCommand: No open websocket')
+    }
+
+    command = command.replace(/\n/g, "\r")
+    if (!command.endsWith('\r')) { command += '\r' }
+    this.state.ws.send(command)
+    this.state.replPromise = new Promise((resolve) => this.state.replPromiseResolve = resolve)
+    return this.state.replPromise
+  }
+
+  async close() {
+    if (this.state.ws && this.state.ws.readyState === WebSocket.OPEN) {
+      console.log('closing')
+      this.state.ws.close()
+      this.state.replState = WebReplState.CLOSED
+      this.state.replPromise = new Promise((resolve) => this.state.replPromiseResolve = resolve)
+      return this.state.replPromise
+      } else {
+      console.log('wanting to close already closed websocket')
+      return true
+    }
+  }
 }

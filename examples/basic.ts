@@ -9,6 +9,12 @@ const run = async () => {
   try {
     const webrepl = new WebREPL()
     await webrepl.connect(host, password)
+    console.log('after connect')
+    const output = await webrepl.runReplCommand('import os; os.listdir()')
+    console.log('after run command', output)
+    await webrepl.close()
+    console.log('after close')
+
   } catch (e) {
     // probably invalid password, but could also invalid host or another websocket error
     if (e instanceof InvalidPassword) {
