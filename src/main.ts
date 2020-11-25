@@ -1,6 +1,6 @@
-import WebSocket from 'ws'
-import { InvalidPassword } from './errors'
-export { InvalidPassword }
+import WebSocket, { CONNECTING } from 'ws'
+import { InvalidPassword, CouldNotConnect } from './errors'
+export { InvalidPassword, CouldNotConnect }
 
 export enum WebReplState {
   CONNECTING = 'CONNECTING',
@@ -121,7 +121,15 @@ export class WebREPL {
 
     // this.state.ws.onopen = () => console.log(`WebSocket connected`)
     this.state.ws.onmessage = (event) => this.onWebsocketMessage(event)
-    this.state.ws.onerror = (err) => console.log(`WebSocket error`, err)
+    this.state.ws.onerror = (err) => {
+      // console.log(`WebSocket onerror`, err)
+      if (this.state.replState === WebReplState.CONNECTING) {
+        this.state.replPromiseReject(new CouldNotConnect(err.message) as unknown as string)
+      } else {
+        this.state.replPromiseReject(err as unknown as string)
+      }
+    }
+
     this.state.ws.onclose = () => {
       // console.log(`WebSocket onclose`)
       this.state.replState = WebReplState.CLOSED
@@ -154,7 +162,7 @@ export class WebREPL {
 
       } else if (dataTrimmed === 'Access denied') {
         this.state.ws!.close()  // just to be sure. micropy already closes the connection
-        this.state.replPromiseReject('REPL password invalid')
+        this.state.replPromiseReject(new InvalidPassword('REPL password invalid') as unknown as string)
         return
 
       } else if (dataTrimmed.startsWith('WebREPL connected')) {
