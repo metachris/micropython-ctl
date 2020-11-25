@@ -30,10 +30,11 @@ process.stdin.on('keypress', async (str, key) => {
       console.log(webrepl.state.ws)
 
     } else if (key.sequence === 'l') {
+      webrepl.listFiles().then((files) => console.log(`\nfiles:`, files))
+
+    } else if (key.sequence === 'p') {
       const cmd = 'import os; os.listdir()'
-      console.log(cmd)
-      const output = await webrepl.runReplCommand(cmd)
-      console.log(output)
+      await webrepl.wsSendData(cmd + '\r')
     }
 
     return

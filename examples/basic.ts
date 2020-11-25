@@ -14,6 +14,9 @@ const run = async () => {
     const output = await webrepl.runReplCommand('import os; os.listdir()')
     console.log('after run command', output)
 
+    const files = await webrepl.listFiles()
+    console.log('files:', files)
+
     await webrepl.close()
     console.log('after close')
 

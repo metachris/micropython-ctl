@@ -223,7 +223,7 @@ export class WebREPL {
 
   async close() {
     if (this.state.ws && this.state.ws.readyState === WebSocket.OPEN) {
-      console.log('closing')
+      // console.log('closing')
       this.state.ws.close()
       this.state.replState = WebReplState.CLOSED
       this.state.replPromise = new Promise((resolve) => this.state.replPromiseResolve = resolve)
@@ -232,5 +232,10 @@ export class WebREPL {
       console.log('wanting to close already closed websocket')
       return true
     }
+  }
+
+  async listFiles(): Promise<string[]> {
+    const output = await this.runReplCommand('import os; os.listdir()')
+    return JSON.parse(output.replace(/'/g, '"'))
   }
 }
