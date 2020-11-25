@@ -1,8 +1,3 @@
-/**
- * Simple interactive REPL terminal.
- *
- * You can force-quit with Ctrl+] followed by Ctrl+D (like SSH)
- */
 import readline from 'readline'
 import { WebREPL, WebReplMode } from '../src/main'
 
@@ -24,23 +19,39 @@ const setupKeyboardCapture = () => {
   process.stdin.on('keypress', async (str, key) => {
     // console.log(str, key)
 
-    // Enter special mode with ^]
+    // Enter special mode with ^] (force quit with ^] and ^D)
     const wasSpecialMode = specialMode
     specialMode = key.sequence === '\u001d'
-
-    // Force quit with ^D in special mode
     if (wasSpecialMode && key.sequence === '\u0004' && key.ctrl) {
-        process.exit(0)
+      process.exit(0)
     }
 
-    // Send character to webrepl
-    if (webrepl.isConnected() && webrepl.state.replMode === WebReplMode.TERMINAL) {
+    if (!webrepl.isConnected()) return
+
+    if (wasSpecialMode) {
+      if (key.sequence === 'w') {
+        console.log(webrepl.state.ws)
+
+      } else if (key.sequence === 'l') {
+        const files = await webrepl.listFiles()
+        console.log(`\nfiles:`, files)
+
+      } else if (key.sequence === 'p') {
+        const cmd = 'import os; os.listdir()'
+        webrepl.wsSendData(cmd + '\r')
+      }
+
+      return
+    }
+
+    // Send key to webrepl
+    if (webrepl.state.replMode === WebReplMode.TERMINAL) {
       webrepl.wsSendData(str)
     }
   });
 }
 
-// Main program: setup keycapture & connect to webrepl
+// Connect to webrepl and do stuff
 (async () => {
   setupKeyboardCapture()
   await webrepl.connect(HOST, PASSWORD)

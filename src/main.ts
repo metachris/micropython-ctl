@@ -42,6 +42,7 @@ declare const window: WindowWithWebRepl;
 
 export class WebREPL {
   onclose: () => void
+  onTerminalData: (data: string) => void
   state: IWebReplState
 
   private getInitState(): IWebReplState {
@@ -99,8 +100,8 @@ export class WebREPL {
     }
   }
 
-  public async connect(host, password?) {
-    console.log(`connect: host=${host}, password=${password}`)
+  public async connect(host: string, password?: string) {
+    // console.log(`connect: host=${host}, password=${password}`)
     if (!password) {
       throw new Error('Password is required for webrepl (over network). Serial interface is TODO.')
     }
@@ -179,7 +180,7 @@ export class WebREPL {
     if (this.state.replMode === WebReplMode.TERMINAL) {
       // handle terminal message
       // console.log('term:', data, data.length)
-      process.stdout.write(data)
+      if (this.onTerminalData) this.onTerminalData(data)
       return
     }
 
@@ -199,6 +200,10 @@ export class WebREPL {
     } else {
       this.state.inputBuffer += event.data.toString()
     }
+  }
+
+  isConnected() {
+    return this.state.replState === WebReplState.OPEN
   }
 
   async runReplCommand(command: string) {
