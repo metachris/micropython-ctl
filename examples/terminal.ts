@@ -12,12 +12,15 @@ const PASSWORD = 'test'
 
 const webrepl = new WebREPL()
 
-// Shut down program on websocket close
-webrepl.onclose = () => process.exit(0)
-webrepl.onTerminalData = (data) => process.stdout.write(data)
-
-// Keystroke capture for interactive REPL
+// Keystroke capture for interactive REPL. Note: by default the keycapture
+// keeps the program alive even when the socket has closed.
 const setupKeyboardCapture = () => {
+  // Shut down program on websocket close
+  webrepl.onclose = () => process.exit(0)
+
+  // Show terminal output
+  webrepl.onTerminalData = (data) => process.stdout.write(data)
+
   let specialMode = false
   readline.emitKeypressEvents(process.stdin);
   process.stdin.setRawMode(true);
@@ -42,7 +45,13 @@ const setupKeyboardCapture = () => {
 
 // Main program: setup keycapture & connect to webrepl
 (async () => {
-  setupKeyboardCapture()
-  await webrepl.connect(HOST, PASSWORD)
-  webrepl.wsSendData('\x02')  // Ctrl+B: exit raw repl and show micropython header
+  try {
+    await webrepl.connect(HOST, PASSWORD)
+    webrepl.wsSendData('\x02')  // Ctrl+B: exit raw repl and show micropython header
+
+    // Only after connecting we start keyboard capture
+    setupKeyboardCapture()
+  } catch (e) {
+    console.error(e)
+  }
 })()

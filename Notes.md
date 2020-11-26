@@ -5,3 +5,5 @@ stateDiagram-v2
     Connecting --> WebsocketConnected
     WebsocketConnected --> InvalidPassword
     WebsocketConnected --> ReplConnected
+
+import os; os.listdir()

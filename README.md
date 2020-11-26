@@ -1,13 +1,14 @@
-MicroPython WebREPL implementation
+# MicroPython WebREPL in TypeScript
 
-Goal: easy to use, async WebREPL. For websites and Node.js apps.
+Goal: easy to use, async WebREPL with types, for websites and Node.js apps.
 
 ### Functionality
 
-Basic functions:
+Basic async functions:
 - `connect(hostname, password)`
-- `disconnect()`
+- `close()`
 - `runReplCommand(cmd: string)` ... run a Python command (should also lude multi-line "paste", note that original webrepl doesn't send ge clipboards)
+- `wsSendData(data: string | ArrayBuffer)`
 
 webrepl protocol commands:
 - `GET_VER()`
@@ -16,26 +17,6 @@ webrepl protocol commands:
 
 helper:
 - `listFiles()`
-
-### Modes
-
-* ReplMode:
-  * `TERMINAL` (raw io, default)
-  * `WAITING_RESPONSE_COMMAND` (waiting for response after a REPL command was sent with `runReplCommand(cmd)`)
-  * `WAITING_RESPONSE_GETVER`
-  * `WAITING_RESPONSE_GETFILE_INIT`
-  * `WAITING_RESPONSE_GETFILE_CONTENT`
-  * `WAITING_RESPONSE_GETFILE_END`
-  * `WAITING_RESPONSE_PUTFILE_INIT`
-  * `WAITING_RESPONSE_PUTFILE_END`
-
-### Events
-
-* `REPL_CONNECTED`
-* `REPL_CMD_RESPONSE`
-* `REPL_SYSVER_RESPONSE`
-* `REPL_GETFILE_RESPONSE`
-* `REPL_TERMINAL_DATA`
 
 References:
 
@@ -47,17 +28,25 @@ References:
 Usage:
 
 ```js
-import { WebREPL, InvalidPassword } from 'micropython-webrepl'
+import { WebREPL } from 'micropython-webrepl'
 
-try {
-  const webrepl = new WebREPL()
-  await webrepl.connect(host, password)
-} catch (e) {
-  // probably invalid password, but could also invalid host or another websocket error
-  if (e instanceof InvalidPassword) {
-    console.error('invalid password')
-  } else {
-    console.error(e)
-  }
-}
+const webrepl = new WebREPL()
+
+// Connect to webrepl over network
+await webrepl.connect('IP_ADDRESS', 'REPL_PASSWORD')
+console.log('WebREPL connected')
+
+// Run a REPL command and capture the output
+const output = await webrepl.runReplCommand('import os; os.listdir()')
+console.log('Run command output:', output)
+
+// List all files (as a list of filenames)
+const files = await webrepl.listFiles()
+console.log('Files:', files)
+```
+
+See more examples in `/examples/`. You can run them with `ts-node`:
+
+```shell
+$ yarn ts-node examples/terminal.ts
 ```

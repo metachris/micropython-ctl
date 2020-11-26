@@ -1,6 +1,14 @@
-import WebSocket, { CONNECTING } from 'ws'
+/**
+ * raw mode notes:
+ * - starts with '>'. has no echo. input needs to be finished with ctrl+d (\x04)
+ * - output has to start with 'OK', then the actual output, then \x04 then error output then again \x04
+ * - finally starts over with '>'
+ */
+import WebSocket from 'ws'
 import { InvalidPassword, CouldNotConnect } from './errors'
 export { InvalidPassword, CouldNotConnect }
+
+const delayMillis = (delayMs: number) => new Promise(resolve => setTimeout(resolve, delayMs));
 
 export enum WebReplState {
   CONNECTING = 'CONNECTING',
@@ -10,13 +18,27 @@ export enum WebReplState {
 
 export enum WebReplMode {
   TERMINAL = 'TERMINAL',
-  WAITING_RESPONSE_COMMAND = 'WAITING_RESPONSE_COMMAND',
+  SCRIPT_RAW_MODE_ENTER = 'SCRIPT_RAW_MODE_ENTER',  // when entering raw mode
+  SCRIPT_RAW_MODE = 'SCRIPT_RAW_MODE',  // when raw mode is active
+
+  WAITING_RESPONSE_COMMAND = 'WAITING_RESPONSE_COMMAND', // todelete
   WAITING_RESPONSE_GETVER = 'WAITING_RESPONSE_GETVER',
+}
+
+export enum RawReplState {
+  WAITING_FOR_INPUT = 'WAITING_FOR_INPUT',
+  SCRIPT_SENT = 'SCRIPT_SENT',
+  SCRIPT_RECEIVING_OUTPUT = 'SCRIPT_RECEIVING_OUTPUT',
+  SCRIPT_RECEIVING_ERROR = 'SCRIPT_RECEIVING_ERROR',
+  SCRIPT_WAITING_FOR_END = 'SCRIPT_WAITING_FOR_END',
 }
 
 export interface WebReplOptions {
   attachStateToWindow: boolean | Window
 }
+
+type promiseResolve = (value: string | PromiseLike<string>) => void;
+type promiseReject = (reason: any) => void;
 
 export interface IWebReplState {
   ws: WebSocket | null
@@ -24,12 +46,21 @@ export interface IWebReplState {
   replMode: WebReplMode // only if replState is connected
   replPassword: string
 
+  // promise helpers for user script
   replPromise: Promise<string> | null;  // helper to await command executions
-  replPromiseResolve: (value: string | PromiseLike<string>) => void;
-  replPromiseReject: (value: string | PromiseLike<string>) => void;
+  replPromiseResolve: promiseResolve | null
+  replPromiseReject: promiseReject | null
+
+  // promise helpers for switching between RAW and normal terminal mode
+  replModeSwitchPromise: Promise<string> | null;
+  replModeSwitchPromiseResolve: promiseResolve | null
+  replModeSwitchPromiseReject: promiseReject | null
+  replModeSwitchLastInput: string
+  rawReplState: RawReplState
 
   lastCommand: string
   inputBuffer: string
+  errorBuffer: string
 }
 
 export interface WindowWithWebRepl extends Window {
@@ -51,12 +82,19 @@ export class WebREPL {
       replState: WebReplState.CLOSED,
       replMode: WebReplMode.TERMINAL,
       inputBuffer: '',
+      errorBuffer: '',
       replPassword: '',
       lastCommand: '',
+
       replPromise: null,
-      // tslint:disable-next-line: no-empty
-      replPromiseResolve: () => {},
-      replPromiseReject: () => {}
+      replPromiseResolve: null,
+      replPromiseReject: null,
+
+      replModeSwitchPromise: null,
+      replModeSwitchPromiseResolve: null,
+      replModeSwitchPromiseReject: null,
+      replModeSwitchLastInput: '',
+      rawReplState: RawReplState.WAITING_FOR_INPUT,
     }
   }
 
@@ -124,26 +162,36 @@ export class WebREPL {
     this.state.ws.onmessage = (event) => this.onWebsocketMessage(event)
     this.state.ws.onerror = (err) => {
       // console.log(`WebSocket onerror`, err)
-      if (this.state.replState === WebReplState.CONNECTING) {
-        this.state.replPromiseReject(new CouldNotConnect(err.message) as unknown as string)
-      } else {
-        this.state.replPromiseReject(err as unknown as string)
-      }
+      const e = this.state.replState === WebReplState.CONNECTING ? new CouldNotConnect(err.message) : err
+      if (this.state.replPromiseReject) this.state.replPromiseReject(e)
     }
 
     this.state.ws.onclose = () => {
       // console.log(`WebSocket onclose`)
       this.state.replState = WebReplState.CLOSED
-      this.state.replPromiseResolve('') // release the 'close' async event
+      if (this.state.replPromiseResolve) this.state.replPromiseResolve('') // release the 'close' async event
       if (this.onclose) this.onclose()
     }
 
     // create and return a new promise, which is fulfilled only after connecting to repl
-    this.state.replPromise = new Promise((resolve, reject) => {
-      this.state.replPromiseResolve = resolve
-      this.state.replPromiseReject = reject
-    })
-    return this.state.replPromise
+    return this.createReplPromise()
+  }
+
+  private createReplPromise(isModeSwitchPromise = false): Promise<string> {
+    if (isModeSwitchPromise) {
+      this.state.replModeSwitchPromise = new Promise((resolve, reject) => {
+        this.state.replModeSwitchPromiseResolve = resolve
+        this.state.replModeSwitchPromiseReject = reject
+      })
+      return this.state.replModeSwitchPromise
+
+    } else {
+      this.state.replPromise = new Promise((resolve, reject) => {
+        this.state.replPromiseResolve = resolve
+        this.state.replPromiseReject = reject
+      })
+      return this.state.replPromise
+    }
   }
 
   private onWebsocketMessage(event: WebSocket.MessageEvent) {
@@ -163,20 +211,19 @@ export class WebREPL {
 
       } else if (dataTrimmed === 'Access denied') {
         this.state.ws!.close()  // just to be sure. micropy already closes the connection
-        this.state.replPromiseReject(new InvalidPassword('REPL password invalid') as unknown as string)
+        if (this.state.replPromiseReject) this.state.replPromiseReject(new InvalidPassword('REPL password invalid'))
         return
 
       } else if (dataTrimmed.startsWith('WebREPL connected')) {
         this.state.replState = WebReplState.OPEN
         this.state.replMode = WebReplMode.TERMINAL
         this.state.inputBuffer = ''
-        this.state.replPromiseResolve('')
+        if (this.state.replPromiseResolve) this.state.replPromiseResolve('')
         return
       }
     }
 
     // All messages received after here have a successful, open REPL+WS connection.
-    // Handle plain terminal io
     if (this.state.replMode === WebReplMode.TERMINAL) {
       // handle terminal message
       // console.log('term:', data, data.length)
@@ -184,22 +231,86 @@ export class WebREPL {
       return
     }
 
-    // Special handler for executing REPL commands: collect buffer and detect end
-    if (dataTrimmed === '>>>') {
-      // console.log('end of data,', this.state.inputBuffer)
-      let response = this.state.inputBuffer
-      this.state.inputBuffer = ''
-      this.state.replMode = WebReplMode.TERMINAL
+    if (this.state.replMode === WebReplMode.SCRIPT_RAW_MODE_ENTER) {
+      // Waiting for entry info. There are 2 lines, first one is the info string, second is just '>'
+      const waitFor1 = `raw REPL; CTRL-B to exit\r\n`
+      // console.log(`raw_mode_enter: '${data}'`, data.length, data === waitFor1)
 
-      // Sanitize output (strip command):
-      if (response.startsWith(this.state.lastCommand)) {
-        response = response.replace(this.state.lastCommand, '')
+      if (data === waitFor1) this.state.replModeSwitchLastInput = data
+      if (data === '>' && this.state.replModeSwitchLastInput === waitFor1) {
+        // console.log('_raw mode start', !!this.state.replModeSwitchPromiseResolve)
+        this.state.replMode = WebReplMode.SCRIPT_RAW_MODE
+        if (this.state.replModeSwitchPromiseResolve) this.state.replModeSwitchPromiseResolve('')
       }
-      response = response.trim()
-      this.state.replPromiseResolve(response)
-    } else {
-      this.state.inputBuffer += event.data.toString()
+      return
     }
+
+    if (this.state.replMode === WebReplMode.SCRIPT_RAW_MODE) {
+      console.log(`raw_mode: '${data}'`, data.length, data.length > 0 ? data.charCodeAt(0) : '')
+
+      if (this.state.rawReplState === RawReplState.SCRIPT_SENT) {
+        if (data === 'OK') {
+          console.log('ok received, collecting input')
+          this.state.inputBuffer = ''
+          this.state.errorBuffer = ''
+          this.state.rawReplState = RawReplState.SCRIPT_RECEIVING_OUTPUT
+          // this.state.rawReplExitStep = 0
+        } else {
+          console.error('error: should have received OK, received:', data)
+        }
+
+      } else if (this.state.rawReplState === RawReplState.SCRIPT_RECEIVING_OUTPUT) {
+        if (data === '\x04') {
+          // End of output. now switch to receiving error
+          this.state.rawReplState = RawReplState.SCRIPT_RECEIVING_ERROR
+        } else {
+          this.state.inputBuffer += data
+        }
+
+      } else if (this.state.rawReplState === RawReplState.SCRIPT_RECEIVING_ERROR) {
+        if (data === '\x04') {
+          // End of error. now wait for new start
+          this.state.rawReplState = RawReplState.SCRIPT_WAITING_FOR_END
+        } else {
+          this.state.errorBuffer += data
+        }
+
+      } else if (this.state.rawReplState === RawReplState.SCRIPT_WAITING_FOR_END) {
+        if (data === '>') {
+          this.state.inputBuffer = this.state.inputBuffer.trim()
+          this.state.errorBuffer = this.state.errorBuffer.trim()
+          console.log('END', this.state.inputBuffer, this.state.errorBuffer)
+          this.state.rawReplState = RawReplState.WAITING_FOR_INPUT
+
+          if (this.state.errorBuffer.length > 0 && this.state.replPromiseReject) {
+            this.state.replPromiseReject(this.state.errorBuffer)
+          } else if (this.state.replPromiseResolve) {
+            this.state.replPromiseResolve(this.state.inputBuffer)
+          }
+
+        } else {
+          console.error('waiting for end, received unexpected data:', data)
+        }
+      }
+    }
+
+
+    // // Special handler for executing REPL commands: collect buffer and detect end
+    // if (dataTrimmed === '>>>') {
+    //   // console.log('end of data,', this.state.inputBuffer)
+    //   let response = this.state.inputBuffer
+    //   this.state.inputBuffer = ''
+    //   this.state.replMode = WebReplMode.TERMINAL
+
+    //   // Sanitize output (strip command):
+    //   if (response.startsWith(this.state.lastCommand)) {
+    //     response = response.replace(this.state.lastCommand, '')
+    //   }
+    //   response = response.trim()
+    //   if (this.state.replPromiseResolve) this.state.replPromiseResolve(response)
+    // } else {
+    //   this.state.inputBuffer += event.data.toString()
+    // }
   }
 
   isConnected() {
@@ -221,9 +332,9 @@ export class WebREPL {
     this.state.replMode = WebReplMode.WAITING_RESPONSE_COMMAND
 
     // Send command and return promise
+    const promise = this.createReplPromise()
     this.state.ws.send(sanitizedCommand)
-    this.state.replPromise = new Promise((resolve) => this.state.replPromiseResolve = resolve)
-    return this.state.replPromise
+    return promise
   }
 
   wsSendData(data: string | ArrayBuffer) {
@@ -234,21 +345,69 @@ export class WebREPL {
     this.state.ws.send(data)
   }
 
-  async close() {
+  public async close() {
     if (this.state.ws && this.state.ws.readyState === WebSocket.OPEN) {
       // console.log('closing')
       this.state.ws.close()
       this.state.replState = WebReplState.CLOSED
-      this.state.replPromise = new Promise((resolve) => this.state.replPromiseResolve = resolve)
-      return this.state.replPromise
-      } else {
+      return this.createReplPromise()
+    } else {
       console.log('wanting to close already closed websocket')
       return true
     }
   }
 
-  async listFiles(): Promise<string[]> {
+  public async listFiles(): Promise<string[]> {
     const output = await this.runReplCommand('import os; os.listdir()')
     return JSON.parse(output.replace(/'/g, '"'))
   }
+
+  public async runScript(script: string) {
+    console.log('runScript', script)
+    const promise =  this.createReplPromise()
+    await this.enterRawRepl()
+    console.log('runScript: raw mode entered')
+
+    if (!script.endsWith('\r')) { script += '\r\n' }
+
+    this.wsSendData('import os; print(os.listdir())')
+    // this.wsSendData('print(123)')
+    this.state.rawReplState = RawReplState.SCRIPT_SENT
+    this.wsSendData('\x04')  // ctrl+D -> waiting for OK and response
+    console.log('script sent, waiting for response')
+
+    const out = await promise
+    console.log('script done', out)
+
+    // Exit raw repl mode
+    // this.wsSendData('\x02')  // ctrl+B
+
+    return promise
+  }
+
+  private async enterRawRepl() {
+    // see also https://github.com/scientifichackers/ampy/blob/master/ampy/pyboard.py#L175
+    // Prepare state for mode switch
+    this.state.replMode = WebReplMode.SCRIPT_RAW_MODE_ENTER
+    this.state.replModeSwitchLastInput = ''
+
+    const promise = this.createReplPromise(true)
+
+    // Send ctrl-C twice to interrupt any running program
+    this.wsSendData('\r\x03')
+    await delayMillis(100) // wait 0.1sec
+    this.wsSendData('\x03')
+    await delayMillis(100) // wait 0.1sec
+    this.wsSendData('\x01')  // ctrl+A
+    await delayMillis(100) // wait 0.1sec
+
+    return promise
+  }
+
+  private async exitRawRepl() {
+    const promise = this.createReplPromise(true)
+    this.wsSendData('\r\x02')
+    return promise
+  }
+
 }
