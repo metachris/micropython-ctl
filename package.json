@@ -12,6 +12,7 @@
     "build": "tsc -p tsconfig.json",
     "test": "jest",
     "runExample": "ts-node examples/tmp.ts",
+    "runTerminal": "ts-node examples/terminal.ts",
     "ts-node": "ts-node"
   },
   "devDependencies": {

@@ -12,3 +12,10 @@ export class CouldNotConnect extends Error {
     Object.setPrototypeOf(this, CouldNotConnect.prototype);
   }
 }
+
+export class ScriptExecutionError extends Error {
+  constructor(m: string) {
+    super(m);
+    Object.setPrototypeOf(this, ScriptExecutionError.prototype);
+  }
+}

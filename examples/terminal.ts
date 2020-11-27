@@ -6,8 +6,8 @@
 import readline from 'readline'
 import { WebREPL, WebReplMode } from '../src/main'
 
-// const HOST = '10.12.50.101'
-const HOST = '10.0.1.10'
+const HOST = '10.12.50.101'
+// const HOST = '10.0.1.10'
 const PASSWORD = 'test'
 
 const webrepl = new WebREPL()
@@ -33,7 +33,7 @@ const setupKeyboardCapture = () => {
 
     // Force quit with ^D in special mode
     if (wasSpecialMode && key.sequence === '\u0004' && key.ctrl) {
-        process.exit(0)
+      process.exit(0)
     }
 
     // Send character to webrepl

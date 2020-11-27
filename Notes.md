@@ -7,3 +7,6 @@ stateDiagram-v2
     WebsocketConnected --> ReplConnected
 
 import os; os.listdir()
+
+for x in range(3):
+    print(x)
