@@ -6,9 +6,8 @@
 import readline from 'readline'
 import { WebREPL, WebReplMode } from '../src/main'
 
-const HOST = '10.12.50.101'
-// const HOST = '10.0.1.10'
-const PASSWORD = 'test'
+const HOST = process.env.WEBREPL_HOST || '10.12.50.25'; // '10.12.50.101', '10.0.1.10'
+const PASSWORD = process.env.WEBREPL_PASSWORD || 'test';
 
 const webrepl = new WebREPL()
 

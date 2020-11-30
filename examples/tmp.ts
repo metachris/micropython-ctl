@@ -14,9 +14,14 @@ const PASSWORD = process.env.WEBREPL_PASSWORD || 'test';
     await webrepl.connect(HOST, PASSWORD)
 
     // Run a Python command / script
-    const script = TestScripts.simpleRange
+    // const script = TestScripts.simpleRange
+    // const script = TestScripts.ls({ recursive: true, includeFilesize: true })
+    // const script = TestScripts.ls2
+    const script = TestScripts.manyPrints()
+    console.log('script', script)
+
     const scriptOutput = await webrepl.runScript(script)
-    console.log('->', scriptOutput)
+    // console.log('->', scriptOutput)
 
   } catch (e) {
     if (e instanceof ScriptExecutionError) {

@@ -23,6 +23,12 @@ References:
 * https://github.com/micropython/webrepl
 * Original JS implementation: https://github.com/micropython/webrepl/blob/master/webrepl.html
 
+Inspiration:
+
+* https://github.com/scientifichackers/ampy/blob/master/ampy/pyboard.py
+* https://github.com/micropython/micropython/pull/6375/files
+* https://pycopy.readthedocs.io/en/latest/esp32/quickref.html
+
 ---
 
 Usage:

@@ -29,6 +29,11 @@
       "group": {
         "kind": "test",
         "isDefault": true
+      },
+      "options": {
+        "env": {
+          "DEBUG": "1"
+        }
       }
     }
   ]

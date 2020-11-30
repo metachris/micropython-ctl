@@ -6,8 +6,9 @@
  */
 import WebSocket from 'ws'
 import { InvalidPassword, CouldNotConnect, ScriptExecutionError } from './errors'
-import { dedent } from './utils';
+import { debug, dedent } from './utils';
 export { InvalidPassword, CouldNotConnect, ScriptExecutionError }
+import { performance } from 'perf_hooks'
 
 const delayMillis = (delayMs: number) => new Promise(resolve => setTimeout(resolve, delayMs));
 
@@ -64,6 +65,8 @@ export interface IWebReplState {
   lastCommand: string
   inputBuffer: string
   errorBuffer: string
+
+  lastRunScriptTimeNeeded: number
 }
 
 export interface WindowWithWebRepl extends Window {
@@ -98,6 +101,7 @@ export class WebREPL {
       // replModeSwitchPromiseReject: null,
       // replModeSwitchLastInput: '',
       rawReplState: RawReplState.WAITING_FOR_INPUT,
+      lastRunScriptTimeNeeded: -1
     }
   }
 
@@ -375,8 +379,23 @@ export class WebREPL {
     // Prepare script for execution (dedent by default)
     if (!disableDedent) script = dedent(script)
 
-    // Send data to raw repl
-    this.wsSendData(script)
+    // Send data to raw repl. Note: cannot send too much data at once over the
+    // network, else the webrepl can't parse it quick enough and returns an error.
+    // Therefore we chunk the data and add a send delay.
+    // 120b and 180ms delay seems to work well for all ESP32 devices.
+    const chunkSize = 120;  // how many bytes to send per chunk.
+    const chunkDelayMillis = 200;  // fixed delay. a progressive delay doesn't seem to help
+    debug(`runScript: ${script.length} bytes -> ${Math.ceil(script.length / chunkSize)} chunks`)
+
+    while (script.length) {
+      const chunk = script.substring(0, chunkSize)
+      script = script.substr(chunkSize)
+      this.wsSendData(chunk)
+      await delayMillis(chunkDelayMillis)
+    }
+
+    debug('runScript: script sent')
+    const millisStart = performance.now()
 
     // Update state and create a new promise that will be fulfilled when script has run
     this.state.rawReplState = RawReplState.SCRIPT_SENT
@@ -388,7 +407,9 @@ export class WebREPL {
 
     // wait for script execution
     const scriptOutput = await promise
-    // console.log('runScript: script done', scriptOutput)
+    const millisRuntime = Math.round(performance.now() - millisStart)
+    debug(`runScript: script done (${millisRuntime / 1000}sec)`)
+    this.state.lastRunScriptTimeNeeded = millisRuntime
 
     // Exit raw repl mode, re-enter friendly repl
     await this.exitRawRepl()
