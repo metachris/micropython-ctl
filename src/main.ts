@@ -4,6 +4,7 @@
  * - output has to start with 'OK', then the actual output, then \x04 then error output then again \x04
  * - finally starts over with '>'
  */
+import fs from 'fs'
 import WebSocket from 'ws'
 import { InvalidPassword, CouldNotConnect, ScriptExecutionError } from './errors'
 import { debug, dedent } from './utils';
@@ -19,10 +20,12 @@ export enum WebReplState {
 }
 
 export enum WebReplMode {
-  TERMINAL = 'TERMINAL',
-  SCRIPT_RAW_MODE = 'SCRIPT_RAW_MODE',  // when raw mode is active
+  TERMINAL = 'TERMINAL',  // direct IO with user/program
+  SCRIPT_RAW_MODE = 'SCRIPT_RAW_MODE',  // RAW mode for script execution
 
-  WAITING_RESPONSE_GETVER = 'WAITING_RESPONSE_GETVER',
+  GETVER_WAITING_RESPONSE = 'GETVER_WAITING_RESPONSE',
+  PUTFILE_WAITING_FIRST_RESPONSE = 'PUTFILE_WAITING_FIRST_RESPONSE',
+  PUTFILE_WAITING_FINAL_RESPONSE = 'PUTFILE_WAITING_FINAL_RESPONSE',
 }
 
 export enum RawReplState {
@@ -67,6 +70,11 @@ export interface IWebReplState {
   errorBuffer: string
 
   lastRunScriptTimeNeeded: number
+
+  putFileSize: number
+  putFileData: Uint8Array
+  putFileName: string
+  putFileDest: string
 }
 
 export interface WindowWithWebRepl extends Window {
@@ -101,7 +109,12 @@ export class WebREPL {
       // replModeSwitchPromiseReject: null,
       // replModeSwitchLastInput: '',
       rawReplState: RawReplState.WAITING_FOR_INPUT,
-      lastRunScriptTimeNeeded: -1
+      lastRunScriptTimeNeeded: -1,
+
+      putFileSize: 0,
+      putFileData: new Uint8Array(),
+      putFileName: '',
+      putFileDest: '',
     }
   }
 
@@ -192,6 +205,45 @@ export class WebREPL {
     return this.state.replPromise
   }
 
+
+  private decodeWebreplBinaryResponse(data: Uint8Array) {
+    if (data[0] === 'W'.charCodeAt(0) && data[1] === 'B'.charCodeAt(0)) {
+      // tslint:disable-next-line: no-bitwise
+      const code = data[2] | (data[3] << 8);
+      return code;
+    } else {
+      return -1;
+    }
+  }
+
+  private handleProtocolData(data: Uint8Array) {
+    // console.log(data)
+    if (this.state.replMode === WebReplMode.PUTFILE_WAITING_FIRST_RESPONSE) {
+      if (this.decodeWebreplBinaryResponse(data) === 0) {
+        // send file data in chunks
+        for (let offset = 0; offset < this.state.putFileSize; offset += 1024) {
+          this.wsSendData(this.state.putFileData.slice(offset, offset + 1024));
+        }
+        this.state.replMode = WebReplMode.PUTFILE_WAITING_FINAL_RESPONSE;
+      }
+
+    } else if (this.state.replMode === WebReplMode.PUTFILE_WAITING_FINAL_RESPONSE) {
+      // final response for put
+      if (this.decodeWebreplBinaryResponse(data) === 0) {
+        console.log('Upload success');
+        if (this.state.replPromiseResolve) this.state.replPromiseResolve('')
+      } else {
+        console.error('Upload failed');
+        if (this.state.replPromiseReject) this.state.replPromiseReject('Upload failed')
+      }
+      this.state.replMode = WebReplMode.TERMINAL
+
+    } else if (this.state.replMode === WebReplMode.GETVER_WAITING_RESPONSE) {
+    } else {
+      console.log('unkown ArrayBuffer input:', data)
+    }
+  }
+
   private onWebsocketMessage(event: WebSocket.MessageEvent) {
     const data = event.data.toString()
     const dataTrimmed = data.trim()
@@ -200,6 +252,12 @@ export class WebREPL {
     if (this.state.ws!.readyState === WebSocket.CLOSING && data.length === 2 && data.charCodeAt(0) === 65533 && data.charCodeAt(1) === 0) return
 
     // console.log(`onWebsocketMessage:${event.data instanceof ArrayBuffer ? ' [ArrayBuffer]' : ''}${data.endsWith('\n') ? ' [End:\\n]' : ''}${data.length < 3 ? ' [char0:' + data.charCodeAt(0) + ']'  : ''}`, data.length, data)
+    if (event.data instanceof ArrayBuffer) {
+      debug("In: ArrayBuffer")
+      const binData = new Uint8Array(event.data);
+      this.handleProtocolData(binData)
+      return
+    }
 
     /**
      * CONNECTING
@@ -441,6 +499,40 @@ export class WebREPL {
     this.state.rawReplState = RawReplState.CHANGING_TO_FRIENDLY_REPL
     const promise = this.createReplPromise()
     this.wsSendData('\r\x02')
+    return promise
+  }
+
+  public async uploadFile(filename: string, destFilename: string) {
+    debug(`uploadFile: ${filename} -> ${destFilename}`)
+    const promise = this.createReplPromise()
+
+    this.state.replMode = WebReplMode.PUTFILE_WAITING_FINAL_RESPONSE
+    this.state.putFileName = filename
+    this.state.putFileDest = destFilename
+
+    this.state.putFileData = new Uint8Array(fs.readFileSync(filename))
+    this.state.putFileSize = this.state.putFileData.length
+    debug(`uploadFile: ${this.state.putFileSize} bytes`)
+
+    // WEBREPL_FILE = "<2sBBQLH64s"
+    const rec = new Uint8Array(2 + 1 + 1 + 8 + 4 + 2 + 64);
+    rec[0] = 'W'.charCodeAt(0);
+    rec[1] = 'A'.charCodeAt(0);
+    rec[2] = 1; // put
+    rec[3] = 0;
+    rec[4] = 0; rec[5] = 0; rec[6] = 0; rec[7] = 0; rec[8] = 0; rec[9] = 0; rec[10] = 0; rec[11] = 0;
+    // tslint:disable-next-line: no-bitwise
+    rec[12] = this.state.putFileSize & 0xff; rec[13] = (this.state.putFileSize >> 8) & 0xff; rec[14] = (this.state.putFileSize >> 16) & 0xff; rec[15] = (this.state.putFileSize >> 24) & 0xff;
+    // tslint:disable-next-line: no-bitwise
+    rec[16] = this.state.putFileDest.length & 0xff; rec[17] = (this.state.putFileDest.length >> 8) & 0xff;
+    for (let i = 0; i < 64; ++i) {
+      rec[18 + i] = i < this.state.putFileDest.length ? this.state.putFileDest.charCodeAt(i) : 0
+    }
+
+    // initiate put
+    this.state.replMode = WebReplMode.PUTFILE_WAITING_FIRST_RESPONSE
+    this.wsSendData(rec)
+
     return promise
   }
 }

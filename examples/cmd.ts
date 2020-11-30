@@ -5,7 +5,7 @@ import { ls, lsSimple } from './python-scripts/scripts';
 // import { ls } from './test-scripts';
 const program = new Command();
 
-const HOST = process.env.WEBREPL_HOST || '10.12.50.25'; // '10.12.50.101', '10.0.1.10'
+const HOST = process.env.WEBREPL_HOST || '10.12.50.26'; // '10.12.50.101', '10.0.1.10'
 const PASSWORD = process.env.WEBREPL_PASSWORD || 'test';
 
 const webrepl = new WebREPL()
@@ -30,6 +30,9 @@ const putFile = async (filename: string, destFilename?: string) => {
     destFilename = path.basename(filename)
   }
   console.log(filename, '->', destFilename)
+
+  await ensureConnectedWebRepl()
+  await webrepl.uploadFile(filename, destFilename)
 }
 
 

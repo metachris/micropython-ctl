@@ -2,7 +2,7 @@ import { WebREPL } from '../src/main';
 import { ScriptExecutionError } from '../src/errors';
 import * as TestScripts from './test-scripts';
 
-const HOST = process.env.WEBREPL_HOST || '10.12.50.25'; // '10.12.50.101', '10.0.1.10'
+const HOST = process.env.WEBREPL_HOST || '10.12.50.26'; // '10.12.50.101', '10.0.1.10'
 const PASSWORD = process.env.WEBREPL_PASSWORD || 'test';
 
 (async () => {
@@ -17,10 +17,11 @@ const PASSWORD = process.env.WEBREPL_PASSWORD || 'test';
     // const script = TestScripts.simpleRange
     // const script = TestScripts.ls({ recursive: true, includeFilesize: true })
     // const script = TestScripts.ls2
-    const script = TestScripts.manyPrints()
-    console.log('script', script)
+    // const script = TestScripts.manyPrints()
+    // console.log('script', script)
 
-    const scriptOutput = await webrepl.runScript(script)
+    // const scriptOutput = await webrepl.runScript(script)
+    await webrepl.uploadFile('test.py', 'test.py')
     // console.log('->', scriptOutput)
 
   } catch (e) {
