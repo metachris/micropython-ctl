@@ -1,43 +1,18 @@
-import { dedent } from "../src/utils";
-
-export const listFiles = `import os; print(os.listdir());
+export const lsSimple = `
+import os
+print(os.listdir())
 `
 
-export const simpleRange = `
-    for x in range(3):
-        print(x)
-`;
-
-export const simpleRange2 = `
-\tfor x in range(3):
-\t\tprint(x)
-`;
-
-export const simpleRange3 = `for x in range(3):
-    print(x)
-`;
-
-export const simpleRangeWithError = `
-    for x in range(3):
-        print(x)
-        error
-`;
-
 // https://github.com/scientifichackers/ampy/blob/master/ampy/files.py#L88
-export const ls = ({ directory = "/", includeFilesize = true, recursive = false, jsonOutput = true }) => {
-  if (!directory.startsWith("/")) {
-    directory = "/" + directory
-  }
+export const ls = (args = { directory: "/", includeFilesize: true, recursive: false }) => {
+  const { directory, includeFilesize, recursive } = args
+  const finalDir = directory.startsWith("/") ? directory : "/" + directory
 
   let command = `
 try:
     import os
 except ImportError:
     import uos as os
-`
-
-  if (jsonOutput) command += `
-import json
 `
 
   if (recursive) {
@@ -81,42 +56,18 @@ def listdir(directory):
 
   if (includeFilesize) {
       command += `
-r = []
-for f in listdir('${directory}'):
+for f in listdir('${finalDir}'):
     size = os.stat(f)[6]
-    r.append('{0} - {1} bytes'.format(f, size))
-print(r)
+    s = '{0} - {1} bytes'.format(f, size)
+    print(s)
+pass  # why the fuck is this needed?
 `
   } else {
-    command += `print(listdir('${directory}'))`
+    command += `print(listdir('${finalDir}'))`
   }
 
   return command
 }
-
-// console.log(ls())
-
-export const ls1 = `
-    import os
-    print(os.listdir())
-    `
-
-export const ls2 = `
-    import os
-    files = os.listdir()
-
-    def listdir(directory):
-        if directory == '/':
-            return sorted([directory + f for f in os.listdir(directory)])
-        else:
-            return sorted([directory + '/' + f for f in os.listdir(directory)])
-
-    r = []
-    for f in listdir('/'):
-        size = os.stat(f)[6]
-        r.append('{0} - {1} bytes'.format(f, size))
-    print(r)
-`
 
 
 export const manyPrints = (lines = 200) => {

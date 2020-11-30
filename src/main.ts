@@ -360,8 +360,8 @@ export class WebREPL {
       this.state.replState = WebReplState.CLOSED
       return this.createReplPromise()
     } else {
-      console.log('wanting to close already closed websocket')
-      return true
+      debug('main.close(): wanting to close already closed websocket')
+      return false
     }
   }
 
