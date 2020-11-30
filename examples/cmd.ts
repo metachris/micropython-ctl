@@ -1,8 +1,7 @@
 import path from 'path';
 import { Command } from 'commander';
 import { WebREPL } from '../src/main';
-import { ls, lsSimple } from './python-scripts/scripts';
-// import { ls } from './test-scripts';
+
 const program = new Command();
 
 const HOST = process.env.WEBREPL_HOST || '10.12.50.26'; // '10.12.50.101', '10.0.1.10'
@@ -19,10 +18,8 @@ const ensureConnectedWebRepl = async () => {
 const listFilesOnDevice = async () => {
   await ensureConnectedWebRepl()
   // const output = await webrepl.runScript(lsSimple)
-  const script = ls()
-  console.log(script)
-  const output = await webrepl.runScript(script)
-  console.log(output)
+  const files = await webrepl.listFiles('/', true)
+  console.log(files)
 }
 
 const putFile = async (filename: string, destFilename?: string) => {

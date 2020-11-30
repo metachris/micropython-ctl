@@ -10,6 +10,7 @@ import { InvalidPassword, CouldNotConnect, ScriptExecutionError } from './errors
 import { debug, dedent } from './utils';
 export { InvalidPassword, CouldNotConnect, ScriptExecutionError }
 import { performance } from 'perf_hooks'
+import { ls } from './python-scripts';
 
 const delayMillis = (delayMs: number) => new Promise(resolve => setTimeout(resolve, delayMs));
 
@@ -534,5 +535,10 @@ export class WebREPL {
     this.wsSendData(rec)
 
     return promise
+  }
+
+  public async listFiles(directory = "/", recursive = false) {
+    console.log(`listFiles: ${directory}, recursive: ${recursive}`)
+    return this.runScript(ls({ directory, recursive }))
   }
 }

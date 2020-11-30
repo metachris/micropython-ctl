@@ -4,8 +4,8 @@ print(os.listdir())
 `
 
 // https://github.com/scientifichackers/ampy/blob/master/ampy/files.py#L88
-export const ls = (args = { directory: "/", includeFilesize: true, recursive: false }) => {
-  const { directory, includeFilesize, recursive } = args
+export const ls = (args = { directory: "/", recursive: false }) => {
+  const { directory, recursive } = args
   const finalDir = directory.startsWith("/") ? directory : "/" + directory
 
   let command = `
@@ -54,17 +54,13 @@ def listdir(directory):
 `
   }
 
-  if (includeFilesize) {
-      command += `
+  command += `
 for f in listdir('${finalDir}'):
     size = os.stat(f)[6]
     s = '{0} - {1} bytes'.format(f, size)
     print(s)
 pass  # why the fuck is this needed?
 `
-  } else {
-    command += `print(listdir('${finalDir}'))`
-  }
 
   return command
 }
