@@ -537,8 +537,13 @@ export class WebREPL {
     return promise
   }
 
-  public async listFiles(directory = "/", recursive = false) {
-    console.log(`listFiles: ${directory}, recursive: ${recursive}`)
-    return this.runScript(ls({ directory, recursive }))
+  public async listFiles(directory = "/", recursive = false, include_filesize = true) {
+    console.log(`listFiles: ${directory}, recursive: ${recursive}`, include_filesize)
+    const output = await this.runScript(ls({ directory, recursive }))
+    const lines = output.split('\n')
+    for (const line of lines) {
+      const parts = line.split(' - ')
+      console.log(parts)
+    }
   }
 }
