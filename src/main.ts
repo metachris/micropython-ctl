@@ -3,6 +3,7 @@
  */
 import fs from 'fs'
 import WebSocket from 'ws'
+import SerialPort from "serialport"
 import { InvalidPassword, CouldNotConnect, ScriptExecutionError } from './errors'
 import { debug, dedent } from './utils';
 export { InvalidPassword, CouldNotConnect, ScriptExecutionError }
@@ -10,6 +11,11 @@ import { performance } from 'perf_hooks'
 import { ls } from './python-scripts';
 
 const delayMillis = (delayMs: number) => new Promise(resolve => setTimeout(resolve, delayMs));
+
+export enum DeviceMode {
+  SERIAL = "SERIAL",
+  NETWORK = "NETWORK",
+}
 
 export enum WebReplState {
   CONNECTING = 'CONNECTING',
@@ -45,7 +51,11 @@ type promiseResolve = (value: string | PromiseLike<string>) => void;
 type promiseReject = (reason: any) => void;
 
 export interface IWebReplState {
+  deviceMode: DeviceMode
+
+  port: SerialPort | null
   ws: WebSocket | null
+
   replState: WebReplState
   replMode: WebReplMode // only if replState is connected
   replPassword: string
@@ -86,6 +96,8 @@ export class WebREPL {
 
   private getInitState(): IWebReplState {
     return {
+      deviceMode: DeviceMode.NETWORK,
+      port: null,
       ws: null,
       replState: WebReplState.CLOSED,
       replMode: WebReplMode.TERMINAL,
@@ -148,7 +160,24 @@ export class WebREPL {
     }
   }
 
-  public async connect(host: string, password?: string) {
+  public async connectSerial(path: string) {
+    debug('connectSerial', path)
+    this.state.deviceMode = DeviceMode.SERIAL
+    this.state.replState = WebReplState.CONNECTING
+    this.state.port = new SerialPort(path, { baudRate: 115200 })
+    this.state.replState = WebReplState.OPEN
+
+    // Switches the port into "flowing mode"
+    this.state.port.on('data', (data) => {
+      console.log('Data:', data.toString())
+    })
+
+    this.state.port.write('\x02')
+  }
+
+  public async connectNetwork(host: string, password?: string) {
+    this.state.deviceMode = DeviceMode.NETWORK
+
     // console.log(`connect: host=${host}, password=${password}`)
     if (!password) {
       throw new Error('Password is required for webrepl (over network). Serial interface is TODO.')
