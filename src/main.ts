@@ -37,10 +37,14 @@ export enum RawReplState {
   ENTERING_WAITING_FOR_START = 'ENTERING_WAITING_FOR_START',
   WAITING_FOR_INPUT = 'WAITING_FOR_INPUT',
   SCRIPT_SENT = 'SCRIPT_SENT',
+  SCRIPT_RECEIVING_RESPONSE = 'SCRIPT_RECEIVING_RESPONSE',
+  CHANGING_TO_FRIENDLY_REPL = 'CHANGING_TO_FRIENDLY_REPL',
+}
+
+enum RawReplReceivingResponseSubState {
   SCRIPT_RECEIVING_OUTPUT = 'SCRIPT_RECEIVING_OUTPUT',
   SCRIPT_RECEIVING_ERROR = 'SCRIPT_RECEIVING_ERROR',
   SCRIPT_WAITING_FOR_END = 'SCRIPT_WAITING_FOR_END',
-  CHANGING_TO_FRIENDLY_REPL = 'CHANGING_TO_FRIENDLY_REPL',
 }
 
 export interface WebReplOptions {
@@ -72,6 +76,7 @@ export interface IWebReplState {
   errorBuffer: string
 
   lastRunScriptTimeNeeded: number
+  receivingResponseSubState: RawReplReceivingResponseSubState
 
   putFileSize: number
   putFileData: Uint8Array
@@ -85,13 +90,13 @@ export interface WindowWithWebRepl extends Window {
   webReplState: IWebReplState | undefined
 }
 
-interface FileListEntry  { filename: string, size: number, isDir: boolean }
+interface FileListEntry { filename: string, size: number, isDir: boolean }
 
 declare const window: WindowWithWebRepl;
 
 export class WebREPL {
   onclose: () => void
-  onTerminalData: (data: string) => void
+  onTerminalData: (data: string) => void  // user callback
   state: IWebReplState
 
   private getInitState(): IWebReplState {
@@ -112,6 +117,7 @@ export class WebREPL {
 
       rawReplState: RawReplState.WAITING_FOR_INPUT,
       lastRunScriptTimeNeeded: -1,
+      receivingResponseSubState: RawReplReceivingResponseSubState.SCRIPT_RECEIVING_ERROR,
 
       putFileSize: 0,
       putFileData: new Uint8Array(),
@@ -128,6 +134,10 @@ export class WebREPL {
       // Normal local state init
       this.state = this.getInitState()
     }
+  }
+
+  isSerialDevice() {
+    return this.state.deviceMode === DeviceMode.SERIAL
   }
 
   /**
@@ -169,10 +179,11 @@ export class WebREPL {
 
     // Switches the port into "flowing mode"
     this.state.port.on('data', (data) => {
-      console.log('Data:', data.toString())
+      // console.log('Data:', data.toString())
+      this.handleProtocolData(data)
     })
 
-    this.state.port.write('\x02')
+    // this.state.port.write('\x02')
   }
 
   public async connectNetwork(host: string, password?: string) {
@@ -235,13 +246,13 @@ export class WebREPL {
     }
   }
 
-  private handleProtocolData(data: Uint8Array) {
+  private handleBinaryProtocolData(data: Uint8Array) {
     // console.log(data)
     if (this.state.replMode === WebReplMode.PUTFILE_WAITING_FIRST_RESPONSE) {
       if (this.decodeWebreplBinaryResponse(data) === 0) {
         // send file data in chunks
         for (let offset = 0; offset < this.state.putFileSize; offset += 1024) {
-          this.wsSendData(this.state.putFileData.slice(offset, offset + 1024));
+          this.sendData(this.state.putFileData.slice(offset, offset + 1024));
         }
         this.state.replMode = WebReplMode.PUTFILE_WAITING_FINAL_RESPONSE;
       }
@@ -249,7 +260,7 @@ export class WebREPL {
     } else if (this.state.replMode === WebReplMode.PUTFILE_WAITING_FINAL_RESPONSE) {
       // final response for put
       if (this.decodeWebreplBinaryResponse(data) === 0) {
-        console.log('Upload success');
+        debug('Upload success');
         if (this.state.replPromiseResolve) this.state.replPromiseResolve('')
       } else {
         console.error('Upload failed');
@@ -258,6 +269,8 @@ export class WebREPL {
       this.state.replMode = WebReplMode.TERMINAL
 
     } else if (this.state.replMode === WebReplMode.GETVER_WAITING_RESPONSE) {
+      console.log('got getver response:', data)
+
     } else {
       console.log('unkown ArrayBuffer input:', data)
     }
@@ -274,7 +287,7 @@ export class WebREPL {
     if (event.data instanceof ArrayBuffer) {
       debug("In: ArrayBuffer")
       const binData = new Uint8Array(event.data);
-      this.handleProtocolData(binData)
+      this.handleBinaryProtocolData(binData)
       return
     }
 
@@ -300,79 +313,104 @@ export class WebREPL {
       }
     }
 
+    this.handleProtocolData(Buffer.from(event.data))
+  }
+
+  private handleProtocolData(data: Uint8Array) {
+    // debug('handleStringProtocolData:', data)
+
     /**
      * FRIENDLY MODE REPL / TERMINAL MODE
      */
     if (this.state.replMode === WebReplMode.TERMINAL) {
-      // handle terminal message
+      // pass terminal on to user defined handler
       // console.log('term:', data, data.length)
-      if (this.onTerminalData) this.onTerminalData(data)
+      if (this.onTerminalData) this.onTerminalData(data.toString())
       return
     }
 
     /**
      * RAW MODE REPL
      */
+    const dataStr = data.toString()
+    const dataTrimmed = dataStr.trim()
+
     if (this.state.replMode === WebReplMode.SCRIPT_RAW_MODE) {
-      // console.log(`raw_mode: '${data}'`, data.length, data.length > 0 ? data.charCodeAt(0) : '')
+      // console.log(`raw_mode: '${dataStr}'`, data.length, data.length > 0 ? data.charCodeAt(data.length - 1) : '')
+      // console.log(`raw_mode: '${dataStr}'`, data.length, data.length > 0 ? data[data.length - 1] : '', data)
 
       if (this.state.rawReplState === RawReplState.ENTERING) {
-        const waitFor1 = `raw REPL; CTRL-B to exit\r\n`
-        if (data === waitFor1) this.state.rawReplState = RawReplState.ENTERING_WAITING_FOR_START
+        const waitFor1 = `raw REPL; CTRL-B to exit`
+        if (dataTrimmed.startsWith(waitFor1)) {
+          if (dataTrimmed.endsWith('\n>')) {
+            // serial: > comes in one message, while over network it's spliut
+            this.state.replMode = WebReplMode.SCRIPT_RAW_MODE
+            if (this.state.replPromiseResolve) this.state.replPromiseResolve('')
+          } else {
+            this.state.rawReplState = RawReplState.ENTERING_WAITING_FOR_START
+          }
+        }
 
       } else if (this.state.rawReplState === RawReplState.ENTERING_WAITING_FOR_START) {
-        if (data === '>') {
+        if (dataStr === '>') {
           // console.log('_raw mode start', !!this.state.replModeSwitchPromiseResolve)
           this.state.replMode = WebReplMode.SCRIPT_RAW_MODE
           if (this.state.replPromiseResolve) this.state.replPromiseResolve('')
         }
 
       } else if (this.state.rawReplState === RawReplState.SCRIPT_SENT) {
-        if (data === 'OK') {
-          // console.log('ok received, collecting input')
+        if (dataStr === 'OK') {
+          // console.log('ok received, start collecting input')
           this.state.inputBuffer = ''
           this.state.errorBuffer = ''
-          this.state.rawReplState = RawReplState.SCRIPT_RECEIVING_OUTPUT
-          // this.state.rawReplExitStep = 0
+          this.state.rawReplState = RawReplState.SCRIPT_RECEIVING_RESPONSE
+          this.state.receivingResponseSubState = RawReplReceivingResponseSubState.SCRIPT_RECEIVING_OUTPUT
         } else {
           console.error('error: should have received OK, received:', data)
         }
+        return
+      }
 
-      } else if (this.state.rawReplState === RawReplState.SCRIPT_RECEIVING_OUTPUT) {
-        if (data === '\x04') {
-          // End of output. now switch to receiving error
-          this.state.rawReplState = RawReplState.SCRIPT_RECEIVING_ERROR
-        } else {
-          this.state.inputBuffer += data
-        }
+      // SCRIPT OUTPUT: OK[ok_output]\x04[error_output][x04]>
+      if (this.state.rawReplState === RawReplState.SCRIPT_RECEIVING_RESPONSE) {
+        // debug('receive:', data)
+        for (const entry of data) {
+          // debug(entry)
+          if (entry === 0x04 && this.state.receivingResponseSubState === RawReplReceivingResponseSubState.SCRIPT_RECEIVING_OUTPUT) {
+            // debug('switch to error mode')
+            this.state.receivingResponseSubState = RawReplReceivingResponseSubState.SCRIPT_RECEIVING_ERROR
+          } else if (entry === 0x04 && this.state.receivingResponseSubState === RawReplReceivingResponseSubState.SCRIPT_RECEIVING_ERROR) {
+            // debug('switch to end mode')
+            this.state.receivingResponseSubState = RawReplReceivingResponseSubState.SCRIPT_WAITING_FOR_END
+          } else if (entry === 62 && this.state.receivingResponseSubState === RawReplReceivingResponseSubState.SCRIPT_WAITING_FOR_END) {
+            // debug('all done!!!')
 
-      } else if (this.state.rawReplState === RawReplState.SCRIPT_RECEIVING_ERROR) {
-        if (data === '\x04') {
-          // End of error. now wait for new start
-          this.state.rawReplState = RawReplState.SCRIPT_WAITING_FOR_END
-        } else {
-          this.state.errorBuffer += data
-        }
+            // ALL DONE
+            this.state.inputBuffer = this.state.inputBuffer.trim()
+            this.state.errorBuffer = this.state.errorBuffer.trim()
+            // console.log('END', this.state.inputBuffer, this.state.errorBuffer)
+            this.state.rawReplState = RawReplState.WAITING_FOR_INPUT
 
-      } else if (this.state.rawReplState === RawReplState.SCRIPT_WAITING_FOR_END) {
-        if (data === '>') {
-          this.state.inputBuffer = this.state.inputBuffer.trim()
-          this.state.errorBuffer = this.state.errorBuffer.trim()
-          // console.log('END', this.state.inputBuffer, this.state.errorBuffer)
-          this.state.rawReplState = RawReplState.WAITING_FOR_INPUT
-
-          if (this.state.errorBuffer.length > 0 && this.state.replPromiseReject) {
-            this.state.replPromiseReject(new ScriptExecutionError(this.state.errorBuffer))
-          } else if (this.state.replPromiseResolve) {
-            this.state.replPromiseResolve(this.state.inputBuffer)
+            if (this.state.errorBuffer.length > 0 && this.state.replPromiseReject) {
+              this.state.replPromiseReject(new ScriptExecutionError(this.state.errorBuffer))
+            } else if (this.state.replPromiseResolve) {
+              this.state.replPromiseResolve(this.state.inputBuffer)
+            }
+          } else {
+            // add to buffer
+            if (this.state.receivingResponseSubState === RawReplReceivingResponseSubState.SCRIPT_RECEIVING_OUTPUT) {
+              // debug('adding to buffer:', entry)
+              this.state.inputBuffer += String.fromCharCode(entry)
+            } else {
+              // debug('adding to error buffer:', entry)
+              this.state.errorBuffer += String.fromCharCode(entry)
+            }
           }
-
-        } else {
-          console.error('waiting for end, received unexpected data:', data)
         }
 
       } else if (this.state.rawReplState === RawReplState.CHANGING_TO_FRIENDLY_REPL) {
-        if (dataTrimmed === '>>>') {
+        // console.log('x', data, dataStr)
+        if (dataTrimmed.endsWith('>>>')) {
           // console.log('__ back in friendly repl mode')
           if (this.state.replPromiseResolve) this.state.replPromiseResolve('')
         }
@@ -384,6 +422,23 @@ export class WebREPL {
     return this.state.replState === WebReplState.OPEN
   }
 
+  sendData(data: string | Buffer | ArrayBuffer) {
+    if (this.state.deviceMode === DeviceMode.NETWORK) {
+      return this.sendData(data)
+    } else {
+      if (data instanceof ArrayBuffer) {
+        this.serialSendData(Buffer.from(data))
+      } else {
+        this.serialSendData(data)
+      }
+    }
+  }
+
+  serialSendData(data: string | Buffer) {
+    // debug('serialSendData', data)
+    this.state.port?.write(data)
+  }
+
   wsSendData(data: string | ArrayBuffer) {
     if (!this.state.ws || this.state.ws.readyState !== WebSocket.OPEN) {
       throw new Error('wsSendData: No open websocket')
@@ -393,6 +448,16 @@ export class WebREPL {
   }
 
   public async close() {
+    if (this.isSerialDevice()) {
+      await this.state.port?.close()
+      this.state.replState = WebReplState.CLOSED
+      // return this.createReplPromise()
+    } else {
+      await this.closeWebsocket()
+    }
+  }
+
+  private async closeWebsocket() {
     if (this.state.ws && this.state.ws.readyState === WebSocket.OPEN) {
       // console.log('closing')
       this.state.ws.close()
@@ -404,11 +469,6 @@ export class WebREPL {
     }
   }
 
-  // public async listFiles(): Promise<string[]> {
-  //   const output = await this.runReplCommand('import os; os.listdir()')
-  //   return JSON.parse(output.replace(/'/g, '"'))
-  // }
-
   /**
    *
    * @param script
@@ -417,10 +477,10 @@ export class WebREPL {
    * @throws: ScriptExecutionError on Python code execution error
    */
   public async runScript(script: string, disableDedent = false) {
-    debug('runScript', script)
+    // debug('runScript', script)
 
     await this.enterRawRepl()
-    // console.log('runScript: raw mode entered')
+    // debug('runScript: raw mode entered')
 
     // Prepare script for execution (dedent by default)
     if (!disableDedent) script = dedent(script)
@@ -429,18 +489,18 @@ export class WebREPL {
     // network, else the webrepl can't parse it quick enough and returns an error.
     // Therefore we chunk the data and add a send delay.
     // 120b and 180ms delay seems to work well for all ESP32 devices.
-    const chunkSize = 120;  // how many bytes to send per chunk.
-    const chunkDelayMillis = 200;  // fixed delay. a progressive delay doesn't seem to help
-    debug(`runScript: ${script.length} bytes -> ${Math.ceil(script.length / chunkSize)} chunks`)
+    const chunkSize = this.isSerialDevice() ? 3000 : 120;  // how many bytes to send per chunk.
+    const chunkDelayMillis = this.isSerialDevice() ? 0 : 200;  // fixed delay. a progressive delay doesn't seem to help
+    // debug(`runScript: ${script.length} bytes -> ${Math.ceil(script.length / chunkSize)} chunks`)
 
     while (script.length) {
       const chunk = script.substring(0, chunkSize)
       script = script.substr(chunkSize)
-      this.wsSendData(chunk)
+      this.sendData(chunk)
       await delayMillis(chunkDelayMillis)
     }
 
-    debug('runScript: script sent')
+    // debug('runScript: script sent')
     const millisStart = performance.now()
 
     // Update state and create a new promise that will be fulfilled when script has run
@@ -448,8 +508,8 @@ export class WebREPL {
     const promise = this.createReplPromise()
 
     // Send ctrl+D to execute the uploaded script in the raw repl
-    this.wsSendData('\x04')
-    // console.log('runScript: script sent, waiting for response')
+    this.sendData('\x04')
+    debug('runScript: script sent, waiting for response')
 
     // wait for script execution
     const scriptOutput = await promise
@@ -459,7 +519,7 @@ export class WebREPL {
 
     // Exit raw repl mode, re-enter friendly repl
     await this.exitRawRepl()
-    // console.log('runScript: exited RAW repl')
+    console.log('runScript: exited RAW repl')
 
     return scriptOutput
   }
@@ -467,26 +527,27 @@ export class WebREPL {
   private async enterRawRepl() {
     // see also https://github.com/scientifichackers/ampy/blob/master/ampy/pyboard.py#L175
     // Prepare state for mode switch
+    // debug('enterRawRepl')
     this.state.replMode = WebReplMode.SCRIPT_RAW_MODE
     this.state.rawReplState = RawReplState.ENTERING
 
     const promise = this.createReplPromise()
-
     // Send ctrl-C twice to interrupt any running program
-    this.wsSendData('\r\x03')
+    this.sendData('\r\x03')
     await delayMillis(100) // wait 0.1sec
-    this.wsSendData('\x03')
+    this.sendData('\x03')
     await delayMillis(100) // wait 0.1sec
-    this.wsSendData('\x01')  // ctrl+A
+    this.sendData('\x01')  // ctrl+A
     await delayMillis(100) // wait 0.1sec
 
     return promise
   }
 
   private async exitRawRepl() {
+    console.log('exitRawRepl')
     this.state.rawReplState = RawReplState.CHANGING_TO_FRIENDLY_REPL
     const promise = this.createReplPromise()
-    this.wsSendData('\r\x02')
+    this.sendData('\r\x02')
     return promise
   }
 
@@ -519,14 +580,15 @@ export class WebREPL {
 
     // initiate put
     this.state.replMode = WebReplMode.PUTFILE_WAITING_FIRST_RESPONSE
-    this.wsSendData(rec)
+    this.sendData(rec)
 
     return promise
   }
 
-  public async listFiles(directory = "/", recursive = false): Promise<FileListEntry[]>  {
+  public async listFiles(directory = "/", recursive = false): Promise<FileListEntry[]> {
     debug(`listFiles: ${directory}, recursive: ${recursive}`)
     const output = await this.runScript(ls({ directory, recursive }))
+    console.log('listFiles o', output)
     const lines = output.split('\n')
 
     const ret: FileListEntry[] = []
