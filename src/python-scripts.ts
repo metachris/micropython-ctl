@@ -47,18 +47,23 @@ def listdir(directory):
   } else {
     command += `
 def listdir(directory):
-    if directory == '/':
-        return sorted([directory + f for f in os.listdir(directory)])
-    else:
-        return sorted([directory + '/' + f for f in os.listdir(directory)])
+    files = os.ilistdir(directory)
+    out = []
+    for (filename, filetype, inode, size) in files:
+        if size == -1:
+            size = os.stat(f)[6]
+        isdir = filetype == 0x4000
+        filename = directory + filename if directory == '/' else directory + '/' + f
+        out.append((filename, isdir, size))
+        # out.append("%s [%s] %s" % (filename, "d" if isdir else "f", size))
+        # print(filename, isdir, size)
+    return sorted(out)
 `
   }
 
   command += `
-for f in listdir('${finalDir}'):
-    size = os.stat(f)[6]
-    s = '{0} - {1} bytes'.format(f, size)
-    print(s)
+for (filename, isdir, size) in listdir('${finalDir}'):
+    print("%s | %s | %s" % (filename, "d" if isdir else "f", size))
 pass  # why the fuck is this needed?
 `
 
@@ -73,3 +78,10 @@ export const manyPrints = (lines = 200) => {
   }
   return ret
 }
+
+/**
+ *
+
+
+
+ */

@@ -1,8 +1,5 @@
 /**
- * raw mode notes:
- * - starts with '>'. has no echo. input needs to be finished with ctrl+d (\x04)
- * - output has to start with 'OK', then the actual output, then \x04 then error output then again \x04
- * - finally starts over with '>'
+ * webrepl protocol implementation in async TypeScript
  */
 import fs from 'fs'
 import WebSocket from 'ws'
@@ -30,7 +27,6 @@ export enum WebReplMode {
 }
 
 export enum RawReplState {
-  // DISABLED = 'DISABLED',
   ENTERING = 'ENTERING',
   ENTERING_WAITING_FOR_START = 'ENTERING_WAITING_FOR_START',
   WAITING_FOR_INPUT = 'WAITING_FOR_INPUT',
@@ -59,11 +55,6 @@ export interface IWebReplState {
   replPromiseResolve: promiseResolve | null
   replPromiseReject: promiseReject | null
 
-  // promise helpers for switching between RAW and normal terminal mode
-  // replModeSwitchPromise: Promise<string> | null;
-  // replModeSwitchPromiseResolve: promiseResolve | null
-  // replModeSwitchPromiseReject: promiseReject | null
-  // replModeSwitchLastInput: string
   rawReplState: RawReplState
 
   lastCommand: string
@@ -83,6 +74,8 @@ export interface WindowWithWebRepl extends Window {
   testWindow: any;
   webReplState: IWebReplState | undefined
 }
+
+interface FileListEntry  { filename: string, size: number, isDir: boolean }
 
 declare const window: WindowWithWebRepl;
 
@@ -105,10 +98,6 @@ export class WebREPL {
       replPromiseResolve: null,
       replPromiseReject: null,
 
-      // replModeSwitchPromise: null,
-      // replModeSwitchPromiseResolve: null,
-      // replModeSwitchPromiseReject: null,
-      // replModeSwitchLastInput: '',
       rawReplState: RawReplState.WAITING_FOR_INPUT,
       lastRunScriptTimeNeeded: -1,
 
@@ -360,49 +349,11 @@ export class WebREPL {
         }
       }
     }
-
-
-    // // Special handler for executing REPL commands: collect buffer and detect end
-    // if (dataTrimmed === '>>>') {
-    //   // console.log('end of data,', this.state.inputBuffer)
-    //   let response = this.state.inputBuffer
-    //   this.state.inputBuffer = ''
-    //   this.state.replMode = WebReplMode.TERMINAL
-
-    //   // Sanitize output (strip command):
-    //   if (response.startsWith(this.state.lastCommand)) {
-    //     response = response.replace(this.state.lastCommand, '')
-    //   }
-    //   response = response.trim()
-    //   if (this.state.replPromiseResolve) this.state.replPromiseResolve(response)
-    // } else {
-    //   this.state.inputBuffer += event.data.toString()
-    // }
   }
 
   isConnected() {
     return this.state.replState === WebReplState.OPEN
   }
-
-  // async runReplCommand(command: string) {
-  //   if (!this.state.ws || this.state.ws.readyState !== WebSocket.OPEN) {
-  //     throw new Error('runReplCommand: No open websocket')
-  //   }
-
-  //   // Prepare command
-  //   let sanitizedCommand = command.replace(/\n/g, "\r")
-  //   if (!sanitizedCommand.endsWith('\r')) { sanitizedCommand += '\r' }
-
-  //   // Update state
-  //   this.state.lastCommand = command
-  //   this.state.inputBuffer = ''
-  //   this.state.replMode = WebReplMode.WAITING_RESPONSE_COMMAND
-
-  //   // Send command and return promise
-  //   const promise = this.createReplPromise()
-  //   this.state.ws.send(sanitizedCommand)
-  //   return promise
-  // }
 
   wsSendData(data: string | ArrayBuffer) {
     if (!this.state.ws || this.state.ws.readyState !== WebSocket.OPEN) {
@@ -429,8 +380,15 @@ export class WebREPL {
   //   return JSON.parse(output.replace(/'/g, '"'))
   // }
 
+  /**
+   *
+   * @param script
+   * @param disableDedent
+   *
+   * @throws: ScriptExecutionError on Python code execution error
+   */
   public async runScript(script: string, disableDedent = false) {
-    // console.log('runScript', script)
+    debug('runScript', script)
 
     await this.enterRawRepl()
     // console.log('runScript: raw mode entered')
@@ -537,13 +495,21 @@ export class WebREPL {
     return promise
   }
 
-  public async listFiles(directory = "/", recursive = false, include_filesize = true) {
-    console.log(`listFiles: ${directory}, recursive: ${recursive}`, include_filesize)
+  public async listFiles(directory = "/", recursive = false): Promise<FileListEntry[]>  {
+    debug(`listFiles: ${directory}, recursive: ${recursive}`)
     const output = await this.runScript(ls({ directory, recursive }))
     const lines = output.split('\n')
+
+    const ret: FileListEntry[] = []
     for (const line of lines) {
-      const parts = line.split(' - ')
-      console.log(parts)
+      const parts = line.split(' | ')
+      if (parts[0] === '') continue
+      ret.push({
+        filename: parts[0],
+        size: parseInt(parts[2], 10),
+        isDir: parts[1] === 'd',
+      })
     }
+    return ret
   }
 }

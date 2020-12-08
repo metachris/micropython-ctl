@@ -26,7 +26,7 @@ References:
 Inspiration:
 
 * https://github.com/scientifichackers/ampy/blob/master/ampy/pyboard.py
-* https://github.com/micropython/micropython/pull/6375/files
+* https://github.com/micropython/micropython/pull/6375/files (mpr: fs mount PR)
 * https://pycopy.readthedocs.io/en/latest/esp32/quickref.html
 
 ---
