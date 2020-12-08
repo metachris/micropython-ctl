@@ -178,7 +178,7 @@ export class WebREPL {
     this.state.replState = WebReplState.OPEN
 
     // Switches the port into "flowing mode"
-    this.state.port.on('data', (data) => {
+    this.state.port.on('data', (data: Buffer) => {
       // console.log('Data:', data.toString())
       this.handleProtocolData(data)
     })
@@ -277,15 +277,15 @@ export class WebREPL {
   }
 
   private onWebsocketMessage(event: WebSocket.MessageEvent) {
-    const data = event.data.toString()
-    const dataTrimmed = data.trim()
+    const dataStr = event.data.toString()
+    const dataTrimmed = dataStr.trim()
+    // console.log(`onWebsocketMessage:${event.data instanceof ArrayBuffer ? ' [ArrayBuffer]' : ''}${data.endsWith('\n') ? ' [End:\\n]' : ''}${data.length < 3 ? ' [char0:' + data.charCodeAt(0) + ']'  : ''}`, data.length, data)
 
     // do nothing if special final bytes on closing a ws connection
-    if (this.state.ws!.readyState === WebSocket.CLOSING && data.length === 2 && data.charCodeAt(0) === 65533 && data.charCodeAt(1) === 0) return
+    if (this.state.ws!.readyState === WebSocket.CLOSING && dataStr.length === 2 && dataStr.charCodeAt(0) === 65533 && dataStr.charCodeAt(1) === 0) return
 
-    // console.log(`onWebsocketMessage:${event.data instanceof ArrayBuffer ? ' [ArrayBuffer]' : ''}${data.endsWith('\n') ? ' [End:\\n]' : ''}${data.length < 3 ? ' [char0:' + data.charCodeAt(0) + ']'  : ''}`, data.length, data)
     if (event.data instanceof ArrayBuffer) {
-      debug("In: ArrayBuffer")
+      // debug("In: ArrayBuffer")
       const binData = new Uint8Array(event.data);
       this.handleBinaryProtocolData(binData)
       return
@@ -317,7 +317,7 @@ export class WebREPL {
   }
 
   private handleProtocolData(data: Uint8Array) {
-    // debug('handleStringProtocolData:', data)
+    // debug('handleProtocolData:', data)
 
     /**
      * FRIENDLY MODE REPL / TERMINAL MODE
@@ -424,7 +424,7 @@ export class WebREPL {
 
   sendData(data: string | Buffer | ArrayBuffer) {
     if (this.state.deviceMode === DeviceMode.NETWORK) {
-      return this.sendData(data)
+      return this.wsSendData(data)
     } else {
       if (data instanceof ArrayBuffer) {
         this.serialSendData(Buffer.from(data))
@@ -491,7 +491,7 @@ export class WebREPL {
     // 120b and 180ms delay seems to work well for all ESP32 devices.
     const chunkSize = this.isSerialDevice() ? 3000 : 120;  // how many bytes to send per chunk.
     const chunkDelayMillis = this.isSerialDevice() ? 0 : 200;  // fixed delay. a progressive delay doesn't seem to help
-    // debug(`runScript: ${script.length} bytes -> ${Math.ceil(script.length / chunkSize)} chunks`)
+    debug(`runScript: ${script.length} bytes -> ${Math.ceil(script.length / chunkSize)} chunks`)
 
     while (script.length) {
       const chunk = script.substring(0, chunkSize)
@@ -519,7 +519,7 @@ export class WebREPL {
 
     // Exit raw repl mode, re-enter friendly repl
     await this.exitRawRepl()
-    console.log('runScript: exited RAW repl')
+    // console.log('runScript: exited RAW repl')
 
     return scriptOutput
   }
@@ -544,7 +544,7 @@ export class WebREPL {
   }
 
   private async exitRawRepl() {
-    console.log('exitRawRepl')
+    // console.log('exitRawRepl')
     this.state.rawReplState = RawReplState.CHANGING_TO_FRIENDLY_REPL
     const promise = this.createReplPromise()
     this.sendData('\r\x02')
@@ -586,9 +586,8 @@ export class WebREPL {
   }
 
   public async listFiles(directory = "/", recursive = false): Promise<FileListEntry[]> {
-    debug(`listFiles: ${directory}, recursive: ${recursive}`)
+    debug(`listFiles: ${directory}`)
     const output = await this.runScript(ls({ directory, recursive }))
-    console.log('listFiles o', output)
     const lines = output.split('\n')
 
     const ret: FileListEntry[] = []

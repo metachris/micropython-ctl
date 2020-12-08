@@ -30,7 +30,7 @@ const setupKeyboardCapture = () => {
 
     // Send character to webrepl
     if (webrepl.isConnected() && webrepl.state.replMode === WebReplMode.TERMINAL) {
-      webrepl.serialSendData(str)
+      webrepl.sendData(str)
     }
   });
 }
@@ -40,7 +40,8 @@ const setupKeyboardCapture = () => {
   // console.log(d)
 
   await webrepl.connectSerial('/dev/tty.SLAB_USBtoUART')
-  webrepl.serialSendData('\x02')  // Ctrl+B: exit raw repl and show micropython header
+  // await webrepl.connectNetwork('10.12.50.25', 'test')
+  webrepl.sendData('\x02')  // Ctrl+B: exit raw repl and show micropython header
   setupKeyboardCapture()
 
   try {
