@@ -24,8 +24,11 @@ const setupKeyboardCapture = () => {
     specialMode = key.ctrl && key.name === 'k'
 
     // Force quit with ^D in special mode
-    if (wasSpecialMode && key.name === 'd' && key.ctrl) {
+    if (wasSpecialMode && key.name === 'd') {
       process.exit(0)
+    } else if (wasSpecialMode && key.name === 'l') {
+      console.log(await webrepl.listFiles())
+      return
     }
 
     // Send character to webrepl
@@ -48,11 +51,12 @@ const setupKeyboardCapture = () => {
     // const files = await webrepl.runScript('test()')
     const files = await webrepl.listFiles()
     console.log(files)
+
+    // const ver = await webrepl.getVer()
+    // console.log('get ver:', ver)
   } catch (e) {
     console.log("err:", e.message)
   } finally {
-    process.exit(0)
+    // process.exit(0)
   }
-  // const files = await webrepl.listFiles()
-  // console.log(files)
 })()

@@ -209,7 +209,7 @@ export class WebREPL {
     this.state.ws.binaryType = 'arraybuffer'
 
     // this.state.ws.onopen = () => console.log(`WebSocket connected`)
-    this.state.ws.onmessage = (event) => this.onWebsocketMessage(event)
+    this.state.ws.onmessage = (event) => this.handleWebsocketMessage(event)
     this.state.ws.onerror = (err) => {
       // console.log(`WebSocket onerror`, err)
       const e = this.state.replState === WebReplState.CONNECTING ? new CouldNotConnect(err.message) : err
@@ -236,20 +236,27 @@ export class WebREPL {
   }
 
 
-  private decodeWebreplBinaryResponse(data: Uint8Array) {
-    if (data[0] === 'W'.charCodeAt(0) && data[1] === 'B'.charCodeAt(0)) {
-      // tslint:disable-next-line: no-bitwise
-      const code = data[2] | (data[3] << 8);
-      return code;
-    } else {
-      return -1;
+  /**
+   * Handle special commands output
+   *
+   * getver, putfile, getfile
+   */
+  private handlProtocolSpecialCommandsOutput(data: Uint8Array) {
+    // helper to decode the binary data
+    const decodeWebreplBinaryResponse = (_data: Uint8Array) => {
+      if (_data[0] === 'W'.charCodeAt(0) && _data[1] === 'B'.charCodeAt(0)) {
+        // tslint:disable-next-line: no-bitwise
+        const code = _data[2] | (_data[3] << 8);
+        return code;
+      } else {
+        return -1;
+      }
     }
-  }
 
-  private handleBinaryProtocolData(data: Uint8Array) {
-    // console.log(data)
+    // HANDLE SPECIFIC SPECIAL COMMANDS (getver, putfile, getfile)
     if (this.state.replMode === WebReplMode.PUTFILE_WAITING_FIRST_RESPONSE) {
-      if (this.decodeWebreplBinaryResponse(data) === 0) {
+      // PUTFILE
+      if (decodeWebreplBinaryResponse(data) === 0) {
         // send file data in chunks
         for (let offset = 0; offset < this.state.putFileSize; offset += 1024) {
           this.sendData(this.state.putFileData.slice(offset, offset + 1024));
@@ -259,7 +266,7 @@ export class WebREPL {
 
     } else if (this.state.replMode === WebReplMode.PUTFILE_WAITING_FINAL_RESPONSE) {
       // final response for put
-      if (this.decodeWebreplBinaryResponse(data) === 0) {
+      if (decodeWebreplBinaryResponse(data) === 0) {
         debug('Upload success');
         if (this.state.replPromiseResolve) this.state.replPromiseResolve('')
       } else {
@@ -269,14 +276,16 @@ export class WebREPL {
       this.state.replMode = WebReplMode.TERMINAL
 
     } else if (this.state.replMode === WebReplMode.GETVER_WAITING_RESPONSE) {
-      console.log('got getver response:', data)
+      // GETVER
+      // console.log('got getver response:', data, data.toString())
+      if (this.state.replPromiseResolve) this.state.replPromiseResolve(data.join("."))
 
     } else {
       console.log('unkown ArrayBuffer input:', data)
     }
   }
 
-  private onWebsocketMessage(event: WebSocket.MessageEvent) {
+  private handleWebsocketMessage(event: WebSocket.MessageEvent) {
     const dataStr = event.data.toString()
     const dataTrimmed = dataStr.trim()
     // console.log(`onWebsocketMessage:${event.data instanceof ArrayBuffer ? ' [ArrayBuffer]' : ''}${data.endsWith('\n') ? ' [End:\\n]' : ''}${data.length < 3 ? ' [char0:' + data.charCodeAt(0) + ']'  : ''}`, data.length, data)
@@ -287,7 +296,7 @@ export class WebREPL {
     if (event.data instanceof ArrayBuffer) {
       // debug("In: ArrayBuffer")
       const binData = new Uint8Array(event.data);
-      this.handleBinaryProtocolData(binData)
+      this.handlProtocolSpecialCommandsOutput(binData)
       return
     }
 
@@ -316,9 +325,15 @@ export class WebREPL {
     this.handleProtocolData(Buffer.from(event.data))
   }
 
+  /**
+   * Handle any normal logged in data
+   */
   private handleProtocolData(data: Uint8Array) {
-    // debug('handleProtocolData:', data)
+    // debug('handleProtocolData:', data, data.toString())
 
+    if (this.state.replMode === WebReplMode.GETVER_WAITING_RESPONSE) {
+      return this.handlProtocolSpecialCommandsOutput(data)
+    }
     /**
      * FRIENDLY MODE REPL / TERMINAL MODE
      */
@@ -330,7 +345,7 @@ export class WebREPL {
     }
 
     /**
-     * RAW MODE REPL
+     * RAW MODE REPL (to run scripts)
      */
     const dataStr = data.toString()
     const dataTrimmed = dataStr.trim()
@@ -412,6 +427,8 @@ export class WebREPL {
         // console.log('x', data, dataStr)
         if (dataTrimmed.endsWith('>>>')) {
           // console.log('__ back in friendly repl mode')
+          this.state.rawReplState = RawReplState.WAITING_FOR_INPUT
+          this.state.replMode = WebReplMode.TERMINAL
           if (this.state.replPromiseResolve) this.state.replPromiseResolve('')
         }
       }
@@ -551,11 +568,33 @@ export class WebREPL {
     return promise
   }
 
+  public async getVer(): Promise<string> {
+    // debug(`getVer`)
+    if (this.isSerialDevice()) {
+      throw new Error("getVer is not possible with a serial connection (only with webrepl)")
+    }
+
+    const promise = this.createReplPromise()
+
+    this.state.replMode = WebReplMode.GETVER_WAITING_RESPONSE
+
+    // WEBREPL_REQ_S = "<2sBBQLH64s"
+    const rec = new Uint8Array(2 + 1 + 1 + 8 + 4 + 2 + 64);
+    rec[0] = 'W'.charCodeAt(0);
+    rec[1] = 'A'.charCodeAt(0);
+    rec[2] = 3; // GET_VER
+
+    // initiate put
+    this.sendData(rec)
+    const ret = await promise
+    return ret
+  }
+
   public async uploadFile(filename: string, destFilename: string) {
     debug(`uploadFile: ${filename} -> ${destFilename}`)
     const promise = this.createReplPromise()
 
-    this.state.replMode = WebReplMode.PUTFILE_WAITING_FINAL_RESPONSE
+    this.state.replMode = WebReplMode.PUTFILE_WAITING_FIRST_RESPONSE
     this.state.putFileName = filename
     this.state.putFileDest = destFilename
 
@@ -579,7 +618,6 @@ export class WebREPL {
     }
 
     // initiate put
-    this.state.replMode = WebReplMode.PUTFILE_WAITING_FIRST_RESPONSE
     this.sendData(rec)
 
     return promise
