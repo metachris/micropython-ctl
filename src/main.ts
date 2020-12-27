@@ -1,14 +1,18 @@
 /**
  * webrepl protocol implementation in async TypeScript
  */
-import fs from 'fs'
-import WebSocket from 'ws'
-import SerialPort from "serialport"
+// import fs from 'fs'
+import WebSocket from 'isomorphic-ws'
 import { InvalidPassword, CouldNotConnect, ScriptExecutionError } from './errors'
 import { debug, dedent } from './utils';
 export { InvalidPassword, CouldNotConnect, ScriptExecutionError }
-import { performance } from 'perf_hooks'
 import { ls } from './python-scripts';
+
+// let SerialPort = null
+// if (globalThis.process?.release?.name) {
+//   SerialPort = require('serialport')
+// }
+// console.log('sp', SerialPort)
 
 const delayMillis = (delayMs: number) => new Promise(resolve => setTimeout(resolve, delayMs));
 
@@ -57,7 +61,7 @@ type promiseReject = (reason: any) => void;
 export interface IWebReplState {
   deviceMode: DeviceMode
 
-  port: SerialPort | null
+  port: any
   ws: WebSocket | null
 
   replState: WebReplState
@@ -176,7 +180,8 @@ export class MicroPythonDevice {
     this.state.deviceMode = DeviceMode.SERIAL
     this.state.replState = WebReplState.CONNECTING
 
-    this.state.port = new SerialPort(path, { baudRate: 115200 })
+    // const SerialPort = require('serialport')
+    // this.state.port = new SerialPort(path, { baudRate: 115200 })
 
     // Add error listener
     this.state.port.on('error', (err: string) => {
@@ -535,7 +540,7 @@ export class MicroPythonDevice {
     }
 
     // debug('runScript: script sent')
-    const millisStart = performance.now()
+    const millisStart = Date.now()
 
     // Update state and create a new promise that will be fulfilled when script has run
     this.state.rawReplState = RawReplState.SCRIPT_SENT
@@ -549,7 +554,7 @@ export class MicroPythonDevice {
     const scriptOutput = await promise
     debug(scriptOutput)
 
-    const millisRuntime = Math.round(performance.now() - millisStart)
+    const millisRuntime = Math.round(Date.now() - millisStart)
     debug(`runScript: script done (${millisRuntime / 1000}sec)`)
     this.state.lastRunScriptTimeNeeded = millisRuntime
 
@@ -611,35 +616,35 @@ export class MicroPythonDevice {
 
   public async uploadFile(filename: string, destFilename: string) {
     debug(`uploadFile: ${filename} -> ${destFilename}`)
-    const promise = this.createReplPromise()
+    // const promise = this.createReplPromise()
 
-    this.state.replMode = WebReplMode.PUTFILE_WAITING_FIRST_RESPONSE
-    this.state.putFileName = filename
-    this.state.putFileDest = destFilename
+    // this.state.replMode = WebReplMode.PUTFILE_WAITING_FIRST_RESPONSE
+    // this.state.putFileName = filename
+    // this.state.putFileDest = destFilename
 
-    this.state.putFileData = new Uint8Array(fs.readFileSync(filename))
-    this.state.putFileSize = this.state.putFileData.length
-    debug(`uploadFile: ${this.state.putFileSize} bytes`)
+    // this.state.putFileData = new Uint8Array(fs.readFileSync(filename))
+    // this.state.putFileSize = this.state.putFileData.length
+    // debug(`uploadFile: ${this.state.putFileSize} bytes`)
 
-    // WEBREPL_FILE = "<2sBBQLH64s"
-    const rec = new Uint8Array(2 + 1 + 1 + 8 + 4 + 2 + 64);
-    rec[0] = 'W'.charCodeAt(0);
-    rec[1] = 'A'.charCodeAt(0);
-    rec[2] = 1; // put
-    rec[3] = 0;
-    rec[4] = 0; rec[5] = 0; rec[6] = 0; rec[7] = 0; rec[8] = 0; rec[9] = 0; rec[10] = 0; rec[11] = 0;
-    // tslint:disable-next-line: no-bitwise
-    rec[12] = this.state.putFileSize & 0xff; rec[13] = (this.state.putFileSize >> 8) & 0xff; rec[14] = (this.state.putFileSize >> 16) & 0xff; rec[15] = (this.state.putFileSize >> 24) & 0xff;
-    // tslint:disable-next-line: no-bitwise
-    rec[16] = this.state.putFileDest.length & 0xff; rec[17] = (this.state.putFileDest.length >> 8) & 0xff;
-    for (let i = 0; i < 64; ++i) {
-      rec[18 + i] = i < this.state.putFileDest.length ? this.state.putFileDest.charCodeAt(i) : 0
-    }
+    // // WEBREPL_FILE = "<2sBBQLH64s"
+    // const rec = new Uint8Array(2 + 1 + 1 + 8 + 4 + 2 + 64);
+    // rec[0] = 'W'.charCodeAt(0);
+    // rec[1] = 'A'.charCodeAt(0);
+    // rec[2] = 1; // put
+    // rec[3] = 0;
+    // rec[4] = 0; rec[5] = 0; rec[6] = 0; rec[7] = 0; rec[8] = 0; rec[9] = 0; rec[10] = 0; rec[11] = 0;
+    // // tslint:disable-next-line: no-bitwise
+    // rec[12] = this.state.putFileSize & 0xff; rec[13] = (this.state.putFileSize >> 8) & 0xff; rec[14] = (this.state.putFileSize >> 16) & 0xff; rec[15] = (this.state.putFileSize >> 24) & 0xff;
+    // // tslint:disable-next-line: no-bitwise
+    // rec[16] = this.state.putFileDest.length & 0xff; rec[17] = (this.state.putFileDest.length >> 8) & 0xff;
+    // for (let i = 0; i < 64; ++i) {
+    //   rec[18 + i] = i < this.state.putFileDest.length ? this.state.putFileDest.charCodeAt(i) : 0
+    // }
 
-    // initiate put
-    this.sendData(rec)
+    // // initiate put
+    // this.sendData(rec)
 
-    return promise
+    // return promise
   }
 
   public async listFiles(directory = "/", recursive = false): Promise<FileListEntry[]> {

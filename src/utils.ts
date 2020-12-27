@@ -1,4 +1,4 @@
-const SHOW_DEBUG_OUTPUT = !!process.env.DEBUG
+const SHOW_DEBUG_OUTPUT = globalThis.process?.release?.name && !!process.env.DEBUG
 
 export const debug = (...args: any) => {
   if (SHOW_DEBUG_OUTPUT) {

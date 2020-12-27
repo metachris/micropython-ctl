@@ -1,6 +1,6 @@
 import path from 'path';
 import { Command } from 'commander';
-import { ScriptExecutionError, WebREPL } from '../src/main';
+import { ScriptExecutionError, MicroPythonDevice } from '../src/main';
 import { humanFileSize } from '../src/utils';
 
 const program = new Command();
@@ -8,7 +8,7 @@ const program = new Command();
 const HOST = process.env.WEBREPL_HOST || '192.168.1.130';
 const PASSWORD = process.env.WEBREPL_PASSWORD || 'test';
 
-const micropython = new WebREPL()
+const micropython = new MicroPythonDevice()
 
 const CLR_RESET = "\x1b[0m";
 const CLR_FG_BLUE = "\x1b[34m";
