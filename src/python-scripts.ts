@@ -25,10 +25,11 @@ def listdir(directory):
             children = os.listdir(dir_or_file)
         except OSError:
             # probably a file. run stat() to confirm.
-            os.stat(dir_or_file)
-            result.add(dir_or_file)
+            stat = os.stat(dir_or_file)
+            result.add((dir_or_file, False, stat[6]))
         else:
             # probably a directory, add to result if empty.
+            result.add((dir_or_file, True, 0))
             if children:
                 # queue the children to be dealt with in next iteration.
                 for child in children:
@@ -39,8 +40,6 @@ def listdir(directory):
                         next = dir_or_file + '/' + child
 
                     _listdir(next)
-            else:
-                result.add(dir_or_file)
     _listdir(directory)
     return sorted(result)
 `
@@ -55,15 +54,13 @@ def listdir(directory):
         isdir = filetype == 0x4000
         filename = directory + filename if directory == '/' else directory + '/' + f
         out.append((filename, isdir, size))
-        # out.append("%s [%s] %s" % (filename, "d" if isdir else "f", size))
-        # print(filename, isdir, size)
     return sorted(out)
 `
   }
 
   command += `
 for (filename, isdir, size) in listdir('${finalDir}'):
-    print("%s | %s | %s" % (filename, "d" if isdir else "f", size))
+    print("%s | %s | %s" % (filename, 'd' if isdir else 'f', size))
 pass  # why the fuck is this needed?
 `
 

@@ -1,6 +1,7 @@
 import path from 'path';
 import { Command } from 'commander';
 import { ScriptExecutionError, WebREPL } from '../src/main';
+import { humanFileSize } from '../src/utils';
 
 const program = new Command();
 
@@ -8,6 +9,9 @@ const HOST = process.env.WEBREPL_HOST || '192.168.1.130';
 const PASSWORD = process.env.WEBREPL_PASSWORD || 'test';
 
 const micropython = new WebREPL()
+
+const CLR_RESET = "\x1b[0m";
+const CLR_FG_BLUE = "\x1b[34m";
 
 const ensureConnectedDevice = async () => {
   try {
@@ -27,13 +31,13 @@ const ensureConnectedDevice = async () => {
   }
 }
 
-const listFilesOnDevice = async (directory = '/') => {
+const listFilesOnDevice = async (directory = '/', cmdObj) => {
   // console.log('listFilesOnDevice', directory)
   await ensureConnectedDevice()
 
   try {
-    const files = await micropython.listFiles(directory)
-    console.log(files)
+    const files = await micropython.listFiles(directory, cmdObj.recursive)
+    files.map(file => console.log(`${humanFileSize(file.size).padStart(5)} ${file.isDir ? CLR_FG_BLUE : ''}${file.filename}${CLR_RESET}`))
 
   } catch (e) {
     if (e instanceof ScriptExecutionError && e.message.includes('OSError: [Errno 2] ENOENT')) {
@@ -44,14 +48,6 @@ const listFilesOnDevice = async (directory = '/') => {
   } finally {
     await micropython.close()
   }
-}
-
-const tree = async () => {
-  // console.log('tree')
-  await ensureConnectedDevice()
-  const files = await micropython.listFiles('/')
-  console.log(files)
-  await micropython.close()
 }
 
 const putFile = async (filename: string, destFilename?: string) => {
@@ -71,8 +67,10 @@ program.option('-h, --host <host>', `Hostname or IP of device`, HOST)
 program.option('-p, --password <password>', `Password for network device`, PASSWORD)
 
 // Commands
-program.command('ls [directory]').description('List files').action(listFilesOnDevice);
-program.command('tree').description('Print file tree').action(tree);
+program
+  .command('ls [directory]')
+  .option('-r, --recursive', 'List recursively')
+  .description('List files').action(listFilesOnDevice);
 
 program
   .command('put <filename> [<destFilename>]')

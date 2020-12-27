@@ -1,7 +1,7 @@
 {
-  "name": "micropython-webrepl",
+  "name": "micropython-ctl",
   "version": "1.0.0",
-  "description": "MicroPython WebREPL in TypeScript for browsers and Node.js",
+  "description": "Async TypeScript MicroPython interface (for serial and network connections, REPL & WebREPL)",
   "main": "./lib/main.js",
   "types": "./lib/main.d.ts",
   "author": "Chris Hager <chris@linuxuser.at>",

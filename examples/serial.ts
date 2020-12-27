@@ -1,8 +1,8 @@
 import readline from 'readline'
 import serialport from "serialport"
-import { WebReplMode, WebREPL, ScriptExecutionError } from '../src/main';
+import { WebReplMode, MicroPythonDevice, ScriptExecutionError } from '../src/main';
 
-const webrepl = new WebREPL()
+const webrepl = new MicroPythonDevice()
 
 // Keystroke capture for interactive REPL. Note: by default the keycapture
 // keeps the program alive even when the socket has closed.

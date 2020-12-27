@@ -94,7 +94,7 @@ interface FileListEntry { filename: string, size: number, isDir: boolean }
 
 declare const window: WindowWithWebRepl;
 
-export class WebREPL {
+export class MicroPythonDevice {
   onclose: () => void
   onTerminalData: (data: string) => void  // user callback
   state: IWebReplState
@@ -511,7 +511,7 @@ export class WebREPL {
    * @throws: ScriptExecutionError on Python code execution error
    */
   public async runScript(script: string, disableDedent = false) {
-    // debug('runScript', script)
+    debug('runScript', script)
 
     await this.enterRawRepl()
     // debug('runScript: raw mode entered')
@@ -547,6 +547,8 @@ export class WebREPL {
 
     // wait for script execution
     const scriptOutput = await promise
+    debug(scriptOutput)
+
     const millisRuntime = Math.round(performance.now() - millisStart)
     debug(`runScript: script done (${millisRuntime / 1000}sec)`)
     this.state.lastRunScriptTimeNeeded = millisRuntime

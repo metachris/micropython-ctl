@@ -1,60 +1,45 @@
 # TypeScript MicroPython REPL and WebREPL Interface
 
-* TypeScript/JavaScript/Node.js library to interface with MicroPython devices over a serial and network connection (REPL and WebREPL), fully async (you can await connect or executing REPL commands)
+Interface with MicroPython devices over a serial and network connection (REPL and WebREPL)
+
+* TypeScript library for websites and Node.js
+* Fully async (you can await `connect`,  executing REPL commands, etc.)
 * Command-line utility: `mctl`
+* Functionality:
+  * Connect and disconnect
+  * Run Python script and capture output
+  * List files
+  * Upload and download files
 
-Goals:
+Take a look at the examples:
 
-* Make it easy to develop apps and webapps to interface with MicroPython devices
-* Making terminal interaction more friendly and customizable
-
-Inspiration:
-
-* https://github.com/micropython/webrepl ([original JS implementation](https://github.com/micropython/webrepl/blob/master/webrepl.html))
-* https://github.com/scientifichackers/ampy/blob/master/ampy/pyboard.py
-* https://pycopy.readthedocs.io/en/latest/esp32/quickref.html
-* https://github.com/micropython/micropython/pull/6375/files (mpr: fs mount PR)
-
-Take a look at the examples!
-
-### Functionality
-
-Basic async functions:
-- `connectSerial(path: string)`
-- `connectNetwork(host: string, password: string)`
-- `close()`
-- `listFiles(directory = "/", recursive = false)`
-- `runScript(cmd: string)` ... run a Python script (will execute in RAW mode)
-
-webrepl protocol commands:
-- `GET_VER()`
-- `GET_FILE(filename: string)`
-- `PUT_FILE(filename: string, targetFilename?: string)`
-
-helper:
-- `listFiles()`
+* [examples/basic.ts](https://github.com/metachris/micropython-ctl/blob/master/examples/basic.ts)
+* [examples/cmd.ts](https://github.com/metachris/micropython-ctl/blob/master/examples/cmd.ts)
 
 
----
-
-Usage:
+### Usage Examples
 
 ```js
-import { WebREPL } from 'micropython-webrepl'
+import { MicroPythonDevice } from 'micropython-ctl'
 
-const webrepl = new WebREPL()
+(async () => {
+  const micropython = new MicroPythonDevice()
 
-// Connect to webrepl over network
-await webrepl.connect('IP_ADDRESS', 'REPL_PASSWORD')
-console.log('WebREPL connected')
+  // Connect to micropython device
+  await micropython.connectNetwork('YOUR_IP', 'WEBREPL_PASSWORD')
+  // await micropython.connectSerial('/dev/ttyUSB0')
 
-// Run a REPL command and capture the output
-const output = await webrepl.runReplCommand('import os; os.listdir()')
-console.log('Run command output:', output)
+  // Run a Python script and capture the output
+  const output = await micropython.runScript('import os; os.listdir()')
+  console.log('runScript output:', output)
 
-// List all files (as a list of filenames)
-const files = await webrepl.listFiles()
-console.log('Files:', files)
+  // List all files in the root
+  const files = await micropython.listFiles()
+  console.log('files:', files)
+
+  // Close
+  await micropython.close()
+})()
 ```
 
 See more examples in `/examples/`. You can run them with `ts-node`:
@@ -64,6 +49,15 @@ $ yarn ts-node examples/terminal.ts
 ```
 
 ---
+
+
+Inspiration:
+
+* https://github.com/micropython/webrepl ([original JS implementation](https://github.com/micropython/webrepl/blob/master/webrepl.html))
+* https://github.com/scientifichackers/ampy/blob/master/ampy/pyboard.py
+* https://pycopy.readthedocs.io/en/latest/esp32/quickref.html
+* https://github.com/micropython/micropython/pull/6375/files (mpr: fs mount PR)
+
 
 Future work:
 

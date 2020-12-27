@@ -1,25 +1,23 @@
-import { WebREPL } from '../src/main';
+import { MicroPythonDevice } from '../src/main';
 
-const HOST = '10.12.50.101';
-// const HOST = 'localhost';
-const PASSWORD = 'test';
+const HOST = process.env.WEBREPL_HOST || '10.12.50.101';
+const PASSWORD = process.env.WEBREPL_PASSWORD || 'test';
 
 (async () => {
-  const webrepl = new WebREPL()
+  const micropython = new MicroPythonDevice()
 
-  // Connect to webrepl over network
-  await webrepl.connect(HOST, PASSWORD)
-  console.log('after connect')
+  // Connect to micropython device
+  await micropython.connectNetwork(HOST, PASSWORD)
+  // await micropython.connectSerial('/dev/ttyUSB0')
 
-  // Run a REPL command and capture the output
-  const output = await webrepl.runReplCommand('import os; os.listdir()')
-  console.log('after run command', output)
+  // Run a Python script and capture the output
+  const output = await micropython.runScript('import os; os.listdir()')
+  console.log('runScript output:', output)
 
-  // List all files (as a list of filenames)
-  const files = await webrepl.listFiles()
+  // List all files in the root
+  const files = await micropython.listFiles()
   console.log('files:', files)
 
   // Close
-  await webrepl.close()
-  console.log('after close')
+  await micropython.close()
 })()
