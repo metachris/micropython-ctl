@@ -4,24 +4,35 @@ import { ScriptExecutionError, WebREPL } from '../src/main';
 
 const program = new Command();
 
-const HOST = process.env.WEBREPL_HOST || '10.12.50.25'; // '10.12.50.101', '10.0.1.10'
+const HOST = process.env.WEBREPL_HOST || '192.168.1.130';
 const PASSWORD = process.env.WEBREPL_PASSWORD || 'test';
 
-const webrepl = new WebREPL()
-const ensureConnectedWebRepl = async () => {
-  if (!webrepl.isConnected()) {
-    console.log(`connecting to: ${HOST}`)
-    await webrepl.connect(HOST, PASSWORD)
+const micropython = new WebREPL()
+
+const ensureConnectedDevice = async () => {
+  try {
+    if (!micropython.isConnected()) {
+      if (program.tty) {
+        console.log(`Connecting over serial to: ${program.tty}`)
+        await micropython.connectSerial(program.tty)
+      } else {
+        console.log(`Connecting over network to: ${program.host}`)
+        await micropython.connectNetwork(program.host, program.password)
+      }
+      // console.log('Connected')
+    }
+  } catch (e) {
+    console.error('Could not connect:', e.toString())
+    process.exit(1)
   }
-  console.log('connected')
 }
 
 const listFilesOnDevice = async (directory = '/') => {
-  console.log('listFilesOnDevice', directory)
-  await ensureConnectedWebRepl()
+  // console.log('listFilesOnDevice', directory)
+  await ensureConnectedDevice()
 
   try {
-    const files = await webrepl.listFiles(directory)
+    const files = await micropython.listFiles(directory)
     console.log(files)
 
   } catch (e) {
@@ -31,24 +42,37 @@ const listFilesOnDevice = async (directory = '/') => {
     }
     console.log('Error:', e)
   } finally {
-    await webrepl.close()
+    await micropython.close()
   }
+}
+
+const tree = async () => {
+  // console.log('tree')
+  await ensureConnectedDevice()
+  const files = await micropython.listFiles('/')
+  console.log(files)
+  await micropython.close()
 }
 
 const putFile = async (filename: string, destFilename?: string) => {
   if (!destFilename) destFilename = path.basename(filename)
   console.log(filename, '->', destFilename)
 
-  await ensureConnectedWebRepl()
-  await webrepl.uploadFile(filename, destFilename)
+  await ensureConnectedDevice()
+  await micropython.uploadFile(filename, destFilename)
 }
-
 
 /**
  * Setup command line commands, using commander.js
  * https://github.com/tj/commander.js
  */
+program.option('-t, --tty <device>', `Serial interface (eg. /dev/tty.SLAB_USBtoUART)`)
+program.option('-h, --host <host>', `Hostname or IP of device`, HOST)
+program.option('-p, --password <password>', `Password for network device`, PASSWORD)
+
+// Commands
 program.command('ls [directory]').description('List files').action(listFilesOnDevice);
+program.command('tree').description('Print file tree').action(tree);
 
 program
   .command('put <filename> [<destFilename>]')

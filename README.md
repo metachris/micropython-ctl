@@ -1,14 +1,30 @@
-# MicroPython WebREPL in TypeScript
+# TypeScript MicroPython REPL and WebREPL Interface
 
-Goal: easy to use, async WebREPL with types, for websites and Node.js apps.
+* TypeScript/JavaScript/Node.js library to interface with MicroPython devices over a serial and network connection (REPL and WebREPL), fully async (you can await connect or executing REPL commands)
+* Command-line utility: `mctl`
+
+Goals:
+
+* Make it easy to develop apps and webapps to interface with MicroPython devices
+* Making terminal interaction more friendly and customizable
+
+Inspiration:
+
+* https://github.com/micropython/webrepl ([original JS implementation](https://github.com/micropython/webrepl/blob/master/webrepl.html))
+* https://github.com/scientifichackers/ampy/blob/master/ampy/pyboard.py
+* https://pycopy.readthedocs.io/en/latest/esp32/quickref.html
+* https://github.com/micropython/micropython/pull/6375/files (mpr: fs mount PR)
+
+Take a look at the examples!
 
 ### Functionality
 
 Basic async functions:
-- `connect(hostname, password)`
+- `connectSerial(path: string)`
+- `connectNetwork(host: string, password: string)`
 - `close()`
-- `runReplCommand(cmd: string)` ... run a Python command (should also lude multi-line "paste", note that original webrepl doesn't send ge clipboards)
-- `wsSendData(data: string | ArrayBuffer)`
+- `listFiles(directory = "/", recursive = false)`
+- `runScript(cmd: string)` ... run a Python script (will execute in RAW mode)
 
 webrepl protocol commands:
 - `GET_VER()`
@@ -18,16 +34,6 @@ webrepl protocol commands:
 helper:
 - `listFiles()`
 
-References:
-
-* https://github.com/micropython/webrepl
-* Original JS implementation: https://github.com/micropython/webrepl/blob/master/webrepl.html
-
-Inspiration:
-
-* https://github.com/scientifichackers/ampy/blob/master/ampy/pyboard.py
-* https://github.com/micropython/micropython/pull/6375/files (mpr: fs mount PR)
-* https://pycopy.readthedocs.io/en/latest/esp32/quickref.html
 
 ---
 
@@ -56,3 +62,9 @@ See more examples in `/examples/`. You can run them with `ts-node`:
 ```shell
 $ yarn ts-node examples/terminal.ts
 ```
+
+---
+
+Future work:
+
+* Support new raw-paste mode: https://github.com/micropython/micropython/blob/master/docs/reference/repl.rst#raw-mode-and-raw-paste-mode (only in master, should be part of MicroPython 1.14)

@@ -172,27 +172,44 @@ export class WebREPL {
 
   public async connectSerial(path: string) {
     debug('connectSerial', path)
+    // Connect to serial device
     this.state.deviceMode = DeviceMode.SERIAL
     this.state.replState = WebReplState.CONNECTING
-    this.state.port = new SerialPort(path, { baudRate: 115200 })
-    this.state.replState = WebReplState.OPEN
 
-    // Switches the port into "flowing mode"
+    this.state.port = new SerialPort(path, { baudRate: 115200 })
+
+    // Add error listener
+    this.state.port.on('error', (err: string) => {
+      if (this.state.replPromiseReject) {
+        debug(err)
+        const e = this.state.replState === WebReplState.CONNECTING ? new CouldNotConnect(err.toString()) : err
+        this.state.replPromiseReject(e)
+      } else {
+        throw err
+      }
+    })
+
+    // Add data listener
     this.state.port.on('data', (data: Buffer) => {
       // console.log('Data:', data.toString())
+
+      if (this.state.replState === WebReplState.CONNECTING && data.toString().trim().endsWith('>>>')) {
+        this.state.replState = WebReplState.OPEN
+        this.state.replMode = WebReplMode.TERMINAL
+        this.state.inputBuffer = ''
+        if (this.state.replPromiseResolve) this.state.replPromiseResolve('')
+        return
+      }
+
       this.handleProtocolData(data)
     })
 
-    // this.state.port.write('\x02')
+    this.state.port!.write('\x02')  // Required to send Ctrl+B, so we receive the info that we are in REPL mode
+    return this.createReplPromise()
   }
 
-  public async connectNetwork(host: string, password?: string) {
+  public async connectNetwork(host: string, password: string) {
     this.state.deviceMode = DeviceMode.NETWORK
-
-    // console.log(`connect: host=${host}, password=${password}`)
-    if (!password) {
-      throw new Error('Password is required for webrepl (over network). Serial interface is TODO.')
-    }
 
     // check if already a websocket connection active
     if (this.state.ws && this.state.ws.readyState !== WebSocket.CLOSED) {  // see also https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/readyState
