@@ -9,23 +9,24 @@ import WebSocket from 'isomorphic-ws'
 import { Buffer } from 'buffer/'
 import { InvalidPassword, CouldNotConnect, ScriptExecutionError } from './errors'
 import { debug, dedent } from './utils';
-export { InvalidPassword, CouldNotConnect, ScriptExecutionError }
 import { ls } from './python-scripts';
+
+export { InvalidPassword, CouldNotConnect, ScriptExecutionError }  // allows easy importing from user scripts
 
 const delayMillis = (delayMs: number) => new Promise(resolve => setTimeout(resolve, delayMs));
 
-export enum DeviceMode {
+export enum ConnectionMode {
   SERIAL = "SERIAL",
   NETWORK = "NETWORK",
 }
 
-export enum WebReplState {
+export enum ConnectionState {
   CONNECTING = 'CONNECTING',
   OPEN = 'OPEN',
   CLOSED = 'CLOSED',
 }
 
-export enum WebReplMode {
+export enum ReplMode {
   TERMINAL = 'TERMINAL',  // direct IO with user/program
   SCRIPT_RAW_MODE = 'SCRIPT_RAW_MODE',  // RAW mode for script execution
 
@@ -49,21 +50,21 @@ enum RawReplReceivingResponseSubState {
   SCRIPT_WAITING_FOR_END = 'SCRIPT_WAITING_FOR_END',
 }
 
-export interface WebReplOptions {
+export interface DeviceOptions {
   attachStateToWindow: boolean | Window
 }
 
 type promiseResolve = (value: string | PromiseLike<string>) => void;
 type promiseReject = (reason: any) => void;
 
-export interface IWebReplState {
-  deviceMode: DeviceMode
+export interface DeviceState {
+  connectionMode: ConnectionMode
 
   port: any
   ws: WebSocket | null
 
-  replState: WebReplState
-  replMode: WebReplMode // only if replState is connected
+  replState: ConnectionState
+  replMode: ReplMode // only if replState is connected
   replPassword: string
 
   // promise helpers for user script
@@ -89,7 +90,7 @@ export interface IWebReplState {
 export interface WindowWithWebRepl extends Window {
   [x: string]: any;
   testWindow: any;
-  webReplState: IWebReplState | undefined
+  webReplState: DeviceState | undefined
 }
 
 interface FileListEntry { filename: string, size: number, isDir: boolean }
@@ -99,15 +100,15 @@ declare const window: WindowWithWebRepl;
 export class MicroPythonDevice {
   onclose: () => void
   onTerminalData: (data: string) => void  // user callback
-  state: IWebReplState
+  state: DeviceState
 
-  private getInitState(): IWebReplState {
+  private getInitState(): DeviceState {
     return {
-      deviceMode: DeviceMode.NETWORK,
+      connectionMode: ConnectionMode.NETWORK,
       port: null,
       ws: null,
-      replState: WebReplState.CLOSED,
-      replMode: WebReplMode.TERMINAL,
+      replState: ConnectionState.CLOSED,
+      replMode: ReplMode.TERMINAL,
       inputBuffer: '',
       errorBuffer: '',
       replPassword: '',
@@ -128,7 +129,7 @@ export class MicroPythonDevice {
     }
   }
 
-  constructor(options?: WebReplOptions) {
+  constructor(options?: DeviceOptions) {
     // State init, either local only or also on a window instance (for code hot reloading)
     if (options?.attachStateToWindow) {
       this.attachStateToWindow(options.attachStateToWindow)
@@ -139,7 +140,7 @@ export class MicroPythonDevice {
   }
 
   isSerialDevice() {
-    return this.state.deviceMode === DeviceMode.SERIAL
+    return this.state.connectionMode === ConnectionMode.SERIAL
   }
 
   /**
@@ -175,8 +176,8 @@ export class MicroPythonDevice {
   public async connectSerial(path: string) {
     debug('connectSerial', path)
     // Connect to serial device
-    this.state.deviceMode = DeviceMode.SERIAL
-    this.state.replState = WebReplState.CONNECTING
+    this.state.connectionMode = ConnectionMode.SERIAL
+    this.state.replState = ConnectionState.CONNECTING
 
     const SerialPort = require('serialport')
     this.state.port = new SerialPort(path, { baudRate: 115200 })
@@ -185,7 +186,7 @@ export class MicroPythonDevice {
     this.state.port.on('error', (err: string) => {
       if (this.state.replPromiseReject) {
         debug(err)
-        const e = this.state.replState === WebReplState.CONNECTING ? new CouldNotConnect(err.toString()) : err
+        const e = this.state.replState === ConnectionState.CONNECTING ? new CouldNotConnect(err.toString()) : err
         this.state.replPromiseReject(e)
       } else {
         throw err
@@ -196,9 +197,9 @@ export class MicroPythonDevice {
     this.state.port.on('data', (data: Buffer) => {
       // console.log('Data:', data.toString())
 
-      if (this.state.replState === WebReplState.CONNECTING && data.toString().trim().endsWith('>>>')) {
-        this.state.replState = WebReplState.OPEN
-        this.state.replMode = WebReplMode.TERMINAL
+      if (this.state.replState === ConnectionState.CONNECTING && data.toString().trim().endsWith('>>>')) {
+        this.state.replState = ConnectionState.OPEN
+        this.state.replMode = ReplMode.TERMINAL
         this.state.inputBuffer = ''
         if (this.state.replPromiseResolve) this.state.replPromiseResolve('')
         return
@@ -212,7 +213,7 @@ export class MicroPythonDevice {
   }
 
   public async connectNetwork(host: string, password: string) {
-    this.state.deviceMode = DeviceMode.NETWORK
+    this.state.connectionMode = ConnectionMode.NETWORK
 
     // check if already a websocket connection active
     if (this.state.ws && this.state.ws.readyState !== WebSocket.CLOSED) {  // see also https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/readyState
@@ -222,7 +223,7 @@ export class MicroPythonDevice {
 
     const uri = `ws://${host}:8266`
     // console.log('connect', uri)
-    this.state.replState = WebReplState.CONNECTING
+    this.state.replState = ConnectionState.CONNECTING
     this.state.replPassword = password
 
     this.state.ws = new WebSocket(uri)
@@ -232,13 +233,13 @@ export class MicroPythonDevice {
     this.state.ws.onmessage = (event) => this.handleWebsocketMessage(event)
     this.state.ws.onerror = (err) => {
       // console.log(`WebSocket onerror`, err)
-      const e = this.state.replState === WebReplState.CONNECTING ? new CouldNotConnect(err.message) : err
+      const e = this.state.replState === ConnectionState.CONNECTING ? new CouldNotConnect(err.message) : err
       if (this.state.replPromiseReject) this.state.replPromiseReject(e)
     }
 
     this.state.ws.onclose = () => {
       // console.log(`WebSocket onclose`)
-      this.state.replState = WebReplState.CLOSED
+      this.state.replState = ConnectionState.CLOSED
       if (this.state.replPromiseResolve) this.state.replPromiseResolve('') // release the 'close' async event
       if (this.onclose) this.onclose()
     }
@@ -274,17 +275,17 @@ export class MicroPythonDevice {
     }
 
     // HANDLE SPECIFIC SPECIAL COMMANDS (getver, putfile, getfile)
-    if (this.state.replMode === WebReplMode.PUTFILE_WAITING_FIRST_RESPONSE) {
+    if (this.state.replMode === ReplMode.PUTFILE_WAITING_FIRST_RESPONSE) {
       // PUTFILE
       if (decodeWebreplBinaryResponse(data) === 0) {
         // send file data in chunks
         for (let offset = 0; offset < this.state.putFileSize; offset += 1024) {
           this.sendData(this.state.putFileData.slice(offset, offset + 1024));
         }
-        this.state.replMode = WebReplMode.PUTFILE_WAITING_FINAL_RESPONSE;
+        this.state.replMode = ReplMode.PUTFILE_WAITING_FINAL_RESPONSE;
       }
 
-    } else if (this.state.replMode === WebReplMode.PUTFILE_WAITING_FINAL_RESPONSE) {
+    } else if (this.state.replMode === ReplMode.PUTFILE_WAITING_FINAL_RESPONSE) {
       // final response for put
       if (decodeWebreplBinaryResponse(data) === 0) {
         debug('Upload success');
@@ -293,9 +294,9 @@ export class MicroPythonDevice {
         console.error('Upload failed');
         if (this.state.replPromiseReject) this.state.replPromiseReject('Upload failed')
       }
-      this.state.replMode = WebReplMode.TERMINAL
+      this.state.replMode = ReplMode.TERMINAL
 
-    } else if (this.state.replMode === WebReplMode.GETVER_WAITING_RESPONSE) {
+    } else if (this.state.replMode === ReplMode.GETVER_WAITING_RESPONSE) {
       // GETVER
       // console.log('got getver response:', data, data.toString())
       if (this.state.replPromiseResolve) this.state.replPromiseResolve(data.join("."))
@@ -323,7 +324,7 @@ export class MicroPythonDevice {
     /**
      * CONNECTING
      */
-    if (this.state.replState === WebReplState.CONNECTING) {
+    if (this.state.replState === ConnectionState.CONNECTING) {
       if (dataTrimmed === 'Password:') {
         this.state.ws!.send(this.state.replPassword + '\r')
         return
@@ -334,8 +335,8 @@ export class MicroPythonDevice {
         return
 
       } else if (dataTrimmed.startsWith('WebREPL connected')) {
-        this.state.replState = WebReplState.OPEN
-        this.state.replMode = WebReplMode.TERMINAL
+        this.state.replState = ConnectionState.OPEN
+        this.state.replMode = ReplMode.TERMINAL
         this.state.inputBuffer = ''
         if (this.state.replPromiseResolve) this.state.replPromiseResolve('')
         return
@@ -355,13 +356,13 @@ export class MicroPythonDevice {
   private handleProtocolData(data: Uint8Array) {
     // debug('handleProtocolData:', data)
 
-    if (this.state.replMode === WebReplMode.GETVER_WAITING_RESPONSE) {
+    if (this.state.replMode === ReplMode.GETVER_WAITING_RESPONSE) {
       return this.handlProtocolSpecialCommandsOutput(data)
     }
     /**
      * FRIENDLY MODE REPL / TERMINAL MODE
      */
-    if (this.state.replMode === WebReplMode.TERMINAL) {
+    if (this.state.replMode === ReplMode.TERMINAL) {
       // pass terminal on to user defined handler
       // console.log('term:', data, data.length)
       if (this.onTerminalData) this.onTerminalData(data.toString())
@@ -376,7 +377,7 @@ export class MicroPythonDevice {
 
     // debug('handleProtocolData:', dataStr)
 
-    if (this.state.replMode === WebReplMode.SCRIPT_RAW_MODE) {
+    if (this.state.replMode === ReplMode.SCRIPT_RAW_MODE) {
       // console.log(`raw_mode: '${dataStr}'`, data.length, data.length > 0 ? data.charCodeAt(data.length - 1) : '')
       // console.log(`raw_mode: '${dataStr}'`, data.length, data.length > 0 ? data[data.length - 1] : '', data)
 
@@ -385,7 +386,7 @@ export class MicroPythonDevice {
         if (dataTrimmed.startsWith(waitFor1)) {
           if (dataTrimmed.endsWith('\n>')) {
             // serial: > comes in one message, while over network it's spliut
-            this.state.replMode = WebReplMode.SCRIPT_RAW_MODE
+            this.state.replMode = ReplMode.SCRIPT_RAW_MODE
             if (this.state.replPromiseResolve) this.state.replPromiseResolve('')
           } else {
             this.state.rawReplState = RawReplState.ENTERING_WAITING_FOR_START
@@ -395,7 +396,7 @@ export class MicroPythonDevice {
       } else if (this.state.rawReplState === RawReplState.ENTERING_WAITING_FOR_START) {
         if (dataStr === '>') {
           // console.log('_raw mode start', !!this.state.replModeSwitchPromiseResolve)
-          this.state.replMode = WebReplMode.SCRIPT_RAW_MODE
+          this.state.replMode = ReplMode.SCRIPT_RAW_MODE
           if (this.state.replPromiseResolve) this.state.replPromiseResolve('')
         }
 
@@ -454,7 +455,7 @@ export class MicroPythonDevice {
         if (dataTrimmed.endsWith('>>>')) {
           // console.log('__ back in friendly repl mode')
           this.state.rawReplState = RawReplState.WAITING_FOR_INPUT
-          this.state.replMode = WebReplMode.TERMINAL
+          this.state.replMode = ReplMode.TERMINAL
           if (this.state.replPromiseResolve) this.state.replPromiseResolve('')
         }
       }
@@ -462,11 +463,11 @@ export class MicroPythonDevice {
   }
 
   isConnected() {
-    return this.state.replState === WebReplState.OPEN
+    return this.state.replState === ConnectionState.OPEN
   }
 
   sendData(data: string | Buffer | ArrayBuffer) {
-    if (this.state.deviceMode === DeviceMode.NETWORK) {
+    if (this.state.connectionMode === ConnectionMode.NETWORK) {
       return this.wsSendData(data)
     } else {
       if (data instanceof ArrayBuffer) {
@@ -493,7 +494,7 @@ export class MicroPythonDevice {
   public async close() {
     if (this.isSerialDevice()) {
       await this.state.port?.close()
-      this.state.replState = WebReplState.CLOSED
+      this.state.replState = ConnectionState.CLOSED
       // return this.createReplPromise()
     } else {
       await this.closeWebsocket()
@@ -504,7 +505,7 @@ export class MicroPythonDevice {
     if (this.state.ws && this.state.ws.readyState === WebSocket.OPEN) {
       // console.log('closing')
       this.state.ws.close()
-      this.state.replState = WebReplState.CLOSED
+      this.state.replState = ConnectionState.CLOSED
       return this.createReplPromise()
     } else {
       debug('main.close(): wanting to close already closed websocket')
@@ -573,7 +574,7 @@ export class MicroPythonDevice {
     // see also https://github.com/scientifichackers/ampy/blob/master/ampy/pyboard.py#L175
     // Prepare state for mode switch
     // debug('enterRawRepl')
-    this.state.replMode = WebReplMode.SCRIPT_RAW_MODE
+    this.state.replMode = ReplMode.SCRIPT_RAW_MODE
     this.state.rawReplState = RawReplState.ENTERING
 
     const promise = this.createReplPromise()
@@ -604,7 +605,7 @@ export class MicroPythonDevice {
 
     const promise = this.createReplPromise()
 
-    this.state.replMode = WebReplMode.GETVER_WAITING_RESPONSE
+    this.state.replMode = ReplMode.GETVER_WAITING_RESPONSE
 
     // WEBREPL_REQ_S = "<2sBBQLH64s"
     const rec = new Uint8Array(2 + 1 + 1 + 8 + 4 + 2 + 64);
