@@ -18,9 +18,30 @@ Take a look at the examples:
 * [examples/website.html](https://github.com/metachris/micropython-ctl/blob/master/examples/website.html)
 
 
-### Usage Examples
+# Usage Examples
 
-#### Node.js
+
+## Browser
+
+You can include the latest release via CDN:
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/micropython-ctl/dist-browser/main.js"></script>
+```
+
+Example:
+
+* Code in [examples/website.html](https://github.com/metachris/micropython-ctl/blob/master/examples/website.html)
+* Live at
+
+
+Similar as in Node.js, but without serial interface (Browsers don't allow access to USB/serial ports).
+
+
+Note: In the browser, you can enable debug output by opening the console and entering `window.DEBUG = 1`
+
+
+## Node.js
 
 ```js
 import { MicroPythonDevice } from 'micropython-ctl'
@@ -50,14 +71,6 @@ See more examples in `/examples/`. You can run them with `ts-node`:
 ```shell
 $ yarn ts-node examples/terminal.ts
 ```
-
-#### Browser
-
-Similar as in Node.js, but without serial interface (Browsers don't allow access to USB/serial ports).
-
-See [examples/website.html](https://github.com/metachris/micropython-ctl/blob/master/examples/website.html)
-
-Note: In the browser, you can enable debug output by opening the console and entering `window.DEBUG = 1`
 
 ---
 
