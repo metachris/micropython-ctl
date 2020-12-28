@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
+
+  <!-- MicroPythonCtl from CDN (latest npm release) -->
+  <script src="https://cdn.jsdelivr.net/npm/micropython-ctl/dist-browser/main.js"></script>
+
+  <!-- MicroPythonCtl from local (webpack build) -->
+  <!-- <script src="../dist-browser/main.js"></script> -->
+
+  <title>MicroPythonCtl Example</title>
+
+  <style>
+    .container {
+      margin-top: 40px;
+    }
+
+    h1 {
+      margin-bottom: 40px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+
+    <h1>MicroPythonCtl Example</h1>
+
+    <form class="form-inline">
+
+      <div class="input-group mb-3">
+        <label class="sr-only" for="inlineFormInputGroupUsername2">Host:</label>
+        <div class="input-group mb-2 mr-sm-2">
+          <div class="input-group-prepend">
+            <div class="input-group-text">Host:</div>
+          </div>
+          <input type="text" class="form-control" id="txtHost" placeholder="IP Address">
+        </div>
+
+        <label class="sr-only" for="inlineFormInputGroupUsername2">Password:</label>
+        <div class="input-group mb-2 mr-sm-2">
+          <div class="input-group-prepend">
+            <div class="input-group-text">Password:</div>
+          </div>
+          <input type="text" class="form-control" id="txtPassword" placeholder="password">
+        </div>
+
+        <button type="button" class="btn btn-primary mb-2" id="btnConnect" onclick="connect()">Connect</button>
+    </form>
+
+  </div> <!-- EOF container -->
+
+</body>
+
+</html>
+
+<script>
+let micropythonDevice = null;
+
+const INPUT_HOST = document.getElementById('txtHost')
+const INPUT_PASS = document.getElementById('txtPassword')
+
+INPUT_HOST.value = localStorage.getItem('MicroPythonCtl:Host')
+INPUT_PASS.value = localStorage.getItem('MicroPythonCtl:Password')
+
+async function connect() {
+  const host = INPUT_HOST.value
+  const password = INPUT_PASS.value
+  console.log('connect', host, password)
+
+  // Save for next page load
+  localStorage.setItem('MicroPythonCtl:Host', host)
+  localStorage.setItem('MicroPythonCtl:Password', password)
+
+  // Connect
+  micropythonDevice = new MicroPythonCtl.MicroPythonDevice()
+  await micropythonDevice.connectNetwork(host, password)
+  console.log('connected')
+
+  // Run a Python script and capture the output
+  console.log('Running a Python script...')
+  const output = await micropythonDevice.runScript('import os; print(os.listdir())')
+  console.log('runScript output:', output)
+
+  // List all files in the root
+  console.log('Listing files...')
+  const files = await micropythonDevice.listFiles()
+  console.log('files:', files)
+}
+</script>
