@@ -10,7 +10,7 @@ jobs:
     - uses: actions/checkout@v2
 
     - run: mkdir docs
-    - run: cp examples/website.html docs/index.html
+    - run: cp examples/web-example.html docs/
 
     - name: Deploy docs 🚀
       uses: JamesIves/github-pages-deploy-action@releases/v3

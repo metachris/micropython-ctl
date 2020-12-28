@@ -31,7 +31,7 @@ You can include the latest release via CDN:
 
 Example:
 
-* Code in [examples/website.html](https://github.com/metachris/micropython-ctl/blob/master/examples/website.html)
+* Code in [examples/web-example.html](https://github.com/metachris/micropython-ctl/blob/master/examples/web-example.html)
 * Live at https://metachris.github.io/micropython-ctl/web-example.html
 
 
