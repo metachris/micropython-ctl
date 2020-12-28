@@ -72,6 +72,13 @@ $ yarn ts-node examples/terminal.ts
 
 ---
 
+#### Reach out
+
+I'm happy about feedback, please reach out:
+
+* chris@linuxuser.at
+* https://twitter.com/metachris
+
 
 #### Inspiration
 
@@ -85,5 +92,6 @@ $ yarn ts-node examples/terminal.ts
 
 * Serial interfacing is currently broken (due to focus on making it browser compatible. Will be fixed shortly!)
 * Upload & download files
+* Vue.js example with attaching the MicroPythonDevice instance to window, so one instance can live across code hot reloads :) (almost done)
 * Run Python script and receive output (don't wait for finishing) (Note: not sure it's needed, don't rush into implementing)
 * Support new raw-paste mode: https://github.com/micropython/micropython/blob/master/docs/reference/repl.rst#raw-mode-and-raw-paste-mode (only in master, should be part of MicroPython 1.14)
