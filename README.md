@@ -15,7 +15,7 @@ Take a look at the examples:
 
 * [examples/basic.ts](https://github.com/metachris/micropython-ctl/blob/master/examples/basic.ts)
 * [examples/cmd.ts](https://github.com/metachris/micropython-ctl/blob/master/examples/cmd.ts)
-* [examples/website.html](https://github.com/metachris/micropython-ctl/blob/master/examples/website.html)
+* [examples/web-example.html](https://github.com/metachris/micropython-ctl/blob/master/examples/web-example.html)
 
 
 # Usage Examples
@@ -32,7 +32,7 @@ You can include the latest release via CDN:
 Example:
 
 * Code in [examples/website.html](https://github.com/metachris/micropython-ctl/blob/master/examples/website.html)
-* Live at
+* Live at https://metachris.github.io/micropython-ctl/web-example.html
 
 
 Similar as in Node.js, but without serial interface (Browsers don't allow access to USB/serial ports).
