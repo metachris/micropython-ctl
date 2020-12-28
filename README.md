@@ -11,34 +11,32 @@ Interface with MicroPython devices over a serial and network connection (REPL an
   * List files
   * Upload and download files
 
-Take a look at the examples:
+Examples:
 
 * [examples/basic.ts](https://github.com/metachris/micropython-ctl/blob/master/examples/basic.ts)
-* [examples/cmd.ts](https://github.com/metachris/micropython-ctl/blob/master/examples/cmd.ts)
 * [examples/web-example.html](https://github.com/metachris/micropython-ctl/blob/master/examples/web-example.html)
+* [examples/cli.ts](https://github.com/metachris/micropython-ctl/blob/master/examples/cli.ts) (you can run it with `yarn cli`)
 
 
 # Usage Examples
-
 
 ## Browser
 
 You can include the latest release via CDN:
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/micropython-ctl/dist-browser/main.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/micropython-ctl@1.0.1/dist-browser/main.js"></script>
 ```
 
 Example:
 
-* Code in [examples/web-example.html](https://github.com/metachris/micropython-ctl/blob/master/examples/web-example.html)
+* See the code in [examples/web-example.html](https://github.com/metachris/micropython-ctl/blob/master/examples/web-example.html)
 * Live at https://metachris.github.io/micropython-ctl/web-example.html
 
+Notes:
 
-Similar as in Node.js, but without serial interface (Browsers don't allow access to USB/serial ports).
-
-
-Note: In the browser, you can enable debug output by opening the console and entering `window.DEBUG = 1`
+* The code is similar as in Node.js, but without serial interface (Browsers don't allow access to USB/serial ports).
+* You can enable debug output by opening the console and entering `window.DEBUG = 1`
 
 
 ## Node.js
@@ -75,7 +73,7 @@ $ yarn ts-node examples/terminal.ts
 ---
 
 
-Inspiration:
+#### Inspiration
 
 * https://github.com/micropython/webrepl ([original JS implementation](https://github.com/micropython/webrepl/blob/master/webrepl.html))
 * https://github.com/scientifichackers/ampy/blob/master/ampy/pyboard.py
@@ -83,6 +81,9 @@ Inspiration:
 * https://github.com/micropython/micropython/pull/6375/files (mpr: fs mount PR)
 
 
-Future work:
+#### Future work
 
+* Serial interfacing is currently broken (due to focus on making it browser compatible. Will be fixed shortly!)
+* Upload & download files
+* Run Python script and receive output (don't wait for finishing) (Note: not sure it's needed, don't rush into implementing)
 * Support new raw-paste mode: https://github.com/micropython/micropython/blob/master/docs/reference/repl.rst#raw-mode-and-raw-paste-mode (only in master, should be part of MicroPython 1.14)

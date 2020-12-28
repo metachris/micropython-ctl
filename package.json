@@ -10,14 +10,14 @@
   "scripts": {
     "clean": "rm -rf dist dist-node dist-browser build lib",
     "lint": "tslint -c tslint.json 'src/**/*.ts' 'test/**/*.ts'",
-    "build": "yarn buildNode && yarn buildBrowser",
+    "build": "./build.sh",
     "buildNode": "tsc -p tsconfig.json",
     "buildBrowser": "webpack",
     "test": "jest",
     "runExample": "ts-node examples/tmp.ts",
     "runTerminal": "ts-node examples/terminal.ts",
     "ts-node": "ts-node",
-    "cmd": "ts-node examples/cmd.ts"
+    "cli": "ts-node examples/cli.ts"
   },
   "devDependencies": {
     "@types/jest": "^26.0.15",
