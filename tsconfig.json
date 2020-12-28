@@ -21,7 +21,7 @@
         "allowSyntheticDefaultImports": true,
         "experimentalDecorators": true,
         "sourceMap": true,
-        "outDir": "./lib/",
+        "outDir": "./dist-node/",
         "types": ["node", "jest"],
         "lib": [
             "ES6",
