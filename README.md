@@ -3,7 +3,8 @@
 Interface with MicroPython devices over a serial and network connection (REPL and WebREPL)
 
 * TypeScript library for use in websites and Node.js
-* Fully async (you can await `connect`,  executing REPL commands, etc.)
+* Fully async (you can use `await` with `connect`,  executing REPL commands, etc.)
+* Tested with ESP32, should also work with ESP8266, perhaps others
 * Browser bundle only 15kb gzipped
 * Functionality:
   * Connect and disconnect
@@ -17,6 +18,7 @@ Code examples:
 * [examples/basic.ts](https://github.com/metachris/micropython-ctl/blob/master/examples/basic.ts) (run with `yarn ts-node examples/basic.ts`)
 * [examples/web-example.html](https://github.com/metachris/micropython-ctl/blob/master/examples/web-example.html) (just open the file in a browser)
 * [examples/cli.ts](https://github.com/metachris/micropython-ctl/blob/master/examples/cli.ts) (run with `yarn cli`)
+
 
 # Usage
 
@@ -101,6 +103,9 @@ $ yarn ts-node examples/basic.ts
 
 ---
 
+Enjoy and do cool things with this code!
+
+
 #### Reach out
 
 I'm happy about feedback, please reach out:
@@ -119,7 +124,6 @@ I'm happy about feedback, please reach out:
 
 #### Future work
 
-* Serial interfacing is currently broken (due to focus on making it browser compatible. Will be fixed shortly!)
 * Upload & download files
 * Vue.js example with attaching the MicroPythonDevice instance to window, so one instance can live across code hot reloads :) (almost done)
 * A slim version for the browser with minimal footprint (only core code, no listfiles etc.)

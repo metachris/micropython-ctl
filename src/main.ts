@@ -37,7 +37,6 @@ export enum ReplMode {
 
 export enum RawReplState {
   ENTERING = 'ENTERING',
-  ENTERING_WAITING_FOR_START = 'ENTERING_WAITING_FOR_START',
   WAITING_FOR_INPUT = 'WAITING_FOR_INPUT',
   SCRIPT_SENT = 'SCRIPT_SENT',
   SCRIPT_RECEIVING_RESPONSE = 'SCRIPT_RECEIVING_RESPONSE',
@@ -78,6 +77,8 @@ export interface DeviceState {
   inputBuffer: string
   errorBuffer: string
 
+  dataRawBuffer: Buffer
+
   lastRunScriptTimeNeeded: number
   receivingResponseSubState: RawReplReceivingResponseSubState
 
@@ -109,10 +110,12 @@ export class MicroPythonDevice {
       ws: null,
       replState: ConnectionState.CLOSED,
       replMode: ReplMode.TERMINAL,
-      inputBuffer: '',
-      errorBuffer: '',
+
       replPassword: '',
       lastCommand: '',
+      inputBuffer: '',
+      errorBuffer: '',
+      dataRawBuffer: new Buffer(0),
 
       replPromise: null,
       replPromiseResolve: null,
@@ -178,6 +181,7 @@ export class MicroPythonDevice {
     // Connect to serial device
     this.state.connectionMode = ConnectionMode.SERIAL
     this.state.replState = ConnectionState.CONNECTING
+    this.clearBuffer()
 
     const SerialPort = require('serialport')
     this.state.port = new SerialPort(path, { baudRate: 115200 })
@@ -195,16 +199,7 @@ export class MicroPythonDevice {
 
     // Add data listener
     this.state.port.on('data', (data: Buffer) => {
-      // console.log('Data:', data.toString())
-
-      if (this.state.replState === ConnectionState.CONNECTING && data.toString().trim().endsWith('>>>')) {
-        this.state.replState = ConnectionState.OPEN
-        this.state.replMode = ReplMode.TERMINAL
-        this.state.inputBuffer = ''
-        if (this.state.replPromiseResolve) this.state.replPromiseResolve('')
-        return
-      }
-
+      // debug('Data:', data, data.toString())
       this.handleProtocolData(data)
     })
 
@@ -258,7 +253,7 @@ export class MicroPythonDevice {
 
 
   /**
-   * Handle special commands output
+   * Handle special WebREPL only commands data
    *
    * getver, putfile, getfile
    */
@@ -308,23 +303,14 @@ export class MicroPythonDevice {
 
   private handleWebsocketMessage(event: WebSocket.MessageEvent) {
     const dataStr = event.data.toString()
-    const dataTrimmed = dataStr.trim()
     // console.log(`onWebsocketMessage:${event.data instanceof ArrayBuffer ? ' [ArrayBuffer]' : ''}${data.endsWith('\n') ? ' [End:\\n]' : ''}${data.length < 3 ? ' [char0:' + data.charCodeAt(0) + ']'  : ''}`, data.length, data)
 
-    // do nothing if special final bytes on closing a ws connection
+    // On closing a ws connection there may be special final bytes (discard)
     if (this.state.ws!.readyState === WebSocket.CLOSING && dataStr.length === 2 && dataStr.charCodeAt(0) === 65533 && dataStr.charCodeAt(1) === 0) return
 
-    if (event.data instanceof ArrayBuffer) {
-      // debug("In: ArrayBuffer")
-      const binData = new Uint8Array(event.data);
-      this.handlProtocolSpecialCommandsOutput(binData)
-      return
-    }
-
-    /**
-     * CONNECTING
-     */
+    // Handle connecting: enter password and if incorrect throw InvalidPassword
     if (this.state.replState === ConnectionState.CONNECTING) {
+      const dataTrimmed = dataStr.trim()
       if (dataTrimmed === 'Password:') {
         this.state.ws!.send(this.state.replPassword + '\r')
         return
@@ -333,91 +319,95 @@ export class MicroPythonDevice {
         this.state.ws!.close()  // just to be sure. micropy already closes the connection
         if (this.state.replPromiseReject) this.state.replPromiseReject(new InvalidPassword('REPL password invalid'))
         return
-
-      } else if (dataTrimmed.startsWith('WebREPL connected')) {
-        this.state.replState = ConnectionState.OPEN
-        this.state.replMode = ReplMode.TERMINAL
-        this.state.inputBuffer = ''
-        if (this.state.replPromiseResolve) this.state.replPromiseResolve('')
-        return
       }
     }
 
-    // IMPORTANT: WebSocket in Browser always deliver incoming data as string!
-    // Also Uint8Array is different than in Node.js which is why we use https://www.npmjs.com/package/buffer (works in both browser and Node.js)
+    // If data is of type ArrayBuffer, it's a special WebREPL protocol input
+    if (event.data instanceof ArrayBuffer) {
+      const binData = new Uint8Array(event.data);
+      this.handlProtocolSpecialCommandsOutput(binData)
+      return
+    }
+
+    // IMPORTANT: WebSocket from Browser always delivers incoming data as string, whereas in Node.js not necessarily!
+    // Also Uint8Array behaves different than in Node.js, which is why we use https://www.npmjs.com/package/buffer (works in both browser and Node.js)
     const buf = Buffer.from(event.data as string)
-    // debug('ws data:', typeof(event.data), buf)
     this.handleProtocolData(buf)
   }
 
+  private clearBuffer() {
+    this.state.inputBuffer = ''
+    this.state.errorBuffer = ''
+    this.state.dataRawBuffer = new Buffer(0)
+  }
+
   /**
-   * Handle any normal incoming data
+   * Handle incoming data
    */
-  private handleProtocolData(data: Uint8Array) {
+  private handleProtocolData(data: Buffer) {
     // debug('handleProtocolData:', data)
 
+    // Special protocol modes: GET_VER, GET_FILE, PUT_FILE
     if (this.state.replMode === ReplMode.GETVER_WAITING_RESPONSE) {
       return this.handlProtocolSpecialCommandsOutput(data)
     }
-    /**
-     * FRIENDLY MODE REPL / TERMINAL MODE
-     */
-    if (this.state.replMode === ReplMode.TERMINAL) {
-      // pass terminal on to user defined handler
-      // console.log('term:', data, data.length)
+
+    // If in terminal mode, just pass terminal on to user defined handler
+    if (this.isConnected() && this.state.replMode === ReplMode.TERMINAL) {
       if (this.onTerminalData) this.onTerminalData(data.toString())
       return
     }
 
-    /**
-     * RAW MODE REPL (to run scripts)
-     */
-    const dataStr = data.toString()
+    // Extend raw data buffer (data may come in as chunks with arbitrary length)
+    this.state.dataRawBuffer = Buffer.concat([this.state.dataRawBuffer, data])
+
+    // Perpare strings for easy access
+    const dataStr = this.state.dataRawBuffer.toString()
     const dataTrimmed = dataStr.trim()
 
-    // debug('handleProtocolData:', dataStr)
+    // debug('handleProtocolData', data, '=>', dataStr)
 
+    // If connecting, wait until first REPL input prompt
+    if (this.state.replState === ConnectionState.CONNECTING) {
+      if (dataStr.trim().endsWith('>>>')) {
+        this.state.replState = ConnectionState.OPEN
+        this.state.replMode = ReplMode.TERMINAL
+        this.clearBuffer()
+        debug('connected')
+        if (this.state.replPromiseResolve) this.state.replPromiseResolve('')
+      }
+      return
+    }
+
+    // Handle RAW_MODE data (entering, receiving response, receiving error, waiting for end, changing back to friendly repl)
     if (this.state.replMode === ReplMode.SCRIPT_RAW_MODE) {
-      // console.log(`raw_mode: '${dataStr}'`, data.length, data.length > 0 ? data.charCodeAt(data.length - 1) : '')
-      // console.log(`raw_mode: '${dataStr}'`, data.length, data.length > 0 ? data[data.length - 1] : '', data)
+      if (this.state.rawReplState === RawReplState.ENTERING && dataTrimmed.endsWith(`raw REPL; CTRL-B to exit\r\n>`)) {
+        this.state.replMode = ReplMode.SCRIPT_RAW_MODE
+        this.clearBuffer()
+        if (this.state.replPromiseResolve) this.state.replPromiseResolve('')
+        return
+      }
 
-      if (this.state.rawReplState === RawReplState.ENTERING) {
-        const waitFor1 = `raw REPL; CTRL-B to exit`
-        if (dataTrimmed.startsWith(waitFor1)) {
-          if (dataTrimmed.endsWith('\n>')) {
-            // serial: > comes in one message, while over network it's spliut
-            this.state.replMode = ReplMode.SCRIPT_RAW_MODE
-            if (this.state.replPromiseResolve) this.state.replPromiseResolve('')
-          } else {
-            this.state.rawReplState = RawReplState.ENTERING_WAITING_FOR_START
-          }
-        }
-
-      } else if (this.state.rawReplState === RawReplState.ENTERING_WAITING_FOR_START) {
-        if (dataStr === '>') {
-          // console.log('_raw mode start', !!this.state.replModeSwitchPromiseResolve)
-          this.state.replMode = ReplMode.SCRIPT_RAW_MODE
-          if (this.state.replPromiseResolve) this.state.replPromiseResolve('')
-        }
-
-      } else if (this.state.rawReplState === RawReplState.SCRIPT_SENT) {
+      if (this.state.rawReplState === RawReplState.SCRIPT_SENT) {
+        // After script is sent, we wait for OK, then stdout_output, then \x04, then stderr_output
+        // OK[ok_output]\x04[error_output][x04]>
         if (dataStr === 'OK') {
-          // console.log('ok received, start collecting input')
-          this.state.inputBuffer = ''
-          this.state.errorBuffer = ''
+          // debug('ok received, start collecting input')
+          this.clearBuffer()
           this.state.rawReplState = RawReplState.SCRIPT_RECEIVING_RESPONSE
           this.state.receivingResponseSubState = RawReplReceivingResponseSubState.SCRIPT_RECEIVING_OUTPUT
-        } else {
-          console.error('error: should have received OK, received:', data)
         }
         return
       }
 
       // SCRIPT OUTPUT: OK[ok_output]\x04[error_output][x04]>
       if (this.state.rawReplState === RawReplState.SCRIPT_RECEIVING_RESPONSE) {
-        // debug('receive:', data)
+
+        // iterate over received bytes
         for (const entry of data) {
           // debug(entry)
+
+          // There are 3 special markers: switching from output to error, from error to waiting for end, and
           if (entry === 0x04 && this.state.receivingResponseSubState === RawReplReceivingResponseSubState.SCRIPT_RECEIVING_OUTPUT) {
             // debug('switch to error mode')
             this.state.receivingResponseSubState = RawReplReceivingResponseSubState.SCRIPT_RECEIVING_ERROR
@@ -425,9 +415,9 @@ export class MicroPythonDevice {
             // debug('switch to end mode')
             this.state.receivingResponseSubState = RawReplReceivingResponseSubState.SCRIPT_WAITING_FOR_END
           } else if (entry === 62 && this.state.receivingResponseSubState === RawReplReceivingResponseSubState.SCRIPT_WAITING_FOR_END) {
+            // ALL DONE, now trim the buffers and resolve the promises
             // debug('all done!!!')
 
-            // ALL DONE
             this.state.inputBuffer = this.state.inputBuffer.trim()
             this.state.errorBuffer = this.state.errorBuffer.trim()
             // console.log('END', this.state.inputBuffer, this.state.errorBuffer)
@@ -438,8 +428,9 @@ export class MicroPythonDevice {
             } else if (this.state.replPromiseResolve) {
               this.state.replPromiseResolve(this.state.inputBuffer)
             }
+
           } else {
-            // add to buffer
+            // Incoming data (stdout or stderr output). Just add to buffer
             if (this.state.receivingResponseSubState === RawReplReceivingResponseSubState.SCRIPT_RECEIVING_OUTPUT) {
               // debug('adding to buffer:', entry)
               this.state.inputBuffer += String.fromCharCode(entry)
@@ -451,9 +442,9 @@ export class MicroPythonDevice {
         }
 
       } else if (this.state.rawReplState === RawReplState.CHANGING_TO_FRIENDLY_REPL) {
-        // console.log('x', data, dataStr)
+        // After executing a command, we change back to friendly repl (via exitRawRepl())
         if (dataTrimmed.endsWith('>>>')) {
-          // console.log('__ back in friendly repl mode')
+          // debug('__ back in friendly repl mode')
           this.state.rawReplState = RawReplState.WAITING_FOR_INPUT
           this.state.replMode = ReplMode.TERMINAL
           if (this.state.replPromiseResolve) this.state.replPromiseResolve('')
@@ -479,7 +470,7 @@ export class MicroPythonDevice {
   }
 
   serialSendData(data: string | Buffer) {
-    debug('serialSendData', data)
+    // debug('serialSendData', data)
     this.state.port?.write(data)
   }
 
@@ -573,7 +564,7 @@ export class MicroPythonDevice {
   private async enterRawRepl() {
     // see also https://github.com/scientifichackers/ampy/blob/master/ampy/pyboard.py#L175
     // Prepare state for mode switch
-    // debug('enterRawRepl')
+    debug('enterRawRepl')
     this.state.replMode = ReplMode.SCRIPT_RAW_MODE
     this.state.rawReplState = RawReplState.ENTERING
 
