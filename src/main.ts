@@ -1,19 +1,16 @@
 /**
- * webrepl protocol implementation in async TypeScript
+ * Async TypeScript MicroPython interface (for serial and network connections, REPL & WebREPL)
+ *
+ * - License: MIT
+ * - Repository: https://github.com/metachris/micropython-ctl
+ * - Author: chris@linuxuser.at / https://twitter.com/metachris
  */
-// import fs from 'fs'
 import WebSocket from 'isomorphic-ws'
 import { Buffer } from 'buffer/'
 import { InvalidPassword, CouldNotConnect, ScriptExecutionError } from './errors'
 import { debug, dedent } from './utils';
 export { InvalidPassword, CouldNotConnect, ScriptExecutionError }
 import { ls } from './python-scripts';
-
-// let SerialPort = null
-// if (globalThis.process?.release?.name) {
-//   SerialPort = require('serialport')
-// }
-// console.log('sp', SerialPort)
 
 const delayMillis = (delayMs: number) => new Promise(resolve => setTimeout(resolve, delayMs));
 

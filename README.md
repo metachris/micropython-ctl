@@ -2,23 +2,40 @@
 
 Interface with MicroPython devices over a serial and network connection (REPL and WebREPL)
 
-* TypeScript library for websites and Node.js
+* TypeScript library for use in websites and Node.js
 * Fully async (you can await `connect`,  executing REPL commands, etc.)
-* Command-line utility: `mctl`
+* Browser bundle only 15kb gzipped
 * Functionality:
   * Connect and disconnect
   * Run Python script and capture output
-  * List files
-  * Upload and download files
+  * List files, upload and download files
+* Main code file: [`main.js`](https://github.com/metachris/micropython-ctl/blob/master/src/main.ts)
+* Published at [npmjs.com/package/micropython-ctl](https://www.npmjs.com/package/micropython-ctl)
 
-Examples:
+Code examples:
 
-* [examples/basic.ts](https://github.com/metachris/micropython-ctl/blob/master/examples/basic.ts)
-* [examples/web-example.html](https://github.com/metachris/micropython-ctl/blob/master/examples/web-example.html)
-* [examples/cli.ts](https://github.com/metachris/micropython-ctl/blob/master/examples/cli.ts) (you can run it with `yarn cli`)
+* [examples/basic.ts](https://github.com/metachris/micropython-ctl/blob/master/examples/basic.ts) (run with `yarn ts-node examples/basic.ts`)
+* [examples/web-example.html](https://github.com/metachris/micropython-ctl/blob/master/examples/web-example.html) (just open the file in a browser)
+* [examples/cli.ts](https://github.com/metachris/micropython-ctl/blob/master/examples/cli.ts) (run with `yarn cli`)
 
+# Usage
 
-# Usage Examples
+```js
+const micropython = new MicroPythonDevice()
+
+// Connect to micropython device (over network or serial interface)
+await micropython.connectNetwork('YOUR_IP', 'WEBREPL_PASSWORD')
+// await micropython.connectSerial('/dev/ttyUSB0')
+
+// Run a Python script and capture the output
+const output = await micropython.runScript('import os; print(os.listdir())')
+console.log('runScript output:', output)
+
+// List all files in the root
+const files = await micropython.listFiles()
+console.log('files:', files)
+```
+
 
 ## Browser
 
@@ -40,6 +57,18 @@ Notes:
 
 
 ## Node.js
+
+Installation:
+
+```shell
+# If you use yarn
+yarn add micropython-ctl
+
+# Alternatively, if you use npm
+npm install micropython-ctl
+```
+
+Usage:
 
 ```js
 import { MicroPythonDevice } from 'micropython-ctl'
@@ -67,7 +96,7 @@ import { MicroPythonDevice } from 'micropython-ctl'
 See more examples in `/examples/`. You can run them with `ts-node`:
 
 ```shell
-$ yarn ts-node examples/terminal.ts
+$ yarn ts-node examples/basic.ts
 ```
 
 ---
@@ -93,5 +122,10 @@ I'm happy about feedback, please reach out:
 * Serial interfacing is currently broken (due to focus on making it browser compatible. Will be fixed shortly!)
 * Upload & download files
 * Vue.js example with attaching the MicroPythonDevice instance to window, so one instance can live across code hot reloads :) (almost done)
-* Run Python script and receive output (don't wait for finishing) (Note: not sure it's needed, don't rush into implementing)
+* A slim version for the browser with minimal footprint (only core code, no listfiles etc.)
+* Command-line utility: `mctl` (from `examples/cli.ts`)
+
+Maybe (not sure it's needed, don't rush into implementing):
+
+* Run Python script and receive output (don't wait for finishing)
 * Support new raw-paste mode: https://github.com/micropython/micropython/blob/master/docs/reference/repl.rst#raw-mode-and-raw-paste-mode (only in master, should be part of MicroPython 1.14)
