@@ -181,8 +181,8 @@ export class MicroPythonDevice {
     this.state.deviceMode = DeviceMode.SERIAL
     this.state.replState = WebReplState.CONNECTING
 
-    // const SerialPort = require('serialport')
-    // this.state.port = new SerialPort(path, { baudRate: 115200 })
+    const SerialPort = require('serialport')
+    this.state.port = new SerialPort(path, { baudRate: 115200 })
 
     // Add error listener
     this.state.port.on('error', (err: string) => {
