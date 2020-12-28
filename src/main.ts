@@ -3,6 +3,7 @@
  */
 // import fs from 'fs'
 import WebSocket from 'isomorphic-ws'
+import { Buffer } from 'buffer/'
 import { InvalidPassword, CouldNotConnect, ScriptExecutionError } from './errors'
 import { debug, dedent } from './utils';
 export { InvalidPassword, CouldNotConnect, ScriptExecutionError }
@@ -344,14 +345,18 @@ export class MicroPythonDevice {
       }
     }
 
-    this.handleProtocolData(Buffer.from(event.data))
+    // IMPORTANT: WebSocket in Browser always deliver incoming data as string!
+    // Also Uint8Array is different than in Node.js which is why we use https://www.npmjs.com/package/buffer (works in both browser and Node.js)
+    const buf = Buffer.from(event.data as string)
+    // debug('ws data:', typeof(event.data), buf)
+    this.handleProtocolData(buf)
   }
 
   /**
-   * Handle any normal logged in data
+   * Handle any normal incoming data
    */
   private handleProtocolData(data: Uint8Array) {
-    // debug('handleProtocolData:', data, data.toString())
+    // debug('handleProtocolData:', data)
 
     if (this.state.replMode === WebReplMode.GETVER_WAITING_RESPONSE) {
       return this.handlProtocolSpecialCommandsOutput(data)
@@ -371,6 +376,8 @@ export class MicroPythonDevice {
      */
     const dataStr = data.toString()
     const dataTrimmed = dataStr.trim()
+
+    // debug('handleProtocolData:', dataStr)
 
     if (this.state.replMode === WebReplMode.SCRIPT_RAW_MODE) {
       // console.log(`raw_mode: '${dataStr}'`, data.length, data.length > 0 ? data.charCodeAt(data.length - 1) : '')
@@ -474,7 +481,7 @@ export class MicroPythonDevice {
   }
 
   serialSendData(data: string | Buffer) {
-    // debug('serialSendData', data)
+    debug('serialSendData', data)
     this.state.port?.write(data)
   }
 
@@ -519,7 +526,7 @@ export class MicroPythonDevice {
     debug('runScript', script)
 
     await this.enterRawRepl()
-    // debug('runScript: raw mode entered')
+    debug('runScript: raw mode entered')
 
     // Prepare script for execution (dedent by default)
     if (!disableDedent) script = dedent(script)
@@ -560,7 +567,7 @@ export class MicroPythonDevice {
 
     // Exit raw repl mode, re-enter friendly repl
     await this.exitRawRepl()
-    // console.log('runScript: exited RAW repl')
+    // debug('runScript: exited RAW repl')
 
     return scriptOutput
   }

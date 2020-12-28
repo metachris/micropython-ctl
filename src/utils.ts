@@ -1,7 +1,8 @@
-const SHOW_DEBUG_OUTPUT = globalThis.process?.release?.name && !!process.env.DEBUG
+const SHOW_DEBUG_OUTPUT_NODE = globalThis.process?.release?.name && !!process.env.DEBUG
 
 export const debug = (...args: any) => {
-  if (SHOW_DEBUG_OUTPUT) {
+  // console.log(...args)
+  if (SHOW_DEBUG_OUTPUT_NODE || (typeof window !== 'undefined' && (window as any).DEBUG)) {
     console.log(...args)
   }
 }

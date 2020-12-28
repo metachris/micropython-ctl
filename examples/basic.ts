@@ -11,10 +11,12 @@ const PASSWORD = process.env.WEBREPL_PASSWORD || 'test';
   // await micropython.connectSerial('/dev/ttyUSB0')
 
   // Run a Python script and capture the output
-  const output = await micropython.runScript('import os; os.listdir()')
+  console.log('Running a Python script...')
+  const output = await micropython.runScript('import os; print(os.listdir())')
   console.log('runScript output:', output)
 
   // List all files in the root
+  console.log('Listing files...')
   const files = await micropython.listFiles()
   console.log('files:', files)
 

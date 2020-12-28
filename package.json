@@ -9,7 +9,9 @@
   "scripts": {
     "clean": "rm -rf dist build lib",
     "lint": "tslint -c tslint.json 'src/**/*.ts' 'test/**/*.ts'",
-    "build": "tsc -p tsconfig.json",
+    "build": "yarn buildNode && yarn buildBrowser",
+    "buildNode": "tsc -p tsconfig.json",
+    "buildBrowser": "webpack",
     "test": "jest",
     "runExample": "ts-node examples/tmp.ts",
     "runTerminal": "ts-node examples/terminal.ts",
@@ -31,9 +33,10 @@
     "webpack-cli": "^4.3.0"
   },
   "dependencies": {
-    "isomorphic-ws": "^4.0.1",
-    "ws": "^7.4.1",
+    "buffer": "^6.0.3",
     "commander": "^6.2.0",
-    "serialport": "^9.0.3"
+    "isomorphic-ws": "^4.0.1",
+    "serialport": "^9.0.3",
+    "ws": "^7.4.1"
   }
 }
