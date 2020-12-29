@@ -1,6 +1,6 @@
 {
   "name": "micropython-ctl",
-  "version": "1.2.1",
+  "version": "1.2.3",
   "description": "Async TypeScript MicroPython interface (for serial and network connections, REPL & WebREPL)",
   "browser": "./dist-browser/main.js",
   "main": "./dist-node/main.js",
