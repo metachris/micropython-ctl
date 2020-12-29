@@ -1,13 +1,14 @@
-import { MicroPythonDevice } from '../src/main';
-// import { MicroPythonDevice } from 'micropython-ctl';
+const MicroPythonDevice = require('../dist-node/main').MicroPythonDevice
+// const MicroPythonDevice = require('micropython-ctl').MicroPythonDevice
 
-const HOST = process.env.WEBREPL_HOST || '10.12.50.101';
+const HOST = process.env.WEBREPL_HOST || '192.168.1.188';
 const PASSWORD = process.env.WEBREPL_PASSWORD || 'test';
 
 (async () => {
   const micropython = new MicroPythonDevice()
 
   // Connect to micropython device
+  console.log('connecting...')
   await micropython.connectNetwork(HOST, PASSWORD)
   // await micropython.connectSerial('/dev/ttyUSB0')
 

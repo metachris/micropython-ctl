@@ -62,7 +62,7 @@ export interface DeviceState {
   port: any
   ws: WebSocket | null
 
-  replState: ConnectionState
+  connectionState: ConnectionState
   replMode: ReplMode // only if replState is connected
   replPassword: string
 
@@ -106,9 +106,10 @@ export class MicroPythonDevice {
   private getInitState(): DeviceState {
     return {
       connectionMode: ConnectionMode.NETWORK,
+      connectionState: ConnectionState.CLOSED,
+
       port: null,
       ws: null,
-      replState: ConnectionState.CLOSED,
       replMode: ReplMode.TERMINAL,
 
       replPassword: '',
@@ -142,8 +143,16 @@ export class MicroPythonDevice {
     }
   }
 
+  isConnected() {
+    return this.state.connectionState === ConnectionState.OPEN
+  }
+
   isSerialDevice() {
     return this.state.connectionMode === ConnectionMode.SERIAL
+  }
+
+  isTerminalMode() {
+    return this.state.replMode === ReplMode.TERMINAL
   }
 
   /**
@@ -180,7 +189,7 @@ export class MicroPythonDevice {
     debug('connectSerial', path)
     // Connect to serial device
     this.state.connectionMode = ConnectionMode.SERIAL
-    this.state.replState = ConnectionState.CONNECTING
+    this.state.connectionState = ConnectionState.CONNECTING
     this.clearBuffer()
 
     const SerialPort = require('serialport')
@@ -190,7 +199,7 @@ export class MicroPythonDevice {
     this.state.port.on('error', (err: string) => {
       if (this.state.replPromiseReject) {
         debug(err)
-        const e = this.state.replState === ConnectionState.CONNECTING ? new CouldNotConnect(err.toString()) : err
+        const e = this.state.connectionState === ConnectionState.CONNECTING ? new CouldNotConnect(err.toString()) : err
         this.state.replPromiseReject(e)
       } else {
         throw err
@@ -218,7 +227,7 @@ export class MicroPythonDevice {
 
     const uri = `ws://${host}:8266`
     // console.log('connect', uri)
-    this.state.replState = ConnectionState.CONNECTING
+    this.state.connectionState = ConnectionState.CONNECTING
     this.state.replPassword = password
 
     this.state.ws = new WebSocket(uri)
@@ -228,13 +237,13 @@ export class MicroPythonDevice {
     this.state.ws.onmessage = (event) => this.handleWebsocketMessage(event)
     this.state.ws.onerror = (err) => {
       // console.log(`WebSocket onerror`, err)
-      const e = this.state.replState === ConnectionState.CONNECTING ? new CouldNotConnect(err.message) : err
+      const e = this.state.connectionState === ConnectionState.CONNECTING ? new CouldNotConnect(err.message) : err
       if (this.state.replPromiseReject) this.state.replPromiseReject(e)
     }
 
     this.state.ws.onclose = () => {
       // console.log(`WebSocket onclose`)
-      this.state.replState = ConnectionState.CLOSED
+      this.state.connectionState = ConnectionState.CLOSED
       if (this.state.replPromiseResolve) this.state.replPromiseResolve('') // release the 'close' async event
       if (this.onclose) this.onclose()
     }
@@ -309,7 +318,7 @@ export class MicroPythonDevice {
     if (this.state.ws!.readyState === WebSocket.CLOSING && dataStr.length === 2 && dataStr.charCodeAt(0) === 65533 && dataStr.charCodeAt(1) === 0) return
 
     // Handle connecting: enter password and if incorrect throw InvalidPassword
-    if (this.state.replState === ConnectionState.CONNECTING) {
+    if (this.state.connectionState === ConnectionState.CONNECTING) {
       const dataTrimmed = dataStr.trim()
       if (dataTrimmed === 'Password:') {
         this.state.ws!.send(this.state.replPassword + '\r')
@@ -368,9 +377,9 @@ export class MicroPythonDevice {
     // debug('handleProtocolData', data, '=>', dataStr)
 
     // If connecting, wait until first REPL input prompt
-    if (this.state.replState === ConnectionState.CONNECTING) {
+    if (this.state.connectionState === ConnectionState.CONNECTING) {
       if (dataStr.trim().endsWith('>>>')) {
-        this.state.replState = ConnectionState.OPEN
+        this.state.connectionState = ConnectionState.OPEN
         this.state.replMode = ReplMode.TERMINAL
         this.clearBuffer()
         debug('connected')
@@ -453,10 +462,6 @@ export class MicroPythonDevice {
     }
   }
 
-  isConnected() {
-    return this.state.replState === ConnectionState.OPEN
-  }
-
   sendData(data: string | Buffer | ArrayBuffer) {
     if (this.state.connectionMode === ConnectionMode.NETWORK) {
       return this.wsSendData(data)
@@ -485,7 +490,7 @@ export class MicroPythonDevice {
   public async close() {
     if (this.isSerialDevice()) {
       await this.state.port?.close()
-      this.state.replState = ConnectionState.CLOSED
+      this.state.connectionState = ConnectionState.CLOSED
       // return this.createReplPromise()
     } else {
       await this.closeWebsocket()
@@ -496,7 +501,7 @@ export class MicroPythonDevice {
     if (this.state.ws && this.state.ws.readyState === WebSocket.OPEN) {
       // console.log('closing')
       this.state.ws.close()
-      this.state.replState = ConnectionState.CLOSED
+      this.state.connectionState = ConnectionState.CLOSED
       return this.createReplPromise()
     } else {
       debug('main.close(): wanting to close already closed websocket')

@@ -1,27 +1,28 @@
-import { WebREPL, InvalidPassword, CouldNotConnect } from '../src/main'
+import { MicroPythonDevice, InvalidPassword, CouldNotConnect } from '../src/main'
+// import { MicroPythonDevice, InvalidPassword, CouldNotConnect } from 'micropython-ctl'
 
 const HOST = '10.12.50.101';
 // const HOST = 'localhost';
 const PASSWORD = 'test';
 
 (async () => {
-  const webrepl = new WebREPL()
+  const micropython = new MicroPythonDevice()
 
   try {
     // First we connect
-    await webrepl.connect(HOST, PASSWORD)
+    await micropython.connectNetwork(HOST, PASSWORD)
     console.log('after connect')
 
     // Run a REPL command and capture the output
-    const output = await webrepl.runReplCommand('import os; os.listdir()')
+    const output = await micropython.runScript('import os; print(os.listdir())')
     console.log('after run command', output)
 
     // List all files (as a list of filenames)
-    const files = await webrepl.listFiles()
+    const files = await micropython.listFiles()
     console.log('files:', files)
 
     // Close
-    await webrepl.close()
+    await micropython.close()
     console.log('after close')
 
   } catch (e) {

@@ -44,17 +44,24 @@ console.log('files:', files)
 You can include the latest release via CDN:
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/micropython-ctl@1.0.1/dist-browser/main.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/micropython-ctl@1.2.3/dist-browser/main.js"></script>
 ```
 
-Example:
+And then use it like this:
 
-* See the code in [examples/web-example.html](https://github.com/metachris/micropython-ctl/blob/master/examples/web-example.html)
+```js
+micropythonDevice = new MicroPythonCtl.MicroPythonDevice()
+await micropythonDevice.connectNetwork(host, password)
+```
+
+**Usage example:**
+
+* See the code in [examples/web-example.html](https://github.com/metachris/micropython-ctl/blob/master/examples/web-example.html#L88-L101)
 * Live at https://metachris.github.io/micropython-ctl/web-example.html
 
-Notes:
+**Notes:**
 
-* The code is similar as in Node.js, but without serial interface (Browsers don't allow access to USB/serial ports).
+* Usage is the same for browser and Node.js, but without serial interface (Browsers don't allow access to USB/serial ports).
 * You can enable debug output by opening the console and entering `window.DEBUG = 1`
 
 
@@ -73,7 +80,11 @@ npm install micropython-ctl
 Usage:
 
 ```js
+// Node.js with TypeScript:
 import { MicroPythonDevice } from 'micropython-ctl'
+
+// Node.js without TypeScript:
+// const MicroPythonDevice = require('micropython-ctl').MicroPythonDevice
 
 (async () => {
   const micropython = new MicroPythonDevice()
