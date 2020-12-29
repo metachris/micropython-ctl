@@ -152,3 +152,20 @@ Maybe (not sure it's needed, don't rush into implementing):
 
 * Run Python script and receive output (don't wait for finishing)
 * Support new raw-paste mode: https://github.com/micropython/micropython/blob/master/docs/reference/repl.rst#raw-mode-and-raw-paste-mode (only in master, should be part of MicroPython 1.14)
+
+
+#### Release process
+
+```shell
+# make sure all is committed in git
+git status
+
+# create a git tag
+git tag v1.4.0
+
+# create a build
+./build.sh
+
+# publish
+yarn publish --no-git-tag-version
+```
