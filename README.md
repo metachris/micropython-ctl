@@ -101,6 +101,14 @@ See more examples in `/examples/`. You can run them with `ts-node`:
 $ yarn ts-node examples/basic.ts
 ```
 
+## Building the code
+
+```shell
+git clone git@github.com:metachris/micropython-ctl.git
+cd micropython-ctl
+yarn build
+```
+
 ---
 
 Enjoy and do cool things with this code!

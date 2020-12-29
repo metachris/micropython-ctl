@@ -19,6 +19,13 @@
     "ts-node": "ts-node",
     "cli": "ts-node examples/cli.ts"
   },
+  "dependencies": {
+    "buffer": "^6.0.3",
+    "commander": "^6.2.0",
+    "isomorphic-ws": "^4.0.1",
+    "serialport": "^9.0.3",
+    "ws": "^7.4.1"
+  },
   "devDependencies": {
     "@types/jest": "^26.0.15",
     "@types/node": "^14.14.9",
@@ -32,12 +39,5 @@
     "typescript": "^4.1.2",
     "webpack": "^5.11.0",
     "webpack-cli": "^4.3.0"
-  },
-  "dependencies": {
-    "buffer": "^6.0.3",
-    "commander": "^6.2.0",
-    "isomorphic-ws": "^4.0.1",
-    "serialport": "^9.0.3",
-    "ws": "^7.4.1"
   }
 }
