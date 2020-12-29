@@ -41,16 +41,16 @@ console.log('files:', files)
 
 ## Browser
 
-You can include the latest release via CDN:
+Include the latest release via CDN:
 
 ```html
 <script src="https://cdn.jsdelivr.net/npm/micropython-ctl@latest/dist-browser/main.js"></script>
 ```
 
-And then use it like this:
+Use it like this:
 
 ```js
-micropythonDevice = new MicroPythonCtl.MicroPythonDevice()
+const micropythonDevice = new MicroPythonCtl.MicroPythonDevice()
 await micropythonDevice.connectNetwork(host, password)
 ```
 
@@ -63,7 +63,7 @@ await micropythonDevice.connectNetwork(host, password)
 
 * Usage is the same for browser and Node.js, but without serial interface (Browsers don't allow access to USB/serial ports).
 * You can enable debug output by opening the console and entering `window.DEBUG = 1`
-
+* You can download the zipped bundle here: [main.js.gz](https://cdn.jsdelivr.net/npm/micropython-ctl@latest/dist-browser/main.js.gz)
 
 ## Node.js
 
@@ -106,26 +106,30 @@ import { MicroPythonDevice } from 'micropython-ctl'
 })()
 ```
 
-See more examples in `/examples/`. You can run them with `ts-node`:
+## Examples
 
-```shell
-$ yarn ts-node examples/basic.ts
-```
+Find more examples in [`/examples/`](https://github.com/metachris/micropython-ctl/tree/master/examples). You can run them like this: `yarn ts-node examples/basic.ts`
+
+* [examples/basic.ts](https://github.com/metachris/micropython-ctl/blob/master/examples/basic.ts) (run with `yarn ts-node examples/basic.ts`)
+* [examples/web-example.html](https://github.com/metachris/micropython-ctl/blob/master/examples/web-example.html) (just open the file in a browser)
+* [examples/cli.ts](https://github.com/metachris/micropython-ctl/blob/master/examples/cli.ts) (run with `yarn cli`)
+
 
 ## Building the code
 
 ```shell
-git clone https://github.com/metachris/micropython-ctl.git
-cd micropython-ctl
-yarn build
+$ git clone https://github.com/metachris/micropython-ctl.git
+$ cd micropython-ctl
+$ yarn build
 ```
 
 ---
 
-Enjoy and do cool things with this code!
+Enjoy and do cool things with this code! 🚀
 
+---
 
-#### Reach out
+### Reach out
 
 I'm happy about feedback, please reach out:
 
@@ -133,7 +137,7 @@ I'm happy about feedback, please reach out:
 * https://twitter.com/metachris
 
 
-#### Inspiration
+### Inspiration
 
 * https://github.com/micropython/webrepl ([original JS implementation](https://github.com/micropython/webrepl/blob/master/webrepl.html))
 * https://github.com/scientifichackers/ampy/blob/master/ampy/pyboard.py
@@ -141,20 +145,21 @@ I'm happy about feedback, please reach out:
 * https://github.com/micropython/micropython/pull/6375/files (mpr: fs mount PR)
 
 
-#### Future work
+### Future work
 
 * Upload & download files
 * Vue.js example with attaching the MicroPythonDevice instance to window, so one instance can live across code hot reloads :) (almost done)
-* A slim version for the browser with minimal footprint (only core code, no listfiles etc.)
 * Command-line utility: `mctl` (from `examples/cli.ts`)
 
 Maybe (not sure it's needed, don't rush into implementing):
 
-* Run Python script and receive output (don't wait for finishing)
+* A slim version for the browser with minimal footprint (only core code, no listfiles etc.)
+* Allow receiving output of running Python script (don't wait for finishing)
 * Support new raw-paste mode: https://github.com/micropython/micropython/blob/master/docs/reference/repl.rst#raw-mode-and-raw-paste-mode (only in master, should be part of MicroPython 1.14)
 
+---
 
-#### Release process
+### Release process
 
 ```shell
 # make sure all is committed in git
@@ -173,7 +178,7 @@ yarn publish
 git push && git push --tags
 ```
 
-Update [web-example.html](http://current.at/micropython-ctl/web-example.html) (with code on Github `master` branch):
+Update [live web-example.html](http://current.at/micropython-ctl/web-example.html) with code from Github `master` branch:
 
 ```
 ssh nova "cd /server/websites/current.at/micropython-ctl && git pull"
