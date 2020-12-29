@@ -44,7 +44,7 @@ console.log('files:', files)
 You can include the latest release via CDN:
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/micropython-ctl@1.2.3/dist-browser/main.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/micropython-ctl@1.3.0/dist-browser/main.js"></script>
 ```
 
 And then use it like this:
