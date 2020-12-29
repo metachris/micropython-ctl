@@ -101,7 +101,7 @@ declare const window: WindowWithWebRepl;
 export class MicroPythonDevice {
   onclose: () => void
   onTerminalData: (data: string) => void  // user callback
-  state: DeviceState
+  private state: DeviceState
 
   private getInitState(): DeviceState {
     return {
@@ -153,6 +153,10 @@ export class MicroPythonDevice {
 
   isTerminalMode() {
     return this.state.replMode === ReplMode.TERMINAL
+  }
+
+  getState() {
+    return this.state
   }
 
   /**
@@ -474,24 +478,23 @@ export class MicroPythonDevice {
     }
   }
 
-  serialSendData(data: string | Buffer) {
+  private serialSendData(data: string | Buffer) {
     // debug('serialSendData', data)
     this.state.port?.write(data)
   }
 
-  wsSendData(data: string | ArrayBuffer) {
+  private wsSendData(data: string | ArrayBuffer) {
+    // debug('wsSendData', data)
     if (!this.state.ws || this.state.ws.readyState !== WebSocket.OPEN) {
       throw new Error('wsSendData: No open websocket')
     }
-    // console.log('wsSendData', data)
     this.state.ws.send(data)
   }
 
-  public async close() {
+  public async disconnect() {
     if (this.isSerialDevice()) {
       await this.state.port?.close()
       this.state.connectionState = ConnectionState.CLOSED
-      // return this.createReplPromise()
     } else {
       await this.closeWebsocket()
     }
@@ -504,7 +507,7 @@ export class MicroPythonDevice {
       this.state.connectionState = ConnectionState.CLOSED
       return this.createReplPromise()
     } else {
-      debug('main.close(): wanting to close already closed websocket')
+      debug('Websocket already closed')
       return false
     }
   }

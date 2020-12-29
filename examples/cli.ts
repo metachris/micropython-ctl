@@ -5,7 +5,7 @@ import { humanFileSize } from '../src/utils';
 
 const program = new Command();
 
-const HOST = process.env.WEBREPL_HOST || '192.168.1.130';
+const HOST = process.env.WEBREPL_HOST || '192.168.1.188';
 const PASSWORD = process.env.WEBREPL_PASSWORD || 'test';
 
 const micropython = new MicroPythonDevice()
@@ -46,7 +46,7 @@ const listFilesOnDevice = async (directory = '/', cmdObj) => {
     }
     console.log('Error:', e)
   } finally {
-    await micropython.close()
+    await micropython.disconnect()
   }
 }
 

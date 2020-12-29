@@ -23,5 +23,5 @@ const PASSWORD = process.env.WEBREPL_PASSWORD || 'test';
   console.log('files:', files)
 
   // Close
-  await micropython.close()
+  await micropython.disconnect()
 })()

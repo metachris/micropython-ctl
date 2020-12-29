@@ -5,10 +5,10 @@ Interface with MicroPython devices over a serial and network connection (REPL an
 * TypeScript library for use in websites and Node.js
 * Fully async (you can use `await` with `connect`,  executing REPL commands, etc.)
 * Tested with ESP32, should also work with ESP8266, perhaps others
-* Browser bundle only 15kb gzipped
+* Browser bundle only 13kb gzipped
 * Functionality:
-  * Connect and disconnect
-  * Run Python script and capture output
+  * Connect over network and serial interface
+  * Run Python script and await the output
   * List files, upload and download files
 * Main code file: [`main.js`](https://github.com/metachris/micropython-ctl/blob/master/src/main.ts)
 * Published at [npmjs.com/package/micropython-ctl](https://www.npmjs.com/package/micropython-ctl)
@@ -38,6 +38,10 @@ const files = await micropython.listFiles()
 console.log('files:', files)
 ```
 
+Notes:
+
+* To access the webrepl over the network, you need to enable it first through the serial REPL: `import webrepl_setup` (see [docs](https://docs.micropython.org/en/latest/esp8266/tutorial/repl.html#webrepl-a-prompt-over-wifi)).
+* ping the device IP first, to ensure it can be reached over the network.
 
 ## Browser
 
@@ -50,8 +54,8 @@ Include the latest release via CDN:
 Use it like this:
 
 ```js
-const micropythonDevice = new MicroPythonCtl.MicroPythonDevice()
-await micropythonDevice.connectNetwork(host, password)
+const micropython = new MicroPythonCtl.MicroPythonDevice()
+await micropython.connectNetwork(host, password)
 ```
 
 **Usage example:**
@@ -61,7 +65,7 @@ await micropythonDevice.connectNetwork(host, password)
 
 **Notes:**
 
-* Usage is the same for browser and Node.js, but without serial interface (Browsers don't allow access to USB/serial ports).
+* Browsers don't allow access to USB/serial ports.
 * You can enable debug output by opening the console and entering `window.DEBUG = 1`
 * You can download the zipped bundle here: [main.js.gz](https://cdn.jsdelivr.net/npm/micropython-ctl@latest/dist-browser/main.js.gz)
 
@@ -177,6 +181,8 @@ yarn publish
 # push to git
 git push && git push --tags
 ```
+
+Purge CDN cache: https://purge.jsdelivr.net/npm/micropython-ctl@latest
 
 Update [live web-example.html](http://current.at/micropython-ctl/web-example.html) with code from Github `master` branch:
 

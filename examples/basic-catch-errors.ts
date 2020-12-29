@@ -22,7 +22,7 @@ const PASSWORD = 'test';
     console.log('files:', files)
 
     // Close
-    await micropython.close()
+    await micropython.disconnect()
     console.log('after close')
 
   } catch (e) {
