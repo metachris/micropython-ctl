@@ -57,7 +57,7 @@ await micropythonDevice.connectNetwork(host, password)
 **Usage example:**
 
 * See the code in [examples/web-example.html](https://github.com/metachris/micropython-ctl/blob/master/examples/web-example.html#L88-L101)
-* Live at https://metachris.github.io/micropython-ctl/web-example.html
+* Live at http://current.at/micropython-ctl/web-example.html
 
 **Notes:**
 
@@ -115,7 +115,7 @@ $ yarn ts-node examples/basic.ts
 ## Building the code
 
 ```shell
-git clone git@github.com:metachris/micropython-ctl.git
+git clone https://github.com/metachris/micropython-ctl.git
 cd micropython-ctl
 yarn build
 ```
@@ -168,4 +168,13 @@ yarn version
 
 # publish
 yarn publish
+
+# push to git
+git push && git push --tags
+```
+
+Update [web-example.html](http://current.at/micropython-ctl/web-example.html) (with code on Github `master` branch):
+
+```
+ssh nova "cd /server/websites/current.at/micropython-ctl && git pull"
 ```
