@@ -44,7 +44,7 @@ console.log('files:', files)
 You can include the latest release via CDN:
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/micropython-ctl@1.3.0/dist-browser/main.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/micropython-ctl@latest/dist-browser/main.js"></script>
 ```
 
 And then use it like this:
@@ -160,12 +160,12 @@ Maybe (not sure it's needed, don't rush into implementing):
 # make sure all is committed in git
 git status
 
-# create a git tag
-git tag v1.4.0
+# update version number and create a git tag
+yarn version
 
-# create a build
+# create the builds for node and browser
 ./build.sh
 
 # publish
-yarn publish --no-git-tag-version
+yarn publish
 ```
