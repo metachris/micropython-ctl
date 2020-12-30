@@ -1,0 +1,280 @@
+<!doctype html>
+<html class="default no-js">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>micropython-ctl - v1.4.1</title>
+	<meta name="description" content="Documentation for micropython-ctl - v1.4.1">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="assets/css/main.css">
+	<script async src="assets/js/search.js" id="search-script"></script>
+</head>
+<body>
+<header>
+	<div class="tsd-page-toolbar">
+		<div class="container">
+			<div class="table-wrap">
+				<div class="table-cell" id="tsd-search" data-index="assets/js/search.json" data-base=".">
+					<div class="field">
+						<label for="tsd-search-field" class="tsd-widget search no-caption">Search</label>
+						<input id="tsd-search-field" type="text" />
+					</div>
+					<ul class="results">
+						<li class="state loading">Preparing search index...</li>
+						<li class="state failure">The search index is not available</li>
+					</ul>
+					<a href="index.html" class="title">micropython-ctl - v1.4.1</a>
+				</div>
+				<div class="table-cell" id="tsd-widgets">
+					<div id="tsd-filter">
+						<a href="#" class="tsd-widget options no-caption" data-toggle="options">Options</a>
+						<div class="tsd-filter-group">
+							<div class="tsd-select" id="tsd-filter-visibility">
+								<span class="tsd-select-label">All</span>
+								<ul class="tsd-select-list">
+									<li data-value="public">Public</li>
+									<li data-value="protected">Public/Protected</li>
+									<li data-value="private" class="selected">All</li>
+								</ul>
+							</div>
+							<input type="checkbox" id="tsd-filter-inherited" checked />
+							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
+							<input type="checkbox" id="tsd-filter-externals" checked />
+							<label class="tsd-widget" for="tsd-filter-externals">Externals</label>
+						</div>
+					</div>
+					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="tsd-page-title">
+		<div class="container">
+			<h1>Project micropython-ctl - v1.4.1</h1>
+		</div>
+	</div>
+</header>
+<div class="container container-main">
+	<div class="row">
+		<div class="col-8 col-content">
+			<div class="tsd-panel tsd-typography">
+				<a href="#typescript-micropython-repl-and-webrepl-interface" id="typescript-micropython-repl-and-webrepl-interface" style="color: inherit; text-decoration: none;">
+					<h1>TypeScript MicroPython REPL and WebREPL Interface</h1>
+				</a>
+				<p>Interface with MicroPython devices over a serial and network connection (REPL and WebREPL)</p>
+				<ul>
+					<li>TypeScript library for use in websites and Node.js</li>
+					<li>Fully async (you can use <code>await</code> with <code>connect</code>,  executing REPL commands, etc.)</li>
+					<li>Tested with ESP32, should also work with ESP8266, perhaps others</li>
+					<li>Browser bundle only 13kb gzipped</li>
+					<li>Functionality:<ul>
+							<li>Connect over network and serial interface</li>
+							<li>Run Python script and await the output</li>
+							<li>List files, upload and download files</li>
+						</ul>
+					</li>
+					<li>Main code file: <a href="https://github.com/metachris/micropython-ctl/blob/master/src/main.ts"><code>main.js</code></a></li>
+					<li>Published at <a href="https://www.npmjs.com/package/micropython-ctl">npmjs.com/package/micropython-ctl</a></li>
+				</ul>
+				<p>Code examples:</p>
+				<ul>
+					<li><a href="https://github.com/metachris/micropython-ctl/blob/master/examples/basic.ts">examples/basic.ts</a> (run with <code>yarn ts-node examples/basic.ts</code>)</li>
+					<li><a href="https://github.com/metachris/micropython-ctl/blob/master/examples/web-example.html">examples/web-example.html</a> (just open the file in a browser)</li>
+					<li><a href="https://github.com/metachris/micropython-ctl/blob/master/examples/cli.ts">examples/cli.ts</a> (run with <code>yarn cli</code>)</li>
+				</ul>
+				<a href="#usage" id="usage" style="color: inherit; text-decoration: none;">
+					<h1>Usage</h1>
+				</a>
+				<pre><code class="language-js"><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">micropython</span><span style="color: #000000"> = </span><span style="color: #0000FF">new</span><span style="color: #000000"> </span><span style="color: #267F99">MicroPythonDevice</span><span style="color: #000000">()</span>
+
+<span style="color: #008000">// Connect to micropython device over network</span>
+<span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #001080">micropython</span><span style="color: #000000">.</span><span style="color: #795E26">connectNetwork</span><span style="color: #000000">(</span><span style="color: #A31515">&#039;DEVICE_IP&#039;</span><span style="color: #000000">, </span><span style="color: #A31515">&#039;WEBREPL_PASSWORD&#039;</span><span style="color: #000000">)</span>
+
+<span style="color: #008000">// Or connect to micropython device over serial interface</span>
+<span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #001080">micropython</span><span style="color: #000000">.</span><span style="color: #795E26">connectSerial</span><span style="color: #000000">(</span><span style="color: #A31515">&#039;/dev/ttyUSB0&#039;</span><span style="color: #000000">)</span>
+
+<span style="color: #008000">// Run a Python script and capture the output</span>
+<span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">output</span><span style="color: #000000"> = </span><span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #001080">micropython</span><span style="color: #000000">.</span><span style="color: #795E26">runScript</span><span style="color: #000000">(</span><span style="color: #A31515">&#039;import os; print(os.listdir())&#039;</span><span style="color: #000000">)</span>
+<span style="color: #001080">console</span><span style="color: #000000">.</span><span style="color: #795E26">log</span><span style="color: #000000">(</span><span style="color: #A31515">&#039;runScript output:&#039;</span><span style="color: #000000">, </span><span style="color: #001080">output</span><span style="color: #000000">)</span>
+
+<span style="color: #008000">// List all files in the root</span>
+<span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">files</span><span style="color: #000000"> = </span><span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #001080">micropython</span><span style="color: #000000">.</span><span style="color: #795E26">listFiles</span><span style="color: #000000">()</span>
+<span style="color: #001080">console</span><span style="color: #000000">.</span><span style="color: #795E26">log</span><span style="color: #000000">(</span><span style="color: #A31515">&#039;files:&#039;</span><span style="color: #000000">, </span><span style="color: #001080">files</span><span style="color: #000000">)</span>
+</code></pre>
+				<p>Note on network connection: To access the webrepl over the network, you need to enable it first through the serial REPL: <code>import webrepl_setup</code> (see <a href="https://docs.micropython.org/en/latest/esp8266/tutorial/repl.html#webrepl-a-prompt-over-wifi">docs</a>). Also, make sure you can ping the device first.</p>
+				<a href="#browser" id="browser" style="color: inherit; text-decoration: none;">
+					<h2>Browser</h2>
+				</a>
+				<p>Include the latest release via CDN:</p>
+				<pre><code class="language-html"><span style="color: #800000">&lt;script</span><span style="color: #000000FF"> </span><span style="color: #FF0000">src</span><span style="color: #000000FF">=</span><span style="color: #0000FF">&quot;https://cdn.jsdelivr.net/npm/micropython-ctl@latest/dist-browser/main.js&quot;</span><span style="color: #800000">&gt;&lt;/script&gt;</span>
+</code></pre>
+				<p>Use it like this:</p>
+				<pre><code class="language-js"><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">micropython</span><span style="color: #000000"> = </span><span style="color: #0000FF">new</span><span style="color: #000000"> </span><span style="color: #267F99">MicroPythonCtl</span><span style="color: #000000">.</span><span style="color: #267F99">MicroPythonDevice</span><span style="color: #000000">()</span>
+<span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #001080">micropython</span><span style="color: #000000">.</span><span style="color: #795E26">connectNetwork</span><span style="color: #000000">(</span><span style="color: #001080">host</span><span style="color: #000000">, </span><span style="color: #001080">password</span><span style="color: #000000">)</span>
+</code></pre>
+				<p><strong>Usage example:</strong></p>
+				<ul>
+					<li>See the code in <a href="https://github.com/metachris/micropython-ctl/blob/master/examples/web-example.html#L88-L101">examples/web-example.html</a></li>
+					<li>Live at <a href="http://current.at/micropython-ctl/web-example.html">http://current.at/micropython-ctl/web-example.html</a></li>
+				</ul>
+				<p><strong>Notes:</strong></p>
+				<ul>
+					<li>Browsers don&#39;t allow access to USB/serial ports.</li>
+					<li>You can enable debug output by opening the console and entering <code>window.DEBUG = 1</code></li>
+					<li>You can download the zipped bundle here: <a href="https://cdn.jsdelivr.net/npm/micropython-ctl@latest/dist-browser/main.js.gz">main.js.gz</a></li>
+				</ul>
+				<a href="#nodejs" id="nodejs" style="color: inherit; text-decoration: none;">
+					<h2>Node.js</h2>
+				</a>
+				<p>Installation:</p>
+				<pre><code class="language-shell"><span style="color: #008000"># If you use yarn</span>
+<span style="color: #000000">yarn add micropython-ctl</span>
+
+<span style="color: #008000"># Alternatively, if you use npm</span>
+<span style="color: #000000">npm install micropython-ctl</span>
+</code></pre>
+				<p>Usage:</p>
+				<pre><code class="language-js"><span style="color: #008000">// Node.js with TypeScript:</span>
+<span style="color: #AF00DB">import</span><span style="color: #000000"> { </span><span style="color: #001080">MicroPythonDevice</span><span style="color: #000000"> } </span><span style="color: #AF00DB">from</span><span style="color: #000000"> </span><span style="color: #A31515">&#039;micropython-ctl&#039;</span>
+
+<span style="color: #008000">// Node.js without TypeScript:</span>
+<span style="color: #008000">// const MicroPythonDevice = require(&#039;micropython-ctl&#039;).MicroPythonDevice</span>
+
+<span style="color: #000000">(</span><span style="color: #0000FF">async</span><span style="color: #000000"> () </span><span style="color: #0000FF">=&gt;</span><span style="color: #000000"> {</span>
+<span style="color: #000000">  </span><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">micropython</span><span style="color: #000000"> = </span><span style="color: #0000FF">new</span><span style="color: #000000"> </span><span style="color: #267F99">MicroPythonDevice</span><span style="color: #000000">()</span>
+
+<span style="color: #000000">  </span><span style="color: #008000">// Connect to micropython device</span>
+<span style="color: #000000">  </span><span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #001080">micropython</span><span style="color: #000000">.</span><span style="color: #795E26">connectNetwork</span><span style="color: #000000">(</span><span style="color: #A31515">&#039;YOUR_IP&#039;</span><span style="color: #000000">, </span><span style="color: #A31515">&#039;WEBREPL_PASSWORD&#039;</span><span style="color: #000000">)</span>
+<span style="color: #000000">  </span><span style="color: #008000">// await micropython.connectSerial(&#039;/dev/ttyUSB0&#039;)</span>
+
+<span style="color: #000000">  </span><span style="color: #008000">// Run a Python script and capture the output</span>
+<span style="color: #000000">  </span><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">output</span><span style="color: #000000"> = </span><span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #001080">micropython</span><span style="color: #000000">.</span><span style="color: #795E26">runScript</span><span style="color: #000000">(</span><span style="color: #A31515">&#039;import os; print(os.listdir())&#039;</span><span style="color: #000000">)</span>
+<span style="color: #000000">  </span><span style="color: #001080">console</span><span style="color: #000000">.</span><span style="color: #795E26">log</span><span style="color: #000000">(</span><span style="color: #A31515">&#039;runScript output:&#039;</span><span style="color: #000000">, </span><span style="color: #001080">output</span><span style="color: #000000">)</span>
+
+<span style="color: #000000">  </span><span style="color: #008000">// List all files in the root</span>
+<span style="color: #000000">  </span><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">files</span><span style="color: #000000"> = </span><span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #001080">micropython</span><span style="color: #000000">.</span><span style="color: #795E26">listFiles</span><span style="color: #000000">()</span>
+<span style="color: #000000">  </span><span style="color: #001080">console</span><span style="color: #000000">.</span><span style="color: #795E26">log</span><span style="color: #000000">(</span><span style="color: #A31515">&#039;files:&#039;</span><span style="color: #000000">, </span><span style="color: #001080">files</span><span style="color: #000000">)</span>
+
+<span style="color: #000000">  </span><span style="color: #008000">// Close</span>
+<span style="color: #000000">  </span><span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #001080">micropython</span><span style="color: #000000">.</span><span style="color: #795E26">close</span><span style="color: #000000">()</span>
+<span style="color: #000000">})()</span>
+</code></pre>
+				<a href="#examples" id="examples" style="color: inherit; text-decoration: none;">
+					<h2>Examples</h2>
+				</a>
+				<p>Find more examples in <a href="https://github.com/metachris/micropython-ctl/tree/master/examples"><code>/examples/</code></a>. You can run them like this: <code>yarn ts-node examples/basic.ts</code></p>
+				<ul>
+					<li><a href="https://github.com/metachris/micropython-ctl/blob/master/examples/basic.ts">examples/basic.ts</a> - run with <code>yarn ts-node examples/basic.ts</code></li>
+					<li>[examples/web-example.html](<a href="https://github.com/metachris/micropython-ctl/blob/master/examples/web-example.html">https://github.com/metachris/micropython-ctl/blob/master/examples/web-example.html</a> - just open the file in a browser, or view it <a href="http://current.at/micropython-ctl/web-example.html">live here</a></li>
+					<li><a href="https://github.com/metachris/micropython-ctl/blob/master/examples/cli.ts">examples/cli.ts</a> - run with <code>yarn cli</code></li>
+				</ul>
+				<a href="#building-the-code" id="building-the-code" style="color: inherit; text-decoration: none;">
+					<h2>Building the code</h2>
+				</a>
+				<pre><code class="language-shell"><span style="color: #000000">$ git clone https://github.com/metachris/micropython-ctl.git</span>
+<span style="color: #000000">$ </span><span style="color: #795E26">cd</span><span style="color: #000000"> micropython-ctl</span>
+<span style="color: #000000">$ yarn</span>
+<span style="color: #000000">$ yarn build</span>
+</code></pre>
+				<hr>
+				<p>Enjoy and do cool things with this code! 🚀</p>
+				<hr>
+				<a href="#reach-out" id="reach-out" style="color: inherit; text-decoration: none;">
+					<h3>Reach out</h3>
+				</a>
+				<p>I&#39;m happy about feedback, please reach out:</p>
+				<ul>
+					<li><a href="mailto:chris@linuxuser.at">chris@linuxuser.at</a></li>
+					<li><a href="https://twitter.com/metachris">https://twitter.com/metachris</a></li>
+				</ul>
+				<a href="#inspiration" id="inspiration" style="color: inherit; text-decoration: none;">
+					<h3>Inspiration</h3>
+				</a>
+				<ul>
+					<li><a href="https://github.com/micropython/webrepl">https://github.com/micropython/webrepl</a> (<a href="https://github.com/micropython/webrepl/blob/master/webrepl.html">original JS implementation</a>)</li>
+					<li><a href="https://github.com/scientifichackers/ampy/blob/master/ampy/pyboard.py">https://github.com/scientifichackers/ampy/blob/master/ampy/pyboard.py</a></li>
+					<li><a href="https://pycopy.readthedocs.io/en/latest/esp32/quickref.html">https://pycopy.readthedocs.io/en/latest/esp32/quickref.html</a></li>
+					<li><a href="https://github.com/micropython/micropython/pull/6375/files">https://github.com/micropython/micropython/pull/6375/files</a> (mpr: fs mount PR)</li>
+				</ul>
+				<a href="#future-work" id="future-work" style="color: inherit; text-decoration: none;">
+					<h3>Future work</h3>
+				</a>
+				<ul>
+					<li>Upload &amp; download files</li>
+					<li>Vue.js example with attaching the MicroPythonDevice instance to window, so one instance can live across code hot reloads :) (almost done)</li>
+					<li>Command-line utility: <code>mctl</code> (from <code>examples/cli.ts</code>)</li>
+				</ul>
+				<p>Maybe (not sure it&#39;s needed, don&#39;t rush into implementing):</p>
+				<ul>
+					<li>A slim version for the browser with minimal footprint (only core code, no listfiles etc.)</li>
+					<li>Allow receiving output of running Python script (don&#39;t wait for finishing)</li>
+					<li>Support new raw-paste mode: <a href="https://github.com/micropython/micropython/blob/master/docs/reference/repl.rst#raw-mode-and-raw-paste-mode">https://github.com/micropython/micropython/blob/master/docs/reference/repl.rst#raw-mode-and-raw-paste-mode</a> (only in master, should be part of MicroPython 1.14)</li>
+				</ul>
+				<hr>
+				<a href="#release-process" id="release-process" style="color: inherit; text-decoration: none;">
+					<h3>Release process</h3>
+				</a>
+				<pre><code class="language-shell"><span style="color: #008000"># make sure all is committed in git</span>
+<span style="color: #000000">git status</span>
+
+<span style="color: #008000"># update version number and create a git tag</span>
+<span style="color: #000000">yarn version</span>
+
+<span style="color: #008000"># create the builds for node and browser</span>
+<span style="color: #000000">./build.sh</span>
+
+<span style="color: #008000"># publish</span>
+<span style="color: #000000">yarn publish</span>
+
+<span style="color: #008000"># push to git</span>
+<span style="color: #000000">git push &amp;&amp; git push --tags</span>
+</code></pre>
+				<p>Purge CDN cache: <a href="https://purge.jsdelivr.net/npm/micropython-ctl@latest">https://purge.jsdelivr.net/npm/micropython-ctl@latest</a></p>
+				<p>Update <a href="http://current.at/micropython-ctl/web-example.html">live web-example.html</a> with code from Github <code>master</code> branch:</p>
+				<pre><code><span style="color: #001080">ssh</span><span style="color: #000000"> </span><span style="color: #001080">nova</span><span style="color: #000000"> </span><span style="color: #A31515">&quot;cd /server/websites/current.at/micropython-ctl &amp;&amp; git pull&quot;</span>
+</code></pre>
+			</div>
+		</div>
+		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
+			<nav class="tsd-navigation primary">
+				<ul>
+					<li class=" ">
+						<a href="modules.html">Exports</a>
+					</li>
+				</ul>
+			</nav>
+			<nav class="tsd-navigation secondary menu-sticky">
+				<ul class="before-current">
+					<li class=" tsd-kind-class">
+						<a href="classes/micropythondevice.html" class="tsd-kind-icon">Micro<wbr>Python<wbr>Device</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="interfaces/devicestate.html" class="tsd-kind-icon">Device<wbr>State</a>
+					</li>
+				</ul>
+			</nav>
+		</div>
+	</div>
+</div>
+<footer class="with-border-bottom">
+	<div class="container">
+		<h2>Legend</h2>
+		<div class="tsd-legend-group">
+			<ul class="tsd-legend">
+				<li class="tsd-kind-constructor tsd-parent-kind-class"><span class="tsd-kind-icon">Constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-class"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class"><span class="tsd-kind-icon">Method</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-interface"><span class="tsd-kind-icon">Property</span></li>
+			</ul>
+		</div>
+	</div>
+</footer>
+<div class="container tsd-generator">
+	<p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p>
+</div>
+<div class="overlay"></div>
+<script src="assets/js/main.js"></script>
+</body>
+</html>
