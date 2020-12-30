@@ -1,0 +1,16 @@
+# https://github.com/actions/setup-node
+name: Build and test
+
+on: [push]
+
+jobs:
+  build_and_test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v2-beta
+      with:
+        node-version: '12'
+    - run: yarn install --frozen-lockfile
+    - run: yarn lint

@@ -3,6 +3,7 @@
 /lib/
 /dist/
 /dist-*/
+/docs/
 /tmp/
 .idea/*
 

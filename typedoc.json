@@ -1,0 +1,8 @@
+{
+  "entryPoints": ["src/main.ts"],
+  "out": "docs",
+  "excludePrivate": true,
+  "excludeProtected": true,
+  "includeVersion": true,
+  "toc": ["MicroPythonDevice", "DeviceState"]
+}

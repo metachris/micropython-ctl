@@ -88,13 +88,13 @@ export interface DeviceState {
   putFileDest: string
 }
 
-export interface WindowWithWebRepl extends Window {
+interface WindowWithWebRepl extends Window {
   [x: string]: any;
   testWindow: any;
   webReplState: DeviceState | undefined
 }
 
-interface FileListEntry { filename: string, size: number, isDir: boolean }
+export interface FileListEntry { filename: string, size: number, isDir: boolean }
 
 declare const window: WindowWithWebRepl;
 

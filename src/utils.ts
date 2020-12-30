@@ -37,7 +37,7 @@ export const dedent = (text: string): string => {
   return result.trim()
 }
 
-export const humanFileSize = (bytes, si=true, dp=1) => {
+export const humanFileSize = (bytes, si = true, dp = 1) => {
   const thresh = si ? 1000 : 1024;
 
   if (Math.abs(bytes) < thresh) {
@@ -48,7 +48,7 @@ export const humanFileSize = (bytes, si=true, dp=1) => {
     ? ['K', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
     : ['KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB'];
   let u = -1;
-  const r = 10**dp;
+  const r = 10 ** dp;
 
   do {
     bytes /= thresh;
