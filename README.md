@@ -25,9 +25,11 @@ Code examples:
 ```js
 const micropython = new MicroPythonDevice()
 
-// Connect to micropython device (over network or serial interface)
-await micropython.connectNetwork('YOUR_IP', 'WEBREPL_PASSWORD')
-// await micropython.connectSerial('/dev/ttyUSB0')
+// Connect to micropython device over network
+await micropython.connectNetwork('DEVICE_IP', 'WEBREPL_PASSWORD')
+
+// Or connect to micropython device over serial interface
+await micropython.connectSerial('/dev/ttyUSB0')
 
 // Run a Python script and capture the output
 const output = await micropython.runScript('import os; print(os.listdir())')
@@ -38,10 +40,7 @@ const files = await micropython.listFiles()
 console.log('files:', files)
 ```
 
-Notes:
-
-* To access the webrepl over the network, you need to enable it first through the serial REPL: `import webrepl_setup` (see [docs](https://docs.micropython.org/en/latest/esp8266/tutorial/repl.html#webrepl-a-prompt-over-wifi)).
-* ping the device IP first, to ensure it can be reached over the network.
+Note on network connection: To access the webrepl over the network, you need to enable it first through the serial REPL: `import webrepl_setup` (see [docs](https://docs.micropython.org/en/latest/esp8266/tutorial/repl.html#webrepl-a-prompt-over-wifi)). Also, make sure you can ping the device first.
 
 ## Browser
 
@@ -114,9 +113,9 @@ import { MicroPythonDevice } from 'micropython-ctl'
 
 Find more examples in [`/examples/`](https://github.com/metachris/micropython-ctl/tree/master/examples). You can run them like this: `yarn ts-node examples/basic.ts`
 
-* [examples/basic.ts](https://github.com/metachris/micropython-ctl/blob/master/examples/basic.ts) (run with `yarn ts-node examples/basic.ts`)
-* [examples/web-example.html](https://github.com/metachris/micropython-ctl/blob/master/examples/web-example.html) (just open the file in a browser)
-* [examples/cli.ts](https://github.com/metachris/micropython-ctl/blob/master/examples/cli.ts) (run with `yarn cli`)
+* [examples/basic.ts](https://github.com/metachris/micropython-ctl/blob/master/examples/basic.ts) - run with `yarn ts-node examples/basic.ts`
+* [examples/web-example.html](https://github.com/metachris/micropython-ctl/blob/master/examples/web-example.html - just open the file in a browser, or view it [live here](http://current.at/micropython-ctl/web-example.html)
+* [examples/cli.ts](https://github.com/metachris/micropython-ctl/blob/master/examples/cli.ts) - run with `yarn cli`
 
 
 ## Building the code
