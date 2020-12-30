@@ -2,6 +2,7 @@
   "name": "micropython-ctl",
   "version": "1.4.1",
   "description": "Async TypeScript MicroPython interface (for serial and network connections, REPL & WebREPL)",
+  "repository": "https://github.com/metachris/micropython-ctl",
   "browser": "./dist-browser/main.js",
   "main": "./dist-node/main.js",
   "types": "./dist-node/main.d.ts",

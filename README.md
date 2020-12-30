@@ -1,17 +1,17 @@
 # TypeScript MicroPython REPL and WebREPL Interface
 
-Interface with MicroPython devices over a serial and network connection (REPL and WebREPL)
+Library to interface with MicroPython devices over serial and network connection (REPL and WebREPL)
 
-* TypeScript library for use in websites and Node.js
+* Can be used in websites/webapps and Node.js code
 * Fully async (you can use `await` with `connect`,  executing REPL commands, etc.)
 * Tested with ESP32, should also work with ESP8266, perhaps others
 * Browser bundle only 13kb gzipped
 * Functionality:
   * Connect over network and serial interface
   * Run Python script and await the output
-  * List files, upload and download files
-* Main code file: [`main.js`](https://github.com/metachris/micropython-ctl/blob/master/src/main.ts)
-* Published at [npmjs.com/package/micropython-ctl](https://www.npmjs.com/package/micropython-ctl)
+  * List files, upload and download files (not yet implemented)
+* Main code file: [`main.ts`](https://github.com/metachris/micropython-ctl/blob/master/src/main.ts)
+* Links: [github](https://github.com/metachris/micropython-ctl/settings), [documentation](https://metachris.github.io/micropython-ctl/), [npm package](https://www.npmjs.com/package/micropython-ctl)
 
 Code examples:
 
