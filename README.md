@@ -124,6 +124,7 @@ Find more examples in [`/examples/`](https://github.com/metachris/micropython-ct
 ```shell
 $ git clone https://github.com/metachris/micropython-ctl.git
 $ cd micropython-ctl
+$ yarn
 $ yarn build
 ```
 

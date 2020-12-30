@@ -1,4 +1,5 @@
 import path from 'path';
+import SerialPort from 'serialport';
 import { Command } from 'commander';
 import { ScriptExecutionError, MicroPythonDevice } from '../src/main';
 import { humanFileSize } from '../src/utils';
@@ -58,6 +59,17 @@ const putFile = async (filename: string, destFilename?: string) => {
   await micropython.uploadFile(filename, destFilename)
 }
 
+const listSerialDevices = async () => {
+  const devices = await SerialPort.list();
+  // console.log(devices)
+  devices.map(device => {
+    if (!device.manufacturer && !device.serialNumber) {
+      return
+    }
+    console.log(device.path, '\t', device.manufacturer)
+  })
+}
+
 /**
  * Setup command line commands, using commander.js
  * https://github.com/tj/commander.js
@@ -68,9 +80,13 @@ program.option('-p, --password <password>', `Password for network device`, PASSW
 
 // Commands
 program
+  .command('devices')
+  .description('List serial devices').action(listSerialDevices);
+
+program
   .command('ls [directory]')
   .option('-r, --recursive', 'List recursively')
-  .description('List files').action(listFilesOnDevice);
+  .description('List files on a device').action(listFilesOnDevice);
 
 program
   .command('put <filename> [<destFilename>]')
