@@ -1,23 +1,16 @@
-# TypeScript MicroPython REPL and WebREPL Interface
+# TypeScript MicroPython Interface
 
-Library to interface with MicroPython devices over serial and network connection (REPL and WebREPL)
+A library to interface with MicroPython devices over serial and network connections (REPL and WebREPL)
 
-* Can be used in websites/webapps and Node.js code
-* Fully async (you can use `await` with `connect`,  executing REPL commands, etc.)
+* Easily build websites/webapps and Node.js programs that talk with MicroPython devices
+* Typed and fully async (you can use `await` with `connect`,  executing REPL commands, etc.)
 * Tested with ESP32, should also work with ESP8266, perhaps others
-* Browser bundle only 13kb gzipped
 * Functionality:
   * Connect over network and serial interface
-  * Run Python script and await the output
+  * Run Python scripts and await the output
   * List files, upload and download files (not yet implemented)
 * Main code file: [`main.ts`](https://github.com/metachris/micropython-ctl/blob/master/src/main.ts)
 * Links: [github](https://github.com/metachris/micropython-ctl/settings), [documentation](https://metachris.github.io/micropython-ctl/), [npm package](https://www.npmjs.com/package/micropython-ctl)
-
-Code examples:
-
-* [examples/basic.ts](https://github.com/metachris/micropython-ctl/blob/master/examples/basic.ts) (run with `yarn ts-node examples/basic.ts`)
-* [examples/web-example.html](https://github.com/metachris/micropython-ctl/blob/master/examples/web-example.html) (just open the file in a browser)
-* [examples/cli.ts](https://github.com/metachris/micropython-ctl/blob/master/examples/cli.ts) (run with `yarn cli`)
 
 
 # Usage
@@ -42,15 +35,22 @@ console.log('files:', files)
 
 Note on network connection: To access the webrepl over the network, you need to enable it first through the serial REPL: `import webrepl_setup` (see [docs](https://docs.micropython.org/en/latest/esp8266/tutorial/repl.html#webrepl-a-prompt-over-wifi)). Also, make sure you can ping the device first.
 
-## Browser
 
-Include the latest release via CDN:
+Code examples:
+
+* [examples/basic.ts](https://github.com/metachris/micropython-ctl/blob/master/examples/basic.ts) (run with `yarn ts-node examples/basic.ts`)
+* [examples/web-example.html](https://github.com/metachris/micropython-ctl/blob/master/examples/web-example.html) (just open the file in a browser)
+* [examples/cli.ts](https://github.com/metachris/micropython-ctl/blob/master/examples/cli.ts) (run with `yarn cli`)
+
+## Browser / Webapps
+
+In websites/webapps, simply include the latest release via CDN (~13kb gzipped):
 
 ```html
 <script src="https://cdn.jsdelivr.net/npm/micropython-ctl@latest/dist-browser/main.js"></script>
 ```
 
-Use it like this:
+Then you can use it like this:
 
 ```js
 const micropython = new MicroPythonCtl.MicroPythonDevice()
