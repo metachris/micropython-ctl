@@ -58,29 +58,22 @@
 	<div class="row">
 		<div class="col-8 col-content">
 			<div class="tsd-panel tsd-typography">
-				<a href="#typescript-micropython-repl-and-webrepl-interface" id="typescript-micropython-repl-and-webrepl-interface" style="color: inherit; text-decoration: none;">
-					<h1>TypeScript MicroPython REPL and WebREPL Interface</h1>
+				<a href="#typescript-micropython-interface" id="typescript-micropython-interface" style="color: inherit; text-decoration: none;">
+					<h1>TypeScript MicroPython Interface</h1>
 				</a>
-				<p>Library to interface with MicroPython devices over serial and network connection (REPL and WebREPL)</p>
+				<p>A library to interface with MicroPython devices over serial and network connections (REPL and WebREPL)</p>
 				<ul>
-					<li>Can be used in websites/webapps and Node.js code</li>
-					<li>Fully async (you can use <code>await</code> with <code>connect</code>,  executing REPL commands, etc.)</li>
+					<li>Easily build websites/webapps and Node.js programs</li>
+					<li>Typed and fully async (you can use <code>await</code> with <code>connect</code>,  executing REPL commands, etc.)</li>
 					<li>Tested with ESP32, should also work with ESP8266, perhaps others</li>
-					<li>Browser bundle only 13kb gzipped</li>
 					<li>Functionality:<ul>
 							<li>Connect over network and serial interface</li>
-							<li>Run Python script and await the output</li>
+							<li>Run Python scripts and await the output</li>
 							<li>List files, upload and download files (not yet implemented)</li>
 						</ul>
 					</li>
 					<li>Main code file: <a href="https://github.com/metachris/micropython-ctl/blob/master/src/main.ts"><code>main.ts</code></a></li>
 					<li>Links: <a href="https://github.com/metachris/micropython-ctl/settings">github</a>, <a href="https://metachris.github.io/micropython-ctl/">documentation</a>, <a href="https://www.npmjs.com/package/micropython-ctl">npm package</a></li>
-				</ul>
-				<p>Code examples:</p>
-				<ul>
-					<li><a href="https://github.com/metachris/micropython-ctl/blob/master/examples/basic.ts">examples/basic.ts</a> (run with <code>yarn ts-node examples/basic.ts</code>)</li>
-					<li><a href="https://github.com/metachris/micropython-ctl/blob/master/examples/web-example.html">examples/web-example.html</a> (just open the file in a browser)</li>
-					<li><a href="https://github.com/metachris/micropython-ctl/blob/master/examples/cli.ts">examples/cli.ts</a> (run with <code>yarn cli</code>)</li>
 				</ul>
 				<a href="#usage" id="usage" style="color: inherit; text-decoration: none;">
 					<h1>Usage</h1>
@@ -102,13 +95,19 @@
 <span style="color: #001080">console</span><span style="color: #000000">.</span><span style="color: #795E26">log</span><span style="color: #000000">(</span><span style="color: #A31515">&#039;files:&#039;</span><span style="color: #000000">, </span><span style="color: #001080">files</span><span style="color: #000000">)</span>
 </code></pre>
 				<p>Note on network connection: To access the webrepl over the network, you need to enable it first through the serial REPL: <code>import webrepl_setup</code> (see <a href="https://docs.micropython.org/en/latest/esp8266/tutorial/repl.html#webrepl-a-prompt-over-wifi">docs</a>). Also, make sure you can ping the device first.</p>
-				<a href="#browser" id="browser" style="color: inherit; text-decoration: none;">
-					<h2>Browser</h2>
+				<p>Code examples:</p>
+				<ul>
+					<li><a href="https://github.com/metachris/micropython-ctl/blob/master/examples/basic.ts">examples/basic.ts</a> (run with <code>yarn ts-node examples/basic.ts</code>)</li>
+					<li><a href="https://github.com/metachris/micropython-ctl/blob/master/examples/web-example.html">examples/web-example.html</a> (just open the file in a browser)</li>
+					<li><a href="https://github.com/metachris/micropython-ctl/blob/master/examples/cli.ts">examples/cli.ts</a> (run with <code>yarn cli</code>)</li>
+				</ul>
+				<a href="#browser--webapps" id="browser--webapps" style="color: inherit; text-decoration: none;">
+					<h2>Browser / Webapps</h2>
 				</a>
-				<p>Include the latest release via CDN:</p>
+				<p>In websites/webapps, simply include the latest release via CDN (~13kb gzipped):</p>
 				<pre><code class="language-html"><span style="color: #800000">&lt;script</span><span style="color: #000000FF"> </span><span style="color: #FF0000">src</span><span style="color: #000000FF">=</span><span style="color: #0000FF">&quot;https://cdn.jsdelivr.net/npm/micropython-ctl@latest/dist-browser/main.js&quot;</span><span style="color: #800000">&gt;&lt;/script&gt;</span>
 </code></pre>
-				<p>Use it like this:</p>
+				<p>Then you can use it like this:</p>
 				<pre><code class="language-js"><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">micropython</span><span style="color: #000000"> = </span><span style="color: #0000FF">new</span><span style="color: #000000"> </span><span style="color: #267F99">MicroPythonCtl</span><span style="color: #000000">.</span><span style="color: #267F99">MicroPythonDevice</span><span style="color: #000000">()</span>
 <span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #001080">micropython</span><span style="color: #000000">.</span><span style="color: #795E26">connectNetwork</span><span style="color: #000000">(</span><span style="color: #001080">host</span><span style="color: #000000">, </span><span style="color: #001080">password</span><span style="color: #000000">)</span>
 </code></pre>
