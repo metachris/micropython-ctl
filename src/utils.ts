@@ -58,3 +58,11 @@ export const humanFileSize = (bytes, si = true, dp = 1) => {
 
   return bytes.toFixed(dp) + units[u];
 }
+
+export const unhexlify = (str: string) => {
+  let result = '';
+  for (let i=0, l=str.length; i<l; i+=2) {
+    result += String.fromCharCode(parseInt(str.substr(i, 2), 16));
+  }
+  return result;
+}

@@ -61,7 +61,7 @@ def listdir(directory):
   command += `
 for (filename, isdir, size) in listdir('${finalDir}'):
     print("%s | %s | %s" % (filename, 'd' if isdir else 'f', size))
-pass  # why the fuck is this needed?
+#
 `
 
   return command
@@ -74,4 +74,17 @@ export const manyPrints = (lines = 200) => {
     ret += `print(${i})\n`
   }
   return ret
+}
+
+export const getFile = (filename: string) => {
+  return `
+import sys
+import ubinascii
+with open('${filename}', 'rb') as infile:
+    while True:
+        result = infile.read(32)
+        if result == b'':
+            break
+        len = sys.stdout.write(ubinascii.hexlify(result))
+#`  // this # is needed, else we get an error (SyntaxError: invalid syntax)
 }

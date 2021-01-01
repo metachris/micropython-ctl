@@ -8,8 +8,8 @@
 import WebSocket from 'isomorphic-ws'
 import { Buffer } from 'buffer/'
 import { InvalidPassword, CouldNotConnect, ScriptExecutionError } from './errors'
-import { debug, dedent } from './utils';
-import { ls } from './python-scripts';
+import { debug, dedent, unhexlify } from './utils';
+import * as PythonScripts from './python-scripts';
 
 export { InvalidPassword, CouldNotConnect, ScriptExecutionError }  // allows easy importing from user scripts
 
@@ -527,6 +527,7 @@ export class MicroPythonDevice {
 
     // Prepare script for execution (dedent by default)
     if (!disableDedent) script = dedent(script)
+    // if (!script.endsWith('\n')) script += '\r\npass'
 
     // Send data to raw repl. Note: cannot send too much data at once over the
     // network, else the webrepl can't parse it quick enough and returns an error.
@@ -653,7 +654,7 @@ export class MicroPythonDevice {
 
   public async listFiles(directory = "/", recursive = false): Promise<FileListEntry[]> {
     debug(`listFiles: ${directory}`)
-    const output = await this.runScript(ls({ directory, recursive }))
+    const output = await this.runScript(PythonScripts.ls({ directory, recursive }))
     const lines = output.split('\n')
 
     const ret: FileListEntry[] = []
@@ -667,5 +668,11 @@ export class MicroPythonDevice {
       })
     }
     return ret
+  }
+
+  public async getFile(filename: string): Promise<string> {
+    debug(`getFile: ${filename}`)
+    const output = await this.runScript(PythonScripts.getFile(filename))
+    return unhexlify(output)
   }
 }
