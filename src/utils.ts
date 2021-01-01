@@ -1,4 +1,8 @@
-const SHOW_DEBUG_OUTPUT_NODE = globalThis.process?.release?.name && !!process.env.DEBUG
+export const IS_NODEJS = !!globalThis.process?.release?.name
+export const IS_ELECTRON = typeof(navigator) !== 'undefined' && navigator.userAgent.indexOf('Electron/') > -1
+
+// Enable debug output if Node.js and DEBUG env var, alternatively
+const SHOW_DEBUG_OUTPUT_NODE = IS_NODEJS && !!process.env.DEBUG
 
 export const debug = (...args: any) => {
   // console.log(...args)
@@ -61,7 +65,7 @@ export const humanFileSize = (bytes, si = true, dp = 1) => {
 
 export const unhexlify = (str: string) => {
   let result = '';
-  for (let i=0, l=str.length; i<l; i+=2) {
+  for (let i = 0, l = str.length; i < l; i += 2) {
     result += String.fromCharCode(parseInt(str.substr(i, 2), 16));
   }
   return result;

@@ -8,7 +8,7 @@
 import WebSocket from 'isomorphic-ws'
 import { Buffer } from 'buffer/'
 import { InvalidPassword, CouldNotConnect, ScriptExecutionError } from './errors'
-import { debug, dedent, unhexlify } from './utils';
+import { debug, dedent, IS_ELECTRON, IS_NODEJS, unhexlify } from './utils';
 import * as PythonScripts from './python-scripts';
 
 export { InvalidPassword, CouldNotConnect, ScriptExecutionError }  // allows easy importing from user scripts
@@ -196,8 +196,14 @@ export class MicroPythonDevice {
     this.state.connectionState = ConnectionState.CONNECTING
     this.clearBuffer()
 
-    const SerialPort = require('serialport')
-    this.state.port = new SerialPort(path, { baudRate: 115200 })
+    if (IS_ELECTRON) {
+      this.state.port = new window.SerialPort(path, { baudRate: 115200 })
+    } else if (IS_NODEJS) {
+      const SerialPort = require('serialport')
+      this.state.port = new SerialPort(path, { baudRate: 115200 })
+    } else {
+      throw new Error('Cannot use connectSerial from a browser')
+    }
 
     // Add error listener
     this.state.port.on('error', (err: string) => {
