@@ -88,3 +88,16 @@ with open('${filename}', 'rb') as infile:
         len = sys.stdout.write(ubinascii.hexlify(result))
 #`  // this # is needed, else we get an error (SyntaxError: invalid syntax)
 }
+
+export const stat = (path: string) => {
+  return `
+try:
+    import os
+except ImportError:
+    import uos as os
+
+s = os.stat('${path}')
+print('%s | %s' % ('f' if s[0] == 32768 else 'd', s[6]))
+`
+}
+

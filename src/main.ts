@@ -681,4 +681,11 @@ export class MicroPythonDevice {
     const output = await this.runScript(PythonScripts.getFile(filename))
     return unhexlify(output)
   }
+
+  public async statPath(path: string): Promise<{ isDir: boolean, size: number }> {
+    debug(`statPath: ${path}`)
+    const statOutput = this.runScript(PythonScripts.stat(path))
+    const [isDir, size] = (await statOutput).split(' | ')
+    return { isDir: isDir === 'd', size: parseInt(size, 10) }
+  }
 }

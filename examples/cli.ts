@@ -1,9 +1,17 @@
 /**
- * https://github.com/dhylands/rshell#commands
+ * Part of https://github.com/metachris/micropython-ctl
+ *
+ * Using https://github.com/tj/commander.js
+ *
+ * See also:
+ * - https://github.com/dhylands/rshell#commands
+ * - https://github.com/scientifichackers/ampy/blob/master/ampy/files.py
+ *
+ * In progress:
+ * - get
  *
  * TODO:
- * - cat
- * - get
+ * - runScript (script or Python file)
  * - put
  * - edit
  * - mkdir
@@ -11,6 +19,7 @@
  * - rm
  * - rsync
  */
+import fs from 'fs';
 import path from 'path';
 import SerialPort from 'serialport';
 import { Command } from 'commander';
@@ -26,6 +35,7 @@ const micropython = new MicroPythonDevice()
 
 const CLR_RESET = "\x1b[0m";
 const CLR_FG_BLUE = "\x1b[34m";
+const CLR_FG_RED = "\x1b[31m";
 
 const listMicroPythonDevices = async () => {
   const devices = await SerialPort.list();
@@ -45,7 +55,7 @@ const ensureConnectedDevice = async () => {
         if (!device || device === true) {
           const devices = await listMicroPythonDevices()
           if (devices.length === 0) {
-            console.error('No serial devices foudn')
+            console.error('No serial device found')
             process.exit(1)
           }
           device = devices[0].path
@@ -91,10 +101,46 @@ const putFile = async (filename: string, destFilename?: string) => {
 }
 
 const catFile = async (filename: string) => {
-  await ensureConnectedDevice()
-  const contents = await micropython.getFile(filename)
-  console.log(contents)
-  await micropython.disconnect()
+  try {
+    await ensureConnectedDevice()
+    const contents = await micropython.getFile(filename)
+    console.log(contents)
+  } catch (e) {
+    if (e instanceof ScriptExecutionError && e.message.includes('OSError: [Errno 2] ENOENT')) {
+      console.log(`cat: cannot access '${filename}': No such file or directory`)
+      return
+    }
+    console.log('Error:', e)
+  } finally {
+    await micropython.disconnect()
+  }
+}
+
+const get = async (filenameOrDir: string, targetFilenameOrDir: string) => {
+  console.log('get', filenameOrDir, targetFilenameOrDir)
+  try {
+    await ensureConnectedDevice()
+    const statResult = await micropython.statPath(filenameOrDir)
+    if (!statResult.isDir) {
+      // get a file
+      let targetFilename = filenameOrDir.replace(/^.*[\\\/]/, '')
+      if (targetFilenameOrDir) {
+        targetFilename = targetFilenameOrDir.endsWith('/') ? targetFilenameOrDir + targetFilename : targetFilenameOrDir
+      }
+      console.log(`get: ${filenameOrDir} => ${targetFilename}`)
+      const contents = await micropython.getFile(filenameOrDir)
+      fs.writeFileSync(targetFilename, contents)
+    }
+
+  } catch (e) {
+    if (e instanceof ScriptExecutionError && e.message.includes('OSError: [Errno 2] ENOENT')) {
+      console.log(`${CLR_FG_RED}get: cannot access '${filenameOrDir}': No such file or directory${CLR_RESET}`)
+      return
+    }
+    console.log('Error:', e)
+  } finally {
+    await micropython.disconnect()
+  }
 }
 
 const listSerialDevices = async () => {
@@ -125,6 +171,13 @@ program
   .command('cat <filename>')
   .description('Print content of a file on the device')
   .action(catFile);
+
+// Command: get
+program
+  .command('get <file_or_dirname> [out_file_or_dirname]')
+  .option('-r, --recursive', 'List recursively')
+  .description('Download a file or directory from the device')
+  .action(get);
 
 // Command: put
 program
