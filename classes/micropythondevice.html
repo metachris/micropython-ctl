@@ -96,6 +96,7 @@
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="micropythondevice.html#connectnetwork" class="tsd-kind-icon">connect<wbr>Network</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="micropythondevice.html#connectserial" class="tsd-kind-icon">connect<wbr>Serial</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="micropythondevice.html#disconnect" class="tsd-kind-icon">disconnect</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="micropythondevice.html#getfile" class="tsd-kind-icon">get<wbr>File</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="micropythondevice.html#getstate" class="tsd-kind-icon">get<wbr>State</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="micropythondevice.html#getver" class="tsd-kind-icon">get<wbr>Ver</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="micropythondevice.html#isconnected" class="tsd-kind-icon">is<wbr>Connected</a></li>
@@ -104,6 +105,7 @@
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="micropythondevice.html#listfiles" class="tsd-kind-icon">list<wbr>Files</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="micropythondevice.html#runscript" class="tsd-kind-icon">run<wbr>Script</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="micropythondevice.html#senddata" class="tsd-kind-icon">send<wbr>Data</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="micropythondevice.html#statpath" class="tsd-kind-icon">stat<wbr>Path</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="micropythondevice.html#uploadfile" class="tsd-kind-icon">upload<wbr>File</a></li>
 							</ul>
 						</section>
@@ -122,7 +124,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/07029de/src/main.ts#L134">src/main.ts:134</a></li>
+									<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/ce9fb12/src/main.ts#L134">src/main.ts:134</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -144,7 +146,7 @@
 					<div class="tsd-signature tsd-kind-icon">on<wbr>Terminal<wbr>Data<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">(</span>data<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">void</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/07029de/src/main.ts#L103">src/main.ts:103</a></li>
+							<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/ce9fb12/src/main.ts#L103">src/main.ts:103</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-type-declaration">
@@ -175,7 +177,7 @@
 					<div class="tsd-signature tsd-kind-icon">onclose<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">void</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/07029de/src/main.ts#L102">src/main.ts:102</a></li>
+							<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/ce9fb12/src/main.ts#L102">src/main.ts:102</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-type-declaration">
@@ -207,7 +209,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/07029de/src/main.ts#L223">src/main.ts:223</a></li>
+									<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/ce9fb12/src/main.ts#L229">src/main.ts:229</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -233,7 +235,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/07029de/src/main.ts#L192">src/main.ts:192</a></li>
+									<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/ce9fb12/src/main.ts#L192">src/main.ts:192</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -256,10 +258,33 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/07029de/src/main.ts#L494">src/main.ts:494</a></li>
+									<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/ce9fb12/src/main.ts#L500">src/main.ts:500</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="getfile" class="tsd-anchor"></a>
+					<h3>get<wbr>File</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">get<wbr>File<span class="tsd-signature-symbol">(</span>filename<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/ce9fb12/src/main.ts#L679">src/main.ts:679</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>filename: <span class="tsd-signature-type">string</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">&gt;</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -273,7 +298,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/07029de/src/main.ts#L158">src/main.ts:158</a></li>
+									<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/ce9fb12/src/main.ts#L158">src/main.ts:158</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <a href="../interfaces/devicestate.html" class="tsd-signature-type" data-tsd-kind="Interface">DeviceState</a></h4>
@@ -290,7 +315,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/07029de/src/main.ts#L599">src/main.ts:599</a></li>
+									<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/ce9fb12/src/main.ts#L606">src/main.ts:606</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">&gt;</span></h4>
@@ -307,7 +332,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/07029de/src/main.ts#L146">src/main.ts:146</a></li>
+									<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/ce9fb12/src/main.ts#L146">src/main.ts:146</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
@@ -324,7 +349,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/07029de/src/main.ts#L150">src/main.ts:150</a></li>
+									<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/ce9fb12/src/main.ts#L150">src/main.ts:150</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
@@ -341,7 +366,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/07029de/src/main.ts#L154">src/main.ts:154</a></li>
+									<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/ce9fb12/src/main.ts#L154">src/main.ts:154</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
@@ -358,7 +383,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/07029de/src/main.ts#L654">src/main.ts:654</a></li>
+									<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/ce9fb12/src/main.ts#L661">src/main.ts:661</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -384,7 +409,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/07029de/src/main.ts#L522">src/main.ts:522</a></li>
+									<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/ce9fb12/src/main.ts#L528">src/main.ts:528</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -419,7 +444,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/07029de/src/main.ts#L469">src/main.ts:469</a></li>
+									<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/ce9fb12/src/main.ts#L475">src/main.ts:475</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -433,6 +458,29 @@
 					</ul>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="statpath" class="tsd-anchor"></a>
+					<h3>stat<wbr>Path</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">stat<wbr>Path<span class="tsd-signature-symbol">(</span>path<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-symbol">{ </span>isDir<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">; </span>size<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> }</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/ce9fb12/src/main.ts#L685">src/main.ts:685</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>path: <span class="tsd-signature-type">string</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-symbol">{ </span>isDir<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">; </span>size<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> }</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
 					<a name="uploadfile" class="tsd-anchor"></a>
 					<h3>upload<wbr>File</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
@@ -442,7 +490,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/07029de/src/main.ts#L621">src/main.ts:621</a></li>
+									<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/ce9fb12/src/main.ts#L628">src/main.ts:628</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -494,6 +542,9 @@
 								<a href="micropythondevice.html#disconnect" class="tsd-kind-icon">disconnect</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="micropythondevice.html#getfile" class="tsd-kind-icon">get<wbr>File</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="micropythondevice.html#getstate" class="tsd-kind-icon">get<wbr>State</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
@@ -516,6 +567,9 @@
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="micropythondevice.html#senddata" class="tsd-kind-icon">send<wbr>Data</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="micropythondevice.html#statpath" class="tsd-kind-icon">stat<wbr>Path</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="micropythondevice.html#uploadfile" class="tsd-kind-icon">upload<wbr>File</a>
