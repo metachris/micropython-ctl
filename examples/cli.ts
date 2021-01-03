@@ -37,6 +37,17 @@ const CLR_RESET = "\x1b[0m";
 const CLR_FG_BLUE = "\x1b[34m";
 const CLR_FG_RED = "\x1b[31m";
 
+const logError = (...msg: any) => {
+  process.stderr.write(CLR_FG_RED)
+  console.error(...msg, CLR_RESET)
+}
+
+const logVerbose = (...msg: any) => {
+  if (!program.silent) {
+    console.log(...msg)
+  }
+}
+
 const listMicroPythonDevices = async () => {
   const devices = await SerialPort.list();
   return devices.filter(device => device.manufacturer || device.serialNumber)
@@ -46,7 +57,7 @@ const ensureConnectedDevice = async () => {
   try {
     if (!micropython.isConnected()) {
       if (program.host) {
-        console.log(`Connecting over network to: ${program.host}`)
+        logVerbose(`Connecting over network to: ${program.host}`)
         await micropython.connectNetwork(program.host, program.password)
       } else {
         let device = program.tty
@@ -62,13 +73,13 @@ const ensureConnectedDevice = async () => {
         }
 
         // Connect now
-        console.log(`Connecting over serial to: ${device}`)
+        logVerbose(`Connecting over serial to: ${device}`)
         await micropython.connectSerial(device)
       }
       // console.log('Connected')
     }
   } catch (e) {
-    console.error('Could not connect:', e.toString())
+    logError('Could not connect:', e.toString())
     process.exit(1)
   }
 }
@@ -78,12 +89,12 @@ const listFilesOnDevice = async (directory = '/', cmdObj) => {
   await ensureConnectedDevice()
 
   try {
-    const files = await micropython.listFiles(directory, cmdObj.recursive)
+    const files = await micropython.listFiles({ directory, recursive: cmdObj.recursive })
     files.map(file => console.log(`${humanFileSize(file.size).padStart(5)} ${file.isDir ? CLR_FG_BLUE : ''}${file.filename}${CLR_RESET}`))
 
   } catch (e) {
     if (e instanceof ScriptExecutionError && e.message.includes('OSError: [Errno 2] ENOENT')) {
-      console.log(`ls: cannot access '${directory}': No such file or directory`)
+      logError(`ls: cannot access '${directory}': No such file or directory`)
       return
     }
     console.log('Error:', e)
@@ -107,17 +118,17 @@ const catFile = async (filename: string) => {
     console.log(contents)
   } catch (e) {
     if (e instanceof ScriptExecutionError && e.message.includes('OSError: [Errno 2] ENOENT')) {
-      console.log(`cat: cannot access '${filename}': No such file or directory`)
+      logError(`cat: cannot access '${filename}': No such file or directory`)
       return
     }
-    console.log('Error:', e)
+    logError('Error:', e)
   } finally {
     await micropython.disconnect()
   }
 }
 
 const get = async (filenameOrDir: string, targetFilenameOrDir: string) => {
-  console.log('get', filenameOrDir, targetFilenameOrDir)
+  // console.log('get', filenameOrDir, targetFilenameOrDir)
   try {
     await ensureConnectedDevice()
     const statResult = await micropython.statPath(filenameOrDir)
@@ -130,6 +141,9 @@ const get = async (filenameOrDir: string, targetFilenameOrDir: string) => {
       console.log(`get: ${filenameOrDir} => ${targetFilename}`)
       const contents = await micropython.getFile(filenameOrDir)
       fs.writeFileSync(targetFilename, contents)
+    } else {
+      logError('get: download of directory not yet implemented')
+      return
     }
 
   } catch (e) {
@@ -154,6 +168,7 @@ const listSerialDevices = async () => {
 program.option('-t, --tty [device]', `Serial interface (eg. /dev/tty.SLAB_USBtoUART)`)
 program.option('-h, --host <host>', `Hostname or IP of device`)
 program.option('-p, --password <password>', `Password for network device`, PASSWORD)
+program.option('-s, --silent', `Hide unnecessary output`)
 
 // Command: devices
 program
@@ -175,7 +190,7 @@ program
 // Command: get
 program
   .command('get <file_or_dirname> [out_file_or_dirname]')
-  .option('-r, --recursive', 'List recursively')
+  // .option('-r, --recursive', 'List recursively')
   .description('Download a file or directory from the device')
   .action(get);
 
