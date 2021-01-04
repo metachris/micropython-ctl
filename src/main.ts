@@ -49,10 +49,6 @@ enum RawReplReceivingResponseSubState {
   SCRIPT_WAITING_FOR_END = 'SCRIPT_WAITING_FOR_END',
 }
 
-export interface DeviceOptions {
-  attachStateToWindow: boolean | Window
-}
-
 type promiseResolve = (value: string | PromiseLike<string>) => void;
 type promiseReject = (reason: any) => void;
 
@@ -61,6 +57,8 @@ export interface DeviceState {
 
   port: any
   ws: WebSocket | null
+  wsConnectTimeout: NodeJS.Timeout | undefined;
+  wsConnectTimeoutTriggered: boolean
 
   connectionState: ConnectionState
   replMode: ReplMode // only if replState is connected
@@ -110,6 +108,9 @@ export class MicroPythonDevice {
 
       port: null,
       ws: null,
+      wsConnectTimeout: undefined,
+      wsConnectTimeoutTriggered: false,
+
       replMode: ReplMode.TERMINAL,
 
       replPassword: '',
@@ -133,14 +134,8 @@ export class MicroPythonDevice {
     }
   }
 
-  constructor(options?: DeviceOptions) {
-    // State init, either local only or also on a window instance (for code hot reloading)
-    if (options?.attachStateToWindow) {
-      this.attachStateToWindow(options.attachStateToWindow)
-    } else {
-      // Normal local state init
-      this.state = this.getInitState()
-    }
+  constructor() {
+    this.state = this.getInitState()
   }
 
   isConnected() {
@@ -159,36 +154,20 @@ export class MicroPythonDevice {
     return this.state
   }
 
-  /**
-   * attachStateToWindow is a dev helper to allow code hot reloading (reusing a websocket/webrepl instance across code reloads)
-   */
-  private attachStateToWindow(targetWindow: Window | boolean) {
-    // console.log('attachStateToWindow', targetWindow)
-
-    const getTargetWindow = () => {
-      if (typeof targetWindow === 'boolean') {
-        // console.log('attach state to the default window')
-        if (typeof window === 'undefined') {
-          throw new Error('Cannot attach state to window because window is undefined')
-        }
-        return window
-      } else {
-        // console.log('attach state to an existing window')
-        return targetWindow
-      }
-    }
-
-    const _targetWindow = getTargetWindow() as WindowWithWebRepl
-
-    if (_targetWindow.webReplState && _targetWindow.webReplState.ws) {
-      // console.log('hot reloading state from window')
-      this.state = _targetWindow.webReplState
-    } else {
-      // console.log('initial state creation')
-      _targetWindow.webReplState = this.state = this.getInitState()
-    }
+  private createReplPromise(): Promise<string> {
+    this.state.replPromise = new Promise((resolve, reject) => {
+      this.state.replPromiseResolve = resolve
+      this.state.replPromiseReject = reject
+    })
+    return this.state.replPromise
   }
 
+  /**
+   * Connect to a device over the serial interface
+   *
+   * @param path Serial interface (eg. `/dev/ttyUSB0`, `/dev/tty.SLAB_USBtoUART`, ...)
+   * @throws {CouldNotConnect} Connection failed
+   */
   public async connectSerial(path: string) {
     debug('connectSerial', path)
     // Connect to serial device
@@ -226,13 +205,21 @@ export class MicroPythonDevice {
     return this.createReplPromise()
   }
 
-  public async connectNetwork(host: string, password: string) {
+  /**
+   * Connect to a device over the network (requires enabled WebREPL)
+   *
+   * @param host IP address or hostname
+   * @param password webrepl password
+   * @param timeoutSec Connection timeout (default: 5 sec). To disable, set to 0
+   * @throws {CouldNotConnect} Connection failed
+   */
+  public async connectNetwork(host: string, password: string, timeoutSec = 5): Promise<string> {
     this.state.connectionMode = ConnectionMode.NETWORK
 
     // check if already a websocket connection active
     if (this.state.ws && this.state.ws.readyState !== WebSocket.CLOSED) {  // see also https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/readyState
       console.warn("webrepl: Cannot connect, already active ws connection", this.state.ws)
-      return
+      return ''
     }
 
     const uri = `ws://${host}:8266`
@@ -243,10 +230,27 @@ export class MicroPythonDevice {
     this.state.ws = new WebSocket(uri)
     this.state.ws.binaryType = 'arraybuffer'
 
-    // this.state.ws.onopen = () => console.log(`WebSocket connected`)
+    // Set the connect timeout
+    if (timeoutSec) {
+      this.state.wsConnectTimeout = setTimeout(() => {
+        this.state.wsConnectTimeoutTriggered = true
+        this.state.ws?.close()
+      }, timeoutSec * 1000)
+    }
+
+    // On connection established, clear the timeout
+    this.state.ws.onopen = () => { if (this.state.wsConnectTimeout) clearTimeout(this.state.wsConnectTimeout) }
+
+    // Handle messages
     this.state.ws.onmessage = (event) => this.handleWebsocketMessage(event)
+
+    // Handle errors
     this.state.ws.onerror = (err) => {
-      // console.log(`WebSocket onerror`, err)
+      if (this.state.wsConnectTimeoutTriggered) {
+        if (this.state.replPromiseReject) this.state.replPromiseReject(new CouldNotConnect("Connect timeout"))
+        return
+      }
+
       const e = this.state.connectionState === ConnectionState.CONNECTING ? new CouldNotConnect(err.message) : err
       if (this.state.replPromiseReject) this.state.replPromiseReject(e)
     }
@@ -261,15 +265,6 @@ export class MicroPythonDevice {
     // create and return a new promise, which is fulfilled only after connecting to repl
     return this.createReplPromise()
   }
-
-  private createReplPromise(): Promise<string> {
-    this.state.replPromise = new Promise((resolve, reject) => {
-      this.state.replPromiseResolve = resolve
-      this.state.replPromiseReject = reject
-    })
-    return this.state.replPromise
-  }
-
 
   /**
    * Handle special WebREPL only commands data
@@ -658,7 +653,7 @@ export class MicroPythonDevice {
     // return promise
   }
 
-  public async listFiles(directory = "/", recursive = false): Promise<FileListEntry[]> {
+  public async listFiles({ directory = "/", recursive = false }): Promise<FileListEntry[]> {
     debug(`listFiles: ${directory}`)
     const output = await this.runScript(PythonScripts.ls({ directory, recursive }))
     const lines = output.split('\n')
@@ -689,3 +684,8 @@ export class MicroPythonDevice {
     return { isDir: isDir === 'd', size: parseInt(size, 10) }
   }
 }
+
+// export interface ListFileOptions {
+//   directory: string
+//   recursive: boolean
+// }
