@@ -2,13 +2,16 @@
 /**
  * Part of https://github.com/metachris/micropython-ctl
  *
- * Installed as `mctl`.
+ * Installed as `mctl`. Install with:
+ *
+ *     $ npm install -g micropython-ctl
  *
  * Usage:
  *
  *     $ mctl --help
  *     $ mctl devices
  *     $ mctl ls -r
+ *     $ mctl repl
  *
  * Using https://github.com/tj/commander.js
  *
@@ -20,16 +23,16 @@
  * - get
  *
  * TODO:
- * - runScript (script or Python file)
+ * - run (script or Python file)
  * - put
  * - edit
  * - mkdir
- * - repl
  * - rm
  * - rsync
  */
 import fs from 'fs';
 import path from 'path';
+import readline from 'readline'
 import SerialPort from 'serialport';
 import { Command } from 'commander';
 import { ScriptExecutionError, MicroPythonDevice } from '../src/main';
@@ -170,12 +173,42 @@ const listSerialDevices = async () => {
   (await listMicroPythonDevices()).map(device => console.log(device.path, '\t', device.manufacturer))
 }
 
+const repl = async () => {
+  try {
+    await ensureConnectedDevice()
+
+    micropython.onclose = () => process.exit(0)
+    micropython.onTerminalData = (data) => process.stdout.write(data)
+
+    // Setup keyboard capture
+    readline.emitKeypressEvents(process.stdin);
+    process.stdin.setRawMode(true);
+    process.stdin.on('keypress', async (str, key) => {
+      // Quit on Ctrl+K
+      if (key.name === 'k' && key.ctrl) process.exit(0)
+
+      // Send anything to the device, if connected
+      if (micropython.isConnected() && micropython.isTerminalMode()) {
+        micropython.sendData(str)
+      }
+    });
+
+    console.log('Exit REPL by pressing Ctrl+K')
+
+    // Send Ctrl+B (exit raw repl and show micropython header)
+    micropython.sendData('\x02')
+  } catch (e) {
+    console.log('Error:', e)
+    await micropython.disconnect()
+  }
+}
+
 /**
  * Setup command line commands, using commander.js
  * https://github.com/tj/commander.js
  */
-program.option('-t, --tty [device]', `Serial interface (eg. /dev/tty.SLAB_USBtoUART)`)
-program.option('-h, --host <host>', `Hostname or IP of device`)
+program.option('-t, --tty [device]', `Connect over serial interface (eg. /dev/tty.SLAB_USBtoUART)`)
+program.option('-h, --host <host>', `Connect over network to hostname or IP of device`)
 program.option('-p, --password <password>', `Password for network device`, PASSWORD)
 program.option('-s, --silent', `Hide unnecessary output`)
 
@@ -208,6 +241,12 @@ program
   .command('put <filename> [<destFilename>]')
   .description('Copy a file onto the device')
   .action(putFile);
+
+// Command: repl
+program
+  .command('repl')
+  .description('Open a REPL terminal')
+  .action(repl);
 
 // program.parse(process.argv)
 

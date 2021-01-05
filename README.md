@@ -33,6 +33,10 @@ console.log('runScript output:', output)
 // List all files in the root
 const files = await micropython.listFiles()
 console.log('files:', files)
+
+// Set a terminal (REPL) data handler, and send data to the REPL
+micropython.onTerminalData = (data) => process.stdout.write(data)
+micropython.sendData('\x02')  // Ctrl+B to enter friendly repl and print version
 ```
 
 Note on network connection: To access the webrepl over the network, you need to enable it first through the serial REPL: `import webrepl_setup` (see [docs](https://docs.micropython.org/en/latest/esp8266/tutorial/repl.html#webrepl-a-prompt-over-wifi)). Also, make sure you can ping the device first.

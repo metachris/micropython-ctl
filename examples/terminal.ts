@@ -3,15 +3,12 @@
  */
 import readline from 'readline'
 import { MicroPythonDevice } from '../src/main'
+// import { MicroPythonDevice } from 'micropython-ctl';
 
 const HOST = '10.0.1.10'
 const PASSWORD = 'test'
 
 const micropython = new MicroPythonDevice()
-
-// Shut down program on websocket close
-micropython.onclose = () => process.exit(0)
-micropython.onTerminalData = (data) => process.stdout.write(data)
 
 // Keystroke capture for interactive REPL
 const setupKeyboardCapture = () => {
@@ -30,13 +27,20 @@ const setupKeyboardCapture = () => {
   });
 }
 
-// Connect to device
+// Connect to device and do things
 (async () => {
   setupKeyboardCapture()
 
   // Connect over network or serial
   // await micropython.connectNetwork(HOST, PASSWORD)
   await micropython.connectSerial('/dev/tty.SLAB_USBtoUART')
+  console.log('Exit REPL by pressing Ctrl+K')
+
+  // Print incoming REPL data
+  micropython.onTerminalData = (data) => process.stdout.write(data)
+
+  // Shut down program on websocket close
+  micropython.onclose = () => process.exit(0)
 
   // Send Ctrl+B (exit raw repl and show micropython header)
   micropython.sendData('\x02')
