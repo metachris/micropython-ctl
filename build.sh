@@ -1,6 +1,13 @@
 #!/bin/bash
 yarn clean
+
+# Build Node.js version
 yarn buildNode
+cd dist-node
+ln -s ../package.json
+cd ..
+
+# Build browser version
 yarn buildBrowser
 rm -f dist-browser/main.js.LICENSE.txt
 

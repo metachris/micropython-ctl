@@ -1,3 +1,10 @@
+dev
+---
+* renamed `examples/cli.js` -> `examples/mctl.js` (and `yarn cli` to `yarn mctl`)
+* `mctl repl`: open a REPL terminal
+* `mctl version`: print the current version
+
+
 1.5.2 (2021-01-05)
 -----------------------
 

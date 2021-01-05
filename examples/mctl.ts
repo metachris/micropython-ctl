@@ -250,7 +250,14 @@ program
   .description('Open a REPL terminal')
   .action(repl);
 
-// program.parse(process.argv)
+// Command: version
+program
+  .command('version')
+  .description('Print the version of mctl')
+  .action(() => {
+    const pjson = require('../package.json');
+    console.log(`v${pjson.version}`);
+  });
 
 (async () => {
   await program.parseAsync(process.argv);
