@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>ConnectionState | micropython-ctl - v1.5.2</title>
+	<title>ListFilesOptions | micropython-ctl - v1.5.2</title>
 	<meta name="description" content="Documentation for micropython-ctl - v1.5.2">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -55,60 +55,57 @@
 					<a href="../modules.html">micropython-ctl - v1.5.2</a>
 				</li>
 				<li>
-					<a href="connectionstate.html">ConnectionState</a>
+					<a href="listfilesoptions.html">ListFilesOptions</a>
 				</li>
 			</ul>
-			<h1>Enumeration ConnectionState</h1>
+			<h1>Interface ListFilesOptions</h1>
 		</div>
 	</div>
 </header>
 <div class="container container-main">
 	<div class="row">
 		<div class="col-8 col-content">
+			<section class="tsd-panel tsd-hierarchy">
+				<h3>Hierarchy</h3>
+				<ul class="tsd-hierarchy">
+					<li>
+						<span class="target">ListFilesOptions</span>
+					</li>
+				</ul>
+			</section>
 			<section class="tsd-panel-group tsd-index-group">
 				<h2>Index</h2>
 				<section class="tsd-panel tsd-index-panel">
 					<div class="tsd-index-content">
 						<section class="tsd-index-section ">
-							<h3>Enumeration members</h3>
+							<h3>Properties</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="connectionstate.html#closed" class="tsd-kind-icon">CLOSED</a></li>
-								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="connectionstate.html#connecting" class="tsd-kind-icon">CONNECTING</a></li>
-								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="connectionstate.html#open" class="tsd-kind-icon">OPEN</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="listfilesoptions.html#directory" class="tsd-kind-icon">directory</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="listfilesoptions.html#recursive" class="tsd-kind-icon">recursive</a></li>
 							</ul>
 						</section>
 					</div>
 				</section>
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
-				<h2>Enumeration members</h2>
-				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum">
-					<a name="closed" class="tsd-anchor"></a>
-					<h3>CLOSED</h3>
-					<div class="tsd-signature tsd-kind-icon">CLOSED<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> = &quot;CLOSED&quot;</span></div>
+				<h2>Properties</h2>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+					<a name="directory" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> directory</h3>
+					<div class="tsd-signature tsd-kind-icon">directory<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/9fd654d/src/main.ts#L26">src/main.ts:26</a></li>
+							<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/9fd654d/src/main.ts#L711">src/main.ts:711</a></li>
 						</ul>
 					</aside>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum">
-					<a name="connecting" class="tsd-anchor"></a>
-					<h3>CONNECTING</h3>
-					<div class="tsd-signature tsd-kind-icon">CONNECTING<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> = &quot;CONNECTING&quot;</span></div>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+					<a name="recursive" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> recursive</h3>
+					<div class="tsd-signature tsd-kind-icon">recursive<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/9fd654d/src/main.ts#L24">src/main.ts:24</a></li>
-						</ul>
-					</aside>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum">
-					<a name="open" class="tsd-anchor"></a>
-					<h3>OPEN</h3>
-					<div class="tsd-signature tsd-kind-icon">OPEN<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> = &quot;OPEN&quot;</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/9fd654d/src/main.ts#L25">src/main.ts:25</a></li>
+							<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/9fd654d/src/main.ts#L712">src/main.ts:712</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -128,7 +125,7 @@
 						<a href="../classes/micropythondevice.html" class="tsd-kind-icon">Micro<wbr>Python<wbr>Device</a>
 					</li>
 					<li class=" tsd-kind-interface">
-						<a href="../interfaces/devicestate.html" class="tsd-kind-icon">Device<wbr>State</a>
+						<a href="devicestate.html" class="tsd-kind-icon">Device<wbr>State</a>
 					</li>
 				</ul>
 			</nav>
