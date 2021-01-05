@@ -8,6 +8,10 @@
   <!-- Bootstrap CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
 
+  <!-- xterm CSS + JS  -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@4.9.0/css/xterm.css">
+  <script src="https://cdn.jsdelivr.net/npm/xterm@4.9.0/lib/xterm.js"></script>
+
   <!-- MicroPythonCtl JS -->
   <script src="https://cdn.jsdelivr.net/npm/micropython-ctl@latest/dist-browser/main.js"></script>
   <!-- <script src="../dist-browser/main.js"></script> -->
@@ -19,8 +23,13 @@
       margin-top: 40px;
     }
 
-    #output {
-      margin-top: 20px;
+    #terminal {
+      visibility: hidden;
+      /* display: none; */
+    }
+
+    #terminal .xterm {
+      padding: 4px 14px;
     }
   </style>
 </head>
@@ -28,14 +37,13 @@
 <body>
   <div class="container">
 
-    <h1>micropython-ctl Browser Example</h1>
+    <h1>micropython-ctl Terminal Example</h1>
 
     <a href="https://github.com/metachris/micropython-ctl">https://github.com/metachris/micropython-ctl</a>
     <br><br>
 
     <div>
       <form class="form-inline">
-
         <div class="input-group mb-3">
           <label class="sr-only" for="inlineFormInputGroupUsername2">Host:</label>
           <div class="input-group mb-2 mr-sm-2">
@@ -54,11 +62,15 @@
           </div>
 
           <button type="button" class="btn btn-primary mb-2" id="btnConnect" onclick="connect()">Connect</button>
+          <!-- <button type="button" class="btn btn-outline-primary mb-2" id="btnConnect" onclick="listFiles()" style="margin-left: 10px;">List files</button> -->
       </form>
     </div>
-
     <div id="status">Disconnected</div>
-    <div id="output"></div>
+
+    <br>
+
+    <div id="terminal"></div>
+
   </div> <!-- EOF container -->
 
 </body>
@@ -69,13 +81,24 @@
   let micropythonDevice = null;
 
   const DIV_STATUS = document.getElementById('status')
-  const DIV_OUTPUT = document.getElementById('output')
   const INPUT_HOST = document.getElementById('txtHost')
   const INPUT_PASS = document.getElementById('txtPassword')
 
-  // Restore remembered host and password values (from localStorage)
   INPUT_HOST.value = localStorage.getItem('MicroPythonCtl:Host')
   INPUT_PASS.value = localStorage.getItem('MicroPythonCtl:Password')
+
+  // Setup Xterm.js
+  const term = new Terminal({
+    fontSize: 15,
+    rows: 45,
+    cursorBlink: true
+  });
+  term.open(document.getElementById('terminal'));
+  term.onKey((e) => {
+    const { key, domEvent } = e
+    // console.log(key, domEvent);
+    micropythonDevice.sendData(key)
+  });
 
   // Connect to device on button click
   async function connect() {
@@ -89,7 +112,6 @@
 
     // Connect
     micropythonDevice = new MicroPythonCtl.MicroPythonDevice()
-
     try {
       await micropythonDevice.connectNetwork(host, password)
     } catch (e) {
@@ -98,20 +120,14 @@
     }
     DIV_STATUS.innerHTML = "Connected"
 
-    // Run a Python script and capture the output
-    const script = 'import os; print(os.listdir())'
-    DIV_OUTPUT.innerHTML += `<p>Running a Python script ('<tt>${script}</tt>')...</p>`
-    const output = await micropythonDevice.runScript(script)
-    DIV_OUTPUT.innerHTML += '<p>runScript output: ' + output + '</p>'
+    // When receiving terminal data, send to xterm.js
+    micropythonDevice.onTerminalData = (data) => term.write(data)
 
-    // List all files in the root
-    DIV_OUTPUT.innerHTML += '<p>Listing files...</p>'
-    const files = await micropythonDevice.listFiles({ directory: '/', recursive: true })
-    console.log('files', files)
-    files.map(file => {
-      if (!file.isDir) {
-        DIV_OUTPUT.innerHTML += `<div style='padding-left:20px;'>${file.filename} (${file.size}b)</div>`
-      }
-    })
+    // Send Ctrl+B to device
+    micropythonDevice.sendData('\x02')
+
+    // Show terminal and focus
+    document.getElementById('terminal').style.visibility = "visible"
+    term.focus()
   }
 </script>
