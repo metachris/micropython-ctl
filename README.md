@@ -174,8 +174,6 @@ Maybe (not sure it's needed, don't rush into implementing):
 
 ## Release process
 
-Help for writing release notes: https://github.com/metachris/micropython-ctl/compare
-
 ```shell
 # Update CHANGELOG
 vi CHANGELOG.md
@@ -196,10 +194,15 @@ yarn publish
 git push && git push --tags
 ```
 
-Purge CDN cache: https://purge.jsdelivr.net/npm/micropython-ctl@latest
 
 Update [live web-example.html](http://current.at/micropython-ctl/web-example.html) with code from Github `master` branch:
 
 ```
 ssh nova "cd /server/websites/current.at/micropython-ctl && git pull"
 ```
+
+Notes:
+
+* Update browser lib versions in this repo: search for `micropython-ctl@`
+* Help for writing release notes: https://github.com/metachris/micropython-ctl/compare
+* Purge CDN cache: https://purge.jsdelivr.net/npm/micropython-ctl@latest
