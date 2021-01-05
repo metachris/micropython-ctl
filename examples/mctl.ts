@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 /**
+ * Command line interface for talking to MicroPython devices over serial or network (webrepl)
+ *
  * Part of https://github.com/metachris/micropython-ctl
  *
  * Installed as `mctl`. Install with:

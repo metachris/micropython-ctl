@@ -7,7 +7,7 @@
   "main": "./dist-node/src/main.js",
   "types": "./dist-node/src/main.d.ts",
   "bin": {
-    "mctl": "./dist-node/examples/cli.js"
+    "mctl": "./dist-node/examples/mctl.js"
   },
   "author": "Chris Hager <chris@linuxuser.at>",
   "license": "MIT",
@@ -21,7 +21,7 @@
     "runExample": "ts-node examples/tmp.ts",
     "runTerminal": "ts-node examples/terminal.ts",
     "ts-node": "ts-node",
-    "cli": "ts-node examples/cli.ts",
+    "mctl": "ts-node examples/mctl.ts",
     "doc": "typedoc"
   },
   "dependencies": {

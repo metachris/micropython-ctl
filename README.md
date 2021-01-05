@@ -10,7 +10,7 @@ A library to interface with MicroPython devices over serial and network connecti
   * Run Python scripts and await the output
   * List files, upload and download files
   * Terminal (REPL) interaction
-  * [`mctl`](https://github.com/metachris/micropython-ctl/blob/master/examples/cli.ts) command line utility
+  * [`mctl`](https://github.com/metachris/micropython-ctl/blob/master/examples/mctl.ts) command line utility
 * Main code file: [`main.ts`](https://github.com/metachris/micropython-ctl/blob/master/src/main.ts)
 * Links: [Github](https://github.com/metachris/micropython-ctl/settings), [Documentation](https://metachris.github.io/micropython-ctl/), [npm package](https://www.npmjs.com/package/micropython-ctl)
 
@@ -47,7 +47,7 @@ Note on network connection: To access the webrepl over the network, you need to 
 * [examples/basic.ts](https://github.com/metachris/micropython-ctl/blob/master/examples/basic.ts) (run with `yarn ts-node examples/basic.ts`)
 * [examples/web-example.html](https://github.com/metachris/micropython-ctl/blob/master/examples/web-example.html) (open the file in a browser, or view it [live here](http://current.at/micropython-ctl/examples/web-example.html))
 * [examples/web-example2-terminal.html](https://github.com/metachris/micropython-ctl/blob/master/examples/web-example2-terminal.html) (open the file in a browser, or view it [live here](http://current.at/micropython-ctl/examples/web-example2-terminal.html))
-* [examples/cli.ts](https://github.com/metachris/micropython-ctl/blob/master/examples/cli.ts) (run with `yarn cli`)
+* [examples/mctl.ts](https://github.com/metachris/micropython-ctl/blob/master/examples/mctl.ts) (run with `yarn mctl`)
 * [examples/terminal.ts](https://github.com/metachris/micropython-ctl/blob/master/examples/terminal.ts) (run with `yarn examples/terminal.ts`)
 
 ## Browser / Webapps
@@ -124,7 +124,7 @@ Find more examples in [`/examples/`](https://github.com/metachris/micropython-ct
 * [examples/basic.ts](https://github.com/metachris/micropython-ctl/blob/master/examples/basic.ts) (run with `yarn ts-node examples/basic.ts`)
 * [examples/web-example.html](https://github.com/metachris/micropython-ctl/blob/master/examples/web-example.html) (open the file in a browser, or view it [live here](http://current.at/micropython-ctl/examples/web-example.html))
 * [examples/web-example2-terminal.html](https://github.com/metachris/micropython-ctl/blob/master/examples/web-example2-terminal.html) (open the file in a browser, or view it [live here](http://current.at/micropython-ctl/examples/web-example2-terminal.html))
-* [examples/cli.ts](https://github.com/metachris/micropython-ctl/blob/master/examples/cli.ts) (run with `yarn cli`)
+* [examples/mctl.ts](https://github.com/metachris/micropython-ctl/blob/master/examples/mctl.ts) (run with `yarn mctl`)
 * [examples/terminal.ts](https://github.com/metachris/micropython-ctl/blob/master/examples/terminal.ts) (run with `yarn examples/terminal.ts`)
 
 
@@ -162,11 +162,10 @@ I'm happy about feedback, please reach out:
 ## Future work
 
 * Upload & download files
-* Vue.js example with attaching the MicroPythonDevice instance to window, so one instance can live across code hot reloads :) (almost done)
-* Command-line utility: `mctl` (from `examples/cli.ts`)
 
 Maybe (not sure it's needed, don't rush into implementing):
 
+* Vue.js example with attaching the MicroPythonDevice instance to window, so one instance can live across code hot reloads :) (almost done)
 * A slim version for the browser with minimal footprint (only core code, no listfiles etc.)
 * Allow receiving output of running Python script (don't wait for finishing)
 * Support new raw-paste mode: https://github.com/micropython/micropython/blob/master/docs/reference/repl.rst#raw-mode-and-raw-paste-mode (only in master, should be part of MicroPython 1.14)
