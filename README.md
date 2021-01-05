@@ -55,7 +55,7 @@ Note on network connection: To access the webrepl over the network, you need to 
 In websites/webapps, simply include the latest release via CDN (~13kb gzipped):
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/micropython-ctl@latest/dist-browser/main.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/micropython-ctl@1.5.2/dist-browser/main.js"></script>
 ```
 
 Then you can use it like this:
@@ -74,7 +74,7 @@ await micropython.connectNetwork(host, password)
 
 * Browsers don't allow access to USB/serial ports.
 * You can enable debug output by opening the console and entering `window.DEBUG = 1`
-* You can download the zipped bundle here: [main.js.gz](https://cdn.jsdelivr.net/npm/micropython-ctl@latest/dist-browser/main.js.gz)
+* You can download the zipped bundle here: [main.js.gz](https://cdn.jsdelivr.net/npm/micropython-ctl@1.5.2/dist-browser/main.js.gz)
 
 ## Node.js
 
