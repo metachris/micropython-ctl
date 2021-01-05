@@ -39,7 +39,7 @@ Note on network connection: To access the webrepl over the network, you need to 
 Code examples:
 
 * [examples/basic.ts](https://github.com/metachris/micropython-ctl/blob/master/examples/basic.ts) (run with `yarn ts-node examples/basic.ts`)
-* [examples/web-example.html](https://github.com/metachris/micropython-ctl/blob/master/examples/web-example.html) (just open the file in a browser)
+* [examples/web-example.html](https://github.com/metachris/micropython-ctl/blob/master/examples/web-example.html) (just open the file in a browser, or view it [live here](http://current.at/micropython-ctl/web-example.html)
 * [examples/cli.ts](https://github.com/metachris/micropython-ctl/blob/master/examples/cli.ts) (run with `yarn cli`)
 
 ## Browser / Webapps
@@ -114,7 +114,7 @@ import { MicroPythonDevice } from 'micropython-ctl'
 Find more examples in [`/examples/`](https://github.com/metachris/micropython-ctl/tree/master/examples). You can run them like this: `yarn ts-node examples/basic.ts`
 
 * [examples/basic.ts](https://github.com/metachris/micropython-ctl/blob/master/examples/basic.ts) - run with `yarn ts-node examples/basic.ts`
-* [examples/web-example.html](https://github.com/metachris/micropython-ctl/blob/master/examples/web-example.html - just open the file in a browser, or view it [live here](http://current.at/micropython-ctl/web-example.html)
+* [examples/web-example.html](https://github.com/metachris/micropython-ctl/blob/master/examples/web-example.html) (just open the file in a browser, or view it [live here](http://current.at/micropython-ctl/web-example.html)
 * [examples/cli.ts](https://github.com/metachris/micropython-ctl/blob/master/examples/cli.ts) - run with `yarn cli`
 
 
@@ -133,7 +133,7 @@ Enjoy and do cool things with this code! 🚀
 
 ---
 
-### Reach out
+## Reach out
 
 I'm happy about feedback, please reach out:
 
@@ -141,7 +141,7 @@ I'm happy about feedback, please reach out:
 * https://twitter.com/metachris
 
 
-### Inspiration
+## Inspiration
 
 * https://github.com/micropython/webrepl ([original JS implementation](https://github.com/micropython/webrepl/blob/master/webrepl.html))
 * https://github.com/scientifichackers/ampy/blob/master/ampy/pyboard.py
@@ -149,7 +149,7 @@ I'm happy about feedback, please reach out:
 * https://github.com/micropython/micropython/pull/6375/files (mpr: fs mount PR)
 
 
-### Future work
+## Future work
 
 * Upload & download files
 * Vue.js example with attaching the MicroPythonDevice instance to window, so one instance can live across code hot reloads :) (almost done)
@@ -163,7 +163,7 @@ Maybe (not sure it's needed, don't rush into implementing):
 
 ---
 
-### Release process
+## Release process
 
 Help for writing release notes: https://github.com/metachris/micropython-ctl/compare
 
