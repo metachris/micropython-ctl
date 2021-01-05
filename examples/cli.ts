@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /**
  * Part of https://github.com/metachris/micropython-ctl
  *

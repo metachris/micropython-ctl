@@ -96,6 +96,25 @@ export interface FileListEntry { filename: string, size: number, isDir: boolean 
 
 declare const window: WindowWithWebRepl;
 
+/**
+ * The main class for a MicroPython device connection
+ *
+ * ```
+ * const micropython = new MicroPythonDevice()
+ *
+ * // Connect to micropython device over network
+ * await micropython.connectNetwork('DEVICE_IP', 'WEBREPL_PASSWORD')
+ *
+ * // Or connect to micropython device over serial interface
+ * await micropython.connectSerial('/dev/ttyUSB0')
+ *
+ * // Run a Python script and capture the output
+ * const output = await micropython.runScript('import os; print(os.listdir())')
+ *
+ * // List all files in the root
+ * const files = await micropython.listFiles()
+ * ```
+ */
 export class MicroPythonDevice {
   onclose: () => void
   onTerminalData: (data: string) => void  // user callback
@@ -653,8 +672,11 @@ export class MicroPythonDevice {
     // return promise
   }
 
-  public async listFiles({ directory = "/", recursive = false }): Promise<FileListEntry[]> {
-    debug(`listFiles: ${directory}`)
+  public async listFiles(options: ListFilesOptions = {}): Promise<FileListEntry[]> {
+    const directory = options.directory || '/'
+    const recursive = !!options.recursive
+
+    debug(`listFiles: ${directory}, ${recursive}`)
     const output = await this.runScript(PythonScripts.ls({ directory, recursive }))
     const lines = output.split('\n')
 
@@ -685,7 +707,7 @@ export class MicroPythonDevice {
   }
 }
 
-// export interface ListFileOptions {
-//   directory: string
-//   recursive: boolean
-// }
+export interface ListFilesOptions {
+  directory?: string
+  recursive?: boolean
+}

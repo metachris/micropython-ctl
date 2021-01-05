@@ -94,7 +94,7 @@ async function connect() {
 
   // List all files in the root
   console.log('Listing files...')
-  const files = await micropythonDevice.listFiles()
+  const files = await micropythonDevice.listFiles({ directory: '/', recursive: true })
   console.log('files:', files)
 }
 </script>

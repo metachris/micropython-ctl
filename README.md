@@ -165,7 +165,12 @@ Maybe (not sure it's needed, don't rush into implementing):
 
 ### Release process
 
+Help for writing release notes: https://github.com/metachris/micropython-ctl/compare
+
 ```shell
+# Update CHANGELOG
+vi CHANGELOG.md
+
 # make sure all is committed in git
 git status
 

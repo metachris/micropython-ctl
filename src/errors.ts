@@ -1,21 +1,21 @@
 // tslint:disable: max-classes-per-file
 export class InvalidPassword extends Error {
-  constructor(m: string) {
-    super(m);
+  constructor(message: string) {
+    super(message);
     Object.setPrototypeOf(this, InvalidPassword.prototype);
   }
 }
 
 export class CouldNotConnect extends Error {
-  constructor(m: string) {
-    super(m);
+  constructor(message: string) {
+    super(message);
     Object.setPrototypeOf(this, CouldNotConnect.prototype);
   }
 }
 
 export class ScriptExecutionError extends Error {
-  constructor(m: string) {
-    super(m);
+  constructor(message: string) {
+    super(message);
     Object.setPrototypeOf(this, ScriptExecutionError.prototype);
   }
 }
