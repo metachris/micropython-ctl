@@ -8,9 +8,11 @@ A library to interface with MicroPython devices over serial and network connecti
 * Functionality:
   * Connect over network and serial interface
   * Run Python scripts and await the output
-  * List files, upload and download files (not yet implemented)
+  * List files, upload and download files
+  * Terminal (REPL) interaction
+  * [`mctl`](https://github.com/metachris/micropython-ctl/blob/master/examples/cli.ts) command line utility
 * Main code file: [`main.ts`](https://github.com/metachris/micropython-ctl/blob/master/src/main.ts)
-* Links: [github](https://github.com/metachris/micropython-ctl/settings), [documentation](https://metachris.github.io/micropython-ctl/), [npm package](https://www.npmjs.com/package/micropython-ctl)
+* Links: [Github](https://github.com/metachris/micropython-ctl/settings), [Documentation](https://metachris.github.io/micropython-ctl/), [npm package](https://www.npmjs.com/package/micropython-ctl)
 
 
 # Usage
@@ -36,11 +38,11 @@ console.log('files:', files)
 Note on network connection: To access the webrepl over the network, you need to enable it first through the serial REPL: `import webrepl_setup` (see [docs](https://docs.micropython.org/en/latest/esp8266/tutorial/repl.html#webrepl-a-prompt-over-wifi)). Also, make sure you can ping the device first.
 
 
-Code examples:
+**Code examples:**
 
 * [examples/basic.ts](https://github.com/metachris/micropython-ctl/blob/master/examples/basic.ts) (run with `yarn ts-node examples/basic.ts`)
-* [examples/web-example.html](https://github.com/metachris/micropython-ctl/blob/master/examples/web-example.html) (open the file in a browser, or view it [live here](http://current.at/micropython-ctl/examples/web-example.html)
-* [examples/web-example2-terminal.html](https://github.com/metachris/micropython-ctl/blob/master/examples/web-example2-terminal.html) (open the file in a browser, or view it [live here](http://current.at/micropython-ctl/examples/web-example2-terminal.html)
+* [examples/web-example.html](https://github.com/metachris/micropython-ctl/blob/master/examples/web-example.html) (open the file in a browser, or view it [live here](http://current.at/micropython-ctl/examples/web-example.html))
+* [examples/web-example2-terminal.html](https://github.com/metachris/micropython-ctl/blob/master/examples/web-example2-terminal.html) (open the file in a browser, or view it [live here](http://current.at/micropython-ctl/examples/web-example2-terminal.html))
 * [examples/cli.ts](https://github.com/metachris/micropython-ctl/blob/master/examples/cli.ts) (run with `yarn cli`)
 * [examples/terminal.ts](https://github.com/metachris/micropython-ctl/blob/master/examples/terminal.ts) (run with `yarn examples/terminal.ts`)
 
@@ -61,8 +63,8 @@ await micropython.connectNetwork(host, password)
 
 **Usage example:**
 
-* See the code in [examples/web-example.html](https://github.com/metachris/micropython-ctl/blob/master/examples/web-example.html#L88-L101)
-* Live at http://current.at/micropython-ctl/web-example.html
+* [examples/web-example.html](https://github.com/metachris/micropython-ctl/blob/master/examples/web-example.html#L89-L113) - [live here](http://current.at/micropython-ctl/examples/web-example.html)
+* [examples/web-example2-terminal.html](https://github.com/metachris/micropython-ctl/blob/master/examples/web-example2-terminal.html#L112-L130) - [live here](http://current.at/micropython-ctl/examples/web-example2-terminal.html)
 
 **Notes:**
 
@@ -116,8 +118,8 @@ import { MicroPythonDevice } from 'micropython-ctl'
 Find more examples in [`/examples/`](https://github.com/metachris/micropython-ctl/tree/master/examples). You can run them like this: `yarn ts-node examples/basic.ts`
 
 * [examples/basic.ts](https://github.com/metachris/micropython-ctl/blob/master/examples/basic.ts) (run with `yarn ts-node examples/basic.ts`)
-* [examples/web-example.html](https://github.com/metachris/micropython-ctl/blob/master/examples/web-example.html) (open the file in a browser, or view it [live here](http://current.at/micropython-ctl/examples/web-example.html)
-* [examples/web-example2-terminal.html](https://github.com/metachris/micropython-ctl/blob/master/examples/web-example2-terminal.html) (open the file in a browser, or view it [live here](http://current.at/micropython-ctl/examples/web-example2-terminal.html)
+* [examples/web-example.html](https://github.com/metachris/micropython-ctl/blob/master/examples/web-example.html) (open the file in a browser, or view it [live here](http://current.at/micropython-ctl/examples/web-example.html))
+* [examples/web-example2-terminal.html](https://github.com/metachris/micropython-ctl/blob/master/examples/web-example2-terminal.html) (open the file in a browser, or view it [live here](http://current.at/micropython-ctl/examples/web-example2-terminal.html))
 * [examples/cli.ts](https://github.com/metachris/micropython-ctl/blob/master/examples/cli.ts) (run with `yarn cli`)
 * [examples/terminal.ts](https://github.com/metachris/micropython-ctl/blob/master/examples/terminal.ts) (run with `yarn examples/terminal.ts`)
 

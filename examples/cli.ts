@@ -2,6 +2,14 @@
 /**
  * Part of https://github.com/metachris/micropython-ctl
  *
+ * Installed as `mctl`.
+ *
+ * Usage:
+ *
+ *     $ mctl --help
+ *     $ mctl devices
+ *     $ mctl ls -r
+ *
  * Using https://github.com/tj/commander.js
  *
  * See also:
