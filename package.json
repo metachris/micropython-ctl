@@ -1,12 +1,14 @@
 {
   "name": "micropython-ctl",
-  "version": "1.5.1",
+  "version": "1.5.2",
   "description": "Async TypeScript MicroPython interface (for serial and network connections, REPL & WebREPL)",
   "repository": "https://github.com/metachris/micropython-ctl",
   "browser": "./dist-browser/main.js",
   "main": "./dist-node/src/main.js",
   "types": "./dist-node/src/main.d.ts",
-  "bin": { "mctl": "./dist-node/examples/cli.js" },
+  "bin": {
+    "mctl": "./dist-node/examples/cli.js"
+  },
   "author": "Chris Hager <chris@linuxuser.at>",
   "license": "MIT",
   "scripts": {
