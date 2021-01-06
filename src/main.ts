@@ -705,6 +705,18 @@ export class MicroPythonDevice {
     const [isDir, size] = (await statOutput).split(' | ')
     return { isDir: isDir === 'd', size: parseInt(size, 10) }
   }
+
+  /**
+   *
+   * @param name
+   * @throws ScriptExecutionError
+   */
+  public async mkdir(name: string): Promise<boolean> {
+    debug(`mkdir: ${name}`)
+    const script = `import os; os.mkdir('${name}')`
+    await this.runScript(script)
+    return true
+  }
 }
 
 export interface ListFilesOptions {

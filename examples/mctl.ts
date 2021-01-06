@@ -28,9 +28,8 @@
  * - run (script or Python file)
  * - put
  * - edit
- * - mkdir
  * - rm
- * - rsync
+ * - rsync?
  */
 import fs from 'fs';
 import path from 'path';
@@ -112,6 +111,7 @@ const listFilesOnDevice = async (directory = '/', cmdObj) => {
       return
     }
     console.log('Error:', e)
+    process.exit(1)
   } finally {
     await micropython.disconnect()
   }
@@ -125,6 +125,24 @@ const putFile = async (filename: string, destFilename?: string) => {
   await micropython.uploadFile(filename, destFilename)
 }
 
+const mkdir = async (name: string) => {
+  console.log('mkdir', name)
+
+  await ensureConnectedDevice()
+
+  try {
+    await micropython.mkdir(name)
+  } catch (e) {
+    if (e instanceof ScriptExecutionError && e.message.includes('OSError: [Errno 17] EEXIST')) {
+      console.log(`${CLR_FG_RED}mkdir: cannot create directory '${name}': File exists${CLR_RESET}`)
+    }
+    console.log('Error:', e)
+    process.exit(1)
+  } finally {
+    await micropython.disconnect()
+  }
+}
+
 const catFile = async (filename: string) => {
   try {
     await ensureConnectedDevice()
@@ -136,6 +154,7 @@ const catFile = async (filename: string) => {
       return
     }
     logError('Error:', e)
+    process.exit(1)
   } finally {
     await micropython.disconnect()
   }
@@ -166,6 +185,7 @@ const get = async (filenameOrDir: string, targetFilenameOrDir: string) => {
       return
     }
     console.log('Error:', e)
+    process.exit(1)
   } finally {
     await micropython.disconnect()
   }
@@ -243,6 +263,12 @@ program
   .command('put <filename> [<destFilename>]')
   .description('Copy a file onto the device')
   .action(putFile);
+
+// Command: mkdir
+program
+  .command('mkdir <name>')
+  .description('Create a directory')
+  .action(mkdir);
 
 // Command: repl
 program
