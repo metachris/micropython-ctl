@@ -100,4 +100,3 @@ s = os.stat('${path}')
 print('%s | %s' % ('f' if s[0] == 32768 else 'd', s[6]))
 `
 }
-

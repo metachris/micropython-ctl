@@ -8,7 +8,7 @@
 import WebSocket from 'isomorphic-ws'
 import { Buffer } from 'buffer/'
 import { InvalidPassword, CouldNotConnect, ScriptExecutionError } from './errors'
-import { debug, dedent, IS_ELECTRON, IS_NODEJS, unhexlify } from './utils';
+import { debug, dedent, hexlify, IS_ELECTRON, IS_NODEJS, unhexlify } from './utils';
 import * as PythonScripts from './python-scripts';
 
 export { InvalidPassword, CouldNotConnect, ScriptExecutionError }  // allows easy importing from user scripts
@@ -539,7 +539,7 @@ export class MicroPythonDevice {
    *
    * @throws: ScriptExecutionError on Python code execution error
    */
-  public async runScript(script: string, disableDedent = false) {
+  public async runScript(script: string, disableDedent = false, exitRawRepl = true) {
     debug('runScript', script)
 
     await this.enterRawRepl()
@@ -583,8 +583,13 @@ export class MicroPythonDevice {
     debug(`runScript: script done (${millisRuntime / 1000}sec)`)
     this.state.lastRunScriptTimeNeeded = millisRuntime
 
-    // Exit raw repl mode, re-enter friendly repl
-    await this.exitRawRepl()
+    if (exitRawRepl) {
+      // Exit raw repl mode, re-enter friendly repl
+      await this.exitRawRepl()
+    } else {
+      // Stay in raw repl; clear the buffer now
+      this.clearBuffer()
+    }
     // debug('runScript: exited RAW repl')
 
     return scriptOutput
@@ -594,6 +599,10 @@ export class MicroPythonDevice {
     // see also https://github.com/scientifichackers/ampy/blob/master/ampy/pyboard.py#L175
     // Prepare state for mode switch
     debug('enterRawRepl')
+    if (this.state.replMode === ReplMode.SCRIPT_RAW_MODE) {
+      return debug('enterRawRepl: already in raw repl mode')
+    }
+
     this.state.replMode = ReplMode.SCRIPT_RAW_MODE
     this.state.rawReplState = RawReplState.ENTERING
 
@@ -639,38 +648,39 @@ export class MicroPythonDevice {
     return ret
   }
 
-  public async uploadFile(filename: string, destFilename: string) {
-    debug(`uploadFile: ${filename} -> ${destFilename}`)
-    // const promise = this.createReplPromise()
+  // public async uploadFile(filename: string, destFilename: string) {
+  //   debug(`uploadFile: ${filename} -> ${destFilename}`)
 
-    // this.state.replMode = WebReplMode.PUTFILE_WAITING_FIRST_RESPONSE
-    // this.state.putFileName = filename
-    // this.state.putFileDest = destFilename
+  //   // const promise = this.createReplPromise()
 
-    // this.state.putFileData = new Uint8Array(fs.readFileSync(filename))
-    // this.state.putFileSize = this.state.putFileData.length
-    // debug(`uploadFile: ${this.state.putFileSize} bytes`)
+  //   // this.state.replMode = WebReplMode.PUTFILE_WAITING_FIRST_RESPONSE
+  //   // this.state.putFileName = filename
+  //   // this.state.putFileDest = destFilename
 
-    // // WEBREPL_FILE = "<2sBBQLH64s"
-    // const rec = new Uint8Array(2 + 1 + 1 + 8 + 4 + 2 + 64);
-    // rec[0] = 'W'.charCodeAt(0);
-    // rec[1] = 'A'.charCodeAt(0);
-    // rec[2] = 1; // put
-    // rec[3] = 0;
-    // rec[4] = 0; rec[5] = 0; rec[6] = 0; rec[7] = 0; rec[8] = 0; rec[9] = 0; rec[10] = 0; rec[11] = 0;
-    // // tslint:disable-next-line: no-bitwise
-    // rec[12] = this.state.putFileSize & 0xff; rec[13] = (this.state.putFileSize >> 8) & 0xff; rec[14] = (this.state.putFileSize >> 16) & 0xff; rec[15] = (this.state.putFileSize >> 24) & 0xff;
-    // // tslint:disable-next-line: no-bitwise
-    // rec[16] = this.state.putFileDest.length & 0xff; rec[17] = (this.state.putFileDest.length >> 8) & 0xff;
-    // for (let i = 0; i < 64; ++i) {
-    //   rec[18 + i] = i < this.state.putFileDest.length ? this.state.putFileDest.charCodeAt(i) : 0
-    // }
+  //   // this.state.putFileData = new Uint8Array(fs.readFileSync(filename))
+  //   // this.state.putFileSize = this.state.putFileData.length
+  //   // debug(`uploadFile: ${this.state.putFileSize} bytes`)
 
-    // // initiate put
-    // this.sendData(rec)
+  //   // // WEBREPL_FILE = "<2sBBQLH64s"
+  //   // const rec = new Uint8Array(2 + 1 + 1 + 8 + 4 + 2 + 64);
+  //   // rec[0] = 'W'.charCodeAt(0);
+  //   // rec[1] = 'A'.charCodeAt(0);
+  //   // rec[2] = 1; // put
+  //   // rec[3] = 0;
+  //   // rec[4] = 0; rec[5] = 0; rec[6] = 0; rec[7] = 0; rec[8] = 0; rec[9] = 0; rec[10] = 0; rec[11] = 0;
+  //   // // tslint:disable-next-line: no-bitwise
+  //   // rec[12] = this.state.putFileSize & 0xff; rec[13] = (this.state.putFileSize >> 8) & 0xff; rec[14] = (this.state.putFileSize >> 16) & 0xff; rec[15] = (this.state.putFileSize >> 24) & 0xff;
+  //   // // tslint:disable-next-line: no-bitwise
+  //   // rec[16] = this.state.putFileDest.length & 0xff; rec[17] = (this.state.putFileDest.length >> 8) & 0xff;
+  //   // for (let i = 0; i < 64; ++i) {
+  //   //   rec[18 + i] = i < this.state.putFileDest.length ? this.state.putFileDest.charCodeAt(i) : 0
+  //   // }
 
-    // return promise
-  }
+  //   // // initiate put
+  //   // this.sendData(rec)
+
+  //   // return promise
+  // }
 
   public async listFiles(options: ListFilesOptions = {}): Promise<FileListEntry[]> {
     const directory = options.directory || '/'
@@ -715,6 +725,40 @@ export class MicroPythonDevice {
     debug(`mkdir: ${name}`)
     const script = `import os; os.mkdir('${name}')`
     await this.runScript(script)
+    return true
+  }
+
+  /**
+   * Uploading data to the device, saving as a file.
+   *
+   * We break the buffer into multiple chunks, and execute a raw repl command for each of them
+   * in order to not fill up the device RAM.
+   *
+   * See also:
+   * - https://github.com/dhylands/rshell/blob/master/rshell/main.py#L1079
+   * - https://github.com/scientifichackers/ampy/blob/master/ampy/files.py#L209
+   *
+   * @param targetFilename
+   * @param data
+   */
+  public async putFile(targetFilename: string, data: Buffer) {
+    debug(`putFile: ${targetFilename} (${data.length})`)
+
+    const promise = this.createReplPromise()
+    const dataHex = data.toString('hex')
+    const chunkSize = this.isSerialDevice() ? 256 : 64
+
+    const script1 = `import ubinascii; f = open('${targetFilename}', 'wb')`
+    await this.runScript(script1, false, false)
+
+    for (let index = 0; index < dataHex.length; index += chunkSize) {
+      const chunk = dataHex.substr(index, chunkSize)
+      debug('chunk', chunk)
+      const scriptForChunk = `f.write(ubinascii.unhexlify("${chunk}"))`
+      await this.runScript(scriptForChunk, false, false)
+    }
+
+    await this.runScript('f.close()')
     return true
   }
 }

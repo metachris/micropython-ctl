@@ -26,7 +26,6 @@
  *
  * TODO:
  * - run (script or Python file)
- * - put
  * - edit
  * - rm
  * - rsync?
@@ -34,6 +33,7 @@
 import fs from 'fs';
 import path from 'path';
 import readline from 'readline'
+import { Buffer } from 'buffer/'
 import SerialPort from 'serialport';
 import { Command } from 'commander';
 import { ScriptExecutionError, MicroPythonDevice } from '../src/main';
@@ -121,8 +121,11 @@ const putFile = async (filename: string, destFilename?: string) => {
   if (!destFilename) destFilename = path.basename(filename)
   console.log(filename, '->', destFilename)
 
+  const data = Buffer.from(fs.readFileSync(filename))
+
   await ensureConnectedDevice()
-  await micropython.uploadFile(filename, destFilename)
+  await micropython.putFile(filename, data)
+  await micropython.disconnect()
 }
 
 const mkdir = async (name: string) => {

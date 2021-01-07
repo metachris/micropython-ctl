@@ -12,7 +12,7 @@ A library to interface with MicroPython devices over serial and network connecti
   * Terminal (REPL) interaction
   * [`mctl`](https://github.com/metachris/micropython-ctl/blob/master/examples/mctl.ts) command line utility
 * Main code file: [`main.ts`](https://github.com/metachris/micropython-ctl/blob/master/src/main.ts)
-* Links: [Github](https://github.com/metachris/micropython-ctl/settings), [Documentation](https://metachris.github.io/micropython-ctl/), [npm package](https://www.npmjs.com/package/micropython-ctl)
+* Links: [Github](https://github.com/metachris/micropython-ctl), [Documentation](https://metachris.github.io/micropython-ctl/), [npm package](https://www.npmjs.com/package/micropython-ctl)
 
 
 # Usage
@@ -151,7 +151,7 @@ I'm happy about feedback, please reach out:
 * https://twitter.com/metachris
 
 
-## Inspiration
+## Inspiration & References
 
 * https://github.com/micropython/webrepl ([original JS implementation](https://github.com/micropython/webrepl/blob/master/webrepl.html))
 * https://github.com/scientifichackers/ampy/blob/master/ampy/pyboard.py
@@ -162,7 +162,8 @@ I'm happy about feedback, please reach out:
 
 ## Future work
 
-* Upload & download files
+* `getFile` improvement. It's currently a naive implementation that fills the device RAM and probably works badly with large file
+* putfile and getfile over network: switch to webrepl protocol instead of manual up- and download
 * Rename ScriptExecutionError to RuntimeError?
 
 Maybe (not sure it's needed, don't rush into implementing):

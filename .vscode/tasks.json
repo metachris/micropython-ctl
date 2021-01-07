@@ -36,13 +36,21 @@
     {
       "type": "npm",
       "script": "buildBrowser",
+      "group": "build",
+      "problemMatcher": [],
+      "label": "npm: buildBrowser",
+      "detail": "webpack"
+    },
+    {
+      "type": "npm",
+      "script": "buildNode",
       "group": {
         "kind": "build",
         "isDefault": true
       },
       "problemMatcher": [],
-      "label": "npm: buildBrowser",
-      "detail": "webpack"
+      "label": "npm: buildNode",
+      "detail": "tsc -p tsconfig.json"
     }
   ]
 }

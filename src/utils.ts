@@ -1,5 +1,7 @@
+import { Buffer } from 'buffer/'
+
 export const IS_NODEJS = !!globalThis.process?.release?.name
-export const IS_ELECTRON = typeof(navigator) !== 'undefined' && navigator.userAgent.indexOf('Electron/') > -1
+export const IS_ELECTRON = typeof (navigator) !== 'undefined' && navigator.userAgent.indexOf('Electron/') > -1
 
 // Enable debug output if Node.js and DEBUG env var, alternatively
 const SHOW_DEBUG_OUTPUT_NODE = IS_NODEJS && !!process.env.DEBUG
@@ -63,10 +65,16 @@ export const humanFileSize = (bytes, si = true, dp = 1) => {
   return bytes.toFixed(dp) + units[u];
 }
 
+/**
+ * Turn a string or buffer into a hex string
+ */
+export const hexlify = (data: string | Buffer) => {
+  return Buffer.isBuffer(data) ? data.toString('hex') : Buffer.from(data).toString('hex')
+}
+
+/**
+ * Turn hexlified data into a string
+ */
 export const unhexlify = (str: string) => {
-  let result = '';
-  for (let i = 0, l = str.length; i < l; i += 2) {
-    result += String.fromCharCode(parseInt(str.substr(i, 2), 16));
-  }
-  return result;
+  return Buffer.from(str, 'hex').toString()
 }
