@@ -749,17 +749,32 @@ export class MicroPythonDevice {
     const chunkSize = this.isSerialDevice() ? 256 : 64
 
     const script1 = `import ubinascii; f = open('${targetFilename}', 'wb')`
-    await this.runScript(script1, false, false)
+    await this.runScript(script1, false, false) // keeps raw repl open for next instruction
 
     for (let index = 0; index < dataHex.length; index += chunkSize) {
       const chunk = dataHex.substr(index, chunkSize)
       debug('chunk', chunk)
       const scriptForChunk = `f.write(ubinascii.unhexlify("${chunk}"))`
-      await this.runScript(scriptForChunk, false, false)
+      await this.runScript(scriptForChunk, false, false) // keeps raw repl open for next instruction
     }
 
-    await this.runScript('f.close()')
+    await this.runScript('f.close()') // finally closes raw repl, switching back to friendly
     return true
+  }
+
+  /**
+   * Remove a file or directory. Optional recursively
+   *
+   * @param path
+   * @param recursive default: false
+   *
+   * @throws {ScriptExecutionError} if not found: "OSError: [Errno 2] ENOENT"
+   * @throws {ScriptExecutionError} if directory not empty: "OSError: 39"
+   */
+  public async rm(path: string, recursive = false) {
+    debug('rm', path, recursive)
+    const script = recursive ? PythonScripts.deleteEverythingRecurive(path) : `import os; os.remove("${path}")`
+    await this.runScript(script)
   }
 }
 

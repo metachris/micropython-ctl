@@ -100,3 +100,24 @@ s = os.stat('${path}')
 print('%s | %s' % ('f' if s[0] == 32768 else 'd', s[6]))
 `
 }
+
+export const deleteEverythingRecurive = (path: string) => {
+  return `
+try:
+    import os
+except ImportError:
+    import uos as os
+def rmdir(directory):
+    os.chdir(directory)
+    for f in os.listdir():
+        try:
+            os.remove(f)
+        except OSError:
+            pass
+    for f in os.listdir():
+        rmdir(f)
+    os.chdir('..')
+    os.rmdir(directory)
+rmdir('${path}')
+`
+}

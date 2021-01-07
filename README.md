@@ -4,7 +4,7 @@ A library to interface with MicroPython devices over serial and network connecti
 
 * Easily build websites/webapps and Node.js programs that talk with MicroPython devices
 * Typed and fully async (you can use `await` with `connect`,  executing REPL commands, etc.)
-* Tested with ESP32, should also work with ESP8266, perhaps others
+* Tested with ESP32 & ESP8266
 * Functionality:
   * Connect over network and serial interface
   * Run Python scripts and await the output

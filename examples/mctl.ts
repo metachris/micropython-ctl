@@ -27,7 +27,6 @@
  * TODO:
  * - run (script or Python file)
  * - edit
- * - rm
  * - rsync?
  */
 import fs from 'fs';
@@ -123,9 +122,12 @@ const putFile = async (filename: string, destFilename?: string) => {
 
   const data = Buffer.from(fs.readFileSync(filename))
 
-  await ensureConnectedDevice()
-  await micropython.putFile(filename, data)
-  await micropython.disconnect()
+  try {
+    await ensureConnectedDevice()
+    await micropython.putFile(destFilename, data)
+  } finally {
+    await micropython.disconnect()
+  }
 }
 
 const mkdir = async (name: string) => {
@@ -194,6 +196,22 @@ const get = async (filenameOrDir: string, targetFilenameOrDir: string) => {
   }
 }
 
+
+const rm = async (path: string, cmdObj) => {
+  console.log('rm', path)
+
+  try {
+    await ensureConnectedDevice()
+    await micropython.rm(path, cmdObj.recursive)
+  } catch (e) {
+    console.error('Error:', e)
+    process.exit(1)
+  } finally {
+    await micropython.disconnect()
+  }
+}
+
+// mctl devices
 const listSerialDevices = async () => {
   (await listMicroPythonDevices()).map(device => console.log(device.path, '\t', device.manufacturer))
 }
@@ -272,6 +290,13 @@ program
   .command('mkdir <name>')
   .description('Create a directory')
   .action(mkdir);
+
+// Command: rm [-r]
+program
+  .command('rm <path>')
+  .option('-r, --recursive', 'Delete recursively')
+  .description('Delete a file or directory')
+  .action(rm);
 
 // Command: repl
 program
