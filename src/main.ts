@@ -703,10 +703,10 @@ export class MicroPythonDevice {
     return ret
   }
 
-  public async getFile(filename: string): Promise<string> {
+  public async getFile(filename: string): Promise<Buffer> {
     debug(`getFile: ${filename}`)
     const output = await this.runScript(PythonScripts.getFile(filename))
-    return unhexlify(output)
+    return Buffer.from(output, 'hex')
   }
 
   public async statPath(path: string): Promise<{ isDir: boolean, size: number }> {

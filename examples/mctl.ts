@@ -29,8 +29,8 @@
  * - edit
  * - rsync?
  */
+import * as path from 'path';
 import fs from 'fs';
-import path from 'path';
 import readline from 'readline'
 import { Buffer } from 'buffer/'
 import SerialPort from 'serialport';
@@ -152,7 +152,7 @@ const catFile = async (filename: string) => {
   try {
     await ensureConnectedDevice()
     const contents = await micropython.getFile(filename)
-    console.log(contents)
+    console.log(contents.toString())
   } catch (e) {
     if (e instanceof ScriptExecutionError && e.message.includes('OSError: [Errno 2] ENOENT')) {
       logError(`cat: cannot access '${filename}': No such file or directory`)
@@ -176,7 +176,7 @@ const get = async (filenameOrDir: string, targetFilenameOrDir: string) => {
       if (targetFilenameOrDir) {
         targetFilename = targetFilenameOrDir.endsWith('/') ? targetFilenameOrDir + targetFilename : targetFilenameOrDir
       }
-      console.log(`get: ${filenameOrDir} => ${targetFilename}`)
+      console.log(`get: ${filenameOrDir} -> ${targetFilename}`)
       const contents = await micropython.getFile(filenameOrDir)
       fs.writeFileSync(targetFilename, contents)
     } else {
