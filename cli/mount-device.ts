@@ -32,6 +32,8 @@ const fuseDebug = (op: string, path: string, ...args: any) => {
   }
 }
 
+const isWin = process.platform === 'win32'
+
 interface Node {
   fullpath: string;
   dirname: string;
@@ -131,9 +133,8 @@ export const mount = async (opts: MountOpts) => {
   await checkAndInstallFuse()
 
   // tslint:disable-next-line: no-var-requires
-  const fuseModule = process.platform === 'win32' ? 'node-fuse-bindings' : 'fuse-native'
-  const Fuse: any = require(fuseModule)
-  console.log(Fuse)
+  const fuseModule = isWin ? 'node-fuse-bindings' : 'fuse-native'
+  const Fuse = require(fuseModule)
 
   // Connect to the micropython device
   const micropython = new MicroPythonDevice();
@@ -155,6 +156,10 @@ export const mount = async (opts: MountOpts) => {
 
   console.log(`Getting list of files...`)
   const deviceFileList = await micropython.listFiles({ recursive: true })
+  // const deviceFileList: UpstreamFileListEntry[] = [
+  //   { filename: '/', isDir: true, size: 100},
+  //   { filename: '/test2', isDir: false, size: 124}
+  // ]
 
   // Create a new FileSystem instance
   const fs = new FileSystem(deviceFileList)
@@ -274,35 +279,53 @@ export const mount = async (opts: MountOpts) => {
     }
   }
 
-  const fuse = new Fuse('./mnt', fuseOps, {
-    force: true,
-    mkdir: true,
-    debug: false,
-    displayFolder: true
-  })
+  const mountPath = isWin ? 'M:\\' : './mnt'
+  if (isWin) {
+    Fuse.mount(mountPath, fuseOps)
 
-  fuse.mount(err => {
-    if (err) throw err
-    console.log('filesystem mounted on ' + fuse.mnt)
-  })
-
-  process.once('SIGINT', () => {
-    fuse.unmount(err => {
-      if (err) {
-        console.log('filesystem at ' + fuse.mnt + ' not unmounted', err)
-      } else {
-        console.log('filesystem at ' + fuse.mnt + ' unmounted')
-      }
-      console.log(1)
-      fs.nodes = []
-      console.log(2)
-
-      micropython.disconnect()
-      console.log(3)
+    // handle Ctrl+C
+    process.on('SIGINT', function () {
+      Fuse.unmount(mountPath, function (err) {
+        if (err) {
+          console.error('filesystem at ' + mountPath + ' not unmounted')
+          console.error(err)
+          process.exit(1)
+        } else {
+          console.log('filesystem at ' + mountPath + ' unmounted')
+        }
+      })
     })
-  })
+
+  } else {
+    const fuse = new Fuse('./mnt', fuseOps, {
+      force: true,
+      mkdir: true,
+      debug: false,
+      displayFolder: true
+    })
+
+    fuse.mount(err => {
+      if (err) throw err
+      console.log('filesystem mounted on ' + fuse.mnt)
+    })
+
+    // handle Ctrl+C
+    process.once('SIGINT', () => {
+      fuse.unmount(err => {
+        if (err) {
+          console.log('filesystem at ' + fuse.mnt + ' not unmounted', err)
+        } else {
+          console.log('filesystem at ' + fuse.mnt + ' unmounted')
+        }
+        micropython.disconnect()
+        process.exit(err ? 1 : 0)
+      })
+    })
+  }
+
 }
 
+// mount()
 // mount({ tty: '/dev/tty.SLAB_USBtoUART' })
-mount({ tty: 'COM4' })
+// mount({ tty: 'COM4' })
 

@@ -37,7 +37,8 @@ import SerialPort from 'serialport';
 import { Command } from 'commander';
 import { ScriptExecutionError, MicroPythonDevice } from '../src/main';
 import { humanFileSize } from '../src/utils';
-import { mount } from './mount-device'
+import { mount as mountWithFuse } from './mount-device'
+import { checkAndInstall as checkAndInstallFuse } from './fuse-dependencies'
 
 const program = new Command();
 
@@ -217,6 +218,12 @@ const listSerialDevices = async () => {
   (await listMicroPythonDevices()).map(device => console.log(device.path, '\t', device.manufacturer))
 }
 
+const mountCommand = async () => {
+  await checkAndInstallFuse()
+  await ensureConnectedDevice()
+  await mountWithFuse({ micropythonDevice: micropython })
+}
+
 const repl = async () => {
   try {
     await ensureConnectedDevice()
@@ -304,6 +311,12 @@ program
   .command('repl')
   .description('Open a REPL terminal')
   .action(repl);
+
+// Command: mount
+program
+  .command('mount')
+  .description('Mount a MicroPython device (over serial or network)')
+  .action(mountCommand);
 
 // Command: version
 program

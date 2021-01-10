@@ -11,7 +11,6 @@ import { spawnSync, execSync } from 'child_process';
 const commandExists = require('./command-exists').sync
 
 const isWin = process.platform === 'win32'
-const where = isWin ? 'where' : 'whereis'
 
 const askQuestion = (query): Promise<string> => {
   const rl = readline.createInterface({
@@ -81,6 +80,7 @@ const checkFuseOnWindows = async (): Promise<boolean> => {
 
 export const checkAndInstall = async () => {
   const ready = process.platform === 'win32' ? await checkFuseOnWindows() : await checkFuseOnLinuxMacOS()
+  require(isWin ? 'node-fuse-bindings' : 'fuse-native')
   return ready
 }
 
