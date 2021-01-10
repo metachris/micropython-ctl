@@ -37,6 +37,7 @@ import SerialPort from 'serialport';
 import { Command } from 'commander';
 import { ScriptExecutionError, MicroPythonDevice } from '../src/main';
 import { humanFileSize } from '../src/utils';
+import { mount } from './mount-device'
 
 const program = new Command();
 

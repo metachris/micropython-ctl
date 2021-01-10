@@ -117,6 +117,7 @@ class FileSystem {
 }
 
 interface MountOpts {
+  micropythonDevice?: MicroPythonDevice
   tty?: string
   host?: string
   password?: string
@@ -136,13 +137,20 @@ export const mount = async (opts: MountOpts) => {
 
   // Connect to the micropython device
   const micropython = new MicroPythonDevice();
-
-  if (opts.host && opts.password) {
-    console.log(`Connecting over network to ${opts.host}...`)
-    await micropython.connectNetwork(opts.host, opts.password)
-  } else if (opts.tty) {
-    console.log(`Connecting over serial to ${opts.tty}...`)
-    await micropython.connectSerial(opts.tty)
+  if (opts.micropythonDevice) {
+    if (!opts.micropythonDevice.isConnected()) {
+      throw new Error('mount() called with disconnected MicroPythonCtl instance')
+    }
+  } else {
+    if (opts.host && opts.password) {
+      console.log(`Connecting over network to ${opts.host}...`)
+      await micropython.connectNetwork(opts.host, opts.password)
+    } else if (opts.tty) {
+      console.log(`Connecting over serial to ${opts.tty}...`)
+      await micropython.connectSerial(opts.tty)
+    } else {
+      throw new Error('Invalid options ' + JSON.stringify(opts))
+    }
   }
 
   console.log(`Getting list of files...`)
@@ -295,5 +303,6 @@ export const mount = async (opts: MountOpts) => {
   })
 }
 
-mount({ tty: '/dev/tty.SLAB_USBtoUART' })
+// mount({ tty: '/dev/tty.SLAB_USBtoUART' })
+mount({ tty: 'COM4' })
 
