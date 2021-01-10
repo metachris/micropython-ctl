@@ -2,17 +2,13 @@
  * Mount a MicroPython device onto the local file system.
  *
  * Linux & macOS: https://github.com/fuse-friends/fuse-native
+ *
  * Windows:
  * - https://github.com/direktspeed/node-fuse-bindings (fuse-bindings is outdated - see https://github.com/mafintosh/fuse-bindings/issues/77)
  * - https://github.com/dokan-dev/dokany
  *
- * See also:
- * - http://libfuse.github.io/doxygen/structfuse__operations.html#a4a6f1b50c583774125b5003811ecebce
- * - http://events17.linuxfoundation.org/sites/events/files/slides/frontendFS.pdf
- *
  * TODO:
- * - rename, unlink
- * - mkdir, rmdir
+ * - Windows support: almost working, but crash on repeated read https://github.com/direktspeed/node-fuse-bindings/issues/11
  */
 import * as nodePath from 'path'
 import * as crypto from 'crypto'
@@ -20,11 +16,8 @@ import { Buffer } from 'buffer/'
 import { MicroPythonDevice, FileListEntry as UpstreamFileListEntry} from '../src/main';
 import { checkAndInstall as checkAndInstallFuse } from './fuse-dependencies'
 
-// const device = '/dev/tty.SLAB_USBtoUART'
-// const device = '/dev/ttyUSB0'
-
 // Show debug output on a per-file basis. Use '*' for all files, or an empty array for no debug output.
-const SHOW_DEBUG_OUTPUT_FOR_PATHS = ['/a']
+const SHOW_DEBUG_OUTPUT_FOR_PATHS = ['*']
 
 const fuseDebug = (op: string, path: string, ...args: any) => {
   if (SHOW_DEBUG_OUTPUT_FOR_PATHS.indexOf('*') > -1 || SHOW_DEBUG_OUTPUT_FOR_PATHS.indexOf(path) > -1) {
@@ -86,6 +79,14 @@ class FileSystem {
     return null
   }
 
+  public removeNode(node: Node) {
+    this.nodes = this.nodes.filter(_node => _node.fullpath !== node.fullpath)
+  }
+
+  public removeNodeByFullpath(fullpath: string) {
+    this.nodes = this.nodes.filter(node => node.fullpath !== fullpath)
+  }
+
   public getStatInfo(fullpath: string) {
     const node = this.getNodeByFullpath(fullpath)
     if (!node) return null
@@ -119,6 +120,7 @@ class FileSystem {
 }
 
 interface MountOpts {
+  useDummyMicropython?: boolean
   micropythonDevice?: MicroPythonDevice
   tty?: string
   host?: string
@@ -137,36 +139,42 @@ export const mount = async (opts: MountOpts) => {
   const Fuse = require(fuseModule)
 
   // Connect to the micropython device
-  const micropython = new MicroPythonDevice();
-  if (opts.micropythonDevice) {
-    if (!opts.micropythonDevice.isConnected()) {
-      throw new Error('mount() called with disconnected MicroPythonCtl instance')
-    }
-  } else {
-    if (opts.host && opts.password) {
-      console.log(`Connecting over network to ${opts.host}...`)
-      await micropython.connectNetwork(opts.host, opts.password)
-    } else if (opts.tty) {
-      console.log(`Connecting over serial to ${opts.tty}...`)
-      await micropython.connectSerial(opts.tty)
+  const micropython = opts.micropythonDevice || new MicroPythonDevice();
+  if (!opts.useDummyMicropython) {
+    if (opts.micropythonDevice) {
+      if (!micropython.isConnected()) {
+        throw new Error('mount() called with disconnected MicroPythonCtl instance')
+      }
     } else {
-      throw new Error('Invalid options ' + JSON.stringify(opts))
+      if (opts.host && opts.password) {
+        console.log(`Connecting over network to ${opts.host}...`)
+        await micropython.connectNetwork(opts.host, opts.password)
+      } else if (opts.tty) {
+        console.log(`Connecting over serial to ${opts.tty}...`)
+        await micropython.connectSerial(opts.tty)
+      } else {
+        throw new Error('Invalid options ' + JSON.stringify(opts))
+      }
     }
   }
 
   console.log(`Getting list of files...`)
-  const deviceFileList = await micropython.listFiles({ recursive: true })
-  // const deviceFileList: UpstreamFileListEntry[] = [
-  //   { filename: '/', isDir: true, size: 100},
-  //   { filename: '/test2', isDir: false, size: 124}
-  // ]
+  let deviceFileList: UpstreamFileListEntry[]
+  if (opts.useDummyMicropython) {
+    deviceFileList = [
+      { filename: '/', isDir: true, size: 100},
+      { filename: '/test2', isDir: false, size: 124}
+    ]
+  } else {
+    deviceFileList = await micropython.listFiles({ recursive: true })
+  }
 
   // Create a new FileSystem instance
   const fs = new FileSystem(deviceFileList)
   // console.log(fs.nodes)
 
   // console.log('----------------- in / -------------')
-  // console.log(fs.getNodesInDirectory('/'))
+  console.log(fs.getNodesInDirectory('/'))
 
   const fuseOps = {
     readdir(path: string, cb) {
@@ -183,14 +191,14 @@ export const mount = async (opts: MountOpts) => {
     },
 
     getattr(path: string, cb) {
-      fuseDebug('getattr', path)
+      // fuseDebug('getattr', path)
       const statInfo = fs.getStatInfo(path)
       if (!statInfo) return process.nextTick(cb, Fuse.ENOENT)
       return process.nextTick(cb, null, statInfo)
     },
 
-    open(path: string, flags, cb) {
-      fuseDebug('open', path, flags)
+    open(_path: string, _flags, cb) {
+      // fuseDebug('open', path, flags)
       return process.nextTick(cb, 0, 42) // 42 is an fd
     },
 
@@ -204,7 +212,12 @@ export const mount = async (opts: MountOpts) => {
 
       if (node.contents === null) {
         console.log(`Downloading ${path} from device...`)
-        const fileContents = await micropython.getFile(path)
+        let fileContents: Buffer
+        if (opts.useDummyMicropython) {
+          fileContents = Buffer.from(crypto.randomBytes(node.size).toString('hex').slice(0, node.size))
+        } else {
+          fileContents = await micropython.getFile(path)
+        }
         node.contents = Buffer.from(fileContents)
         node.contentsSavedHash = crypto.createHash('md5').update(node.contents).digest('hex')
       }
@@ -255,13 +268,15 @@ export const mount = async (opts: MountOpts) => {
       // on file release, save to device
       const node = fs.getNodeByFullpath(path)
       if (!node) return process.nextTick(cb, -1)
-      if (!node.contents) node.contents = Buffer.alloc(0)
+      if (!node.contents) return process.nextTick(cb, 0)
 
       const contentsHash = crypto.createHash('md5').update(node.contents).digest('hex')
       if (contentsHash !== node.contentsSavedHash) {
         console.log('writing file to device...')
         node.contentsSavedHash = contentsHash
-        await micropython.putFile(path, node.contents)
+        if (!opts.useDummyMicropython) {
+          await micropython.putFile(path, node.contents)
+        }
       }
 
       // done
@@ -276,12 +291,55 @@ export const mount = async (opts: MountOpts) => {
       if (node.contents === null) node.contents = Buffer.alloc(size)
       node.contents.fill(0, size)
       process.nextTick(cb, 0)
+    },
+
+    rename (src: string, dest: string, cb) {
+      fuseDebug('rename', src, dest)
+      const node = fs.getNodeByFullpath(src)
+      if (!node) return process.nextTick(cb, -1)
+      node.fullpath = dest
+      node.basename = nodePath.basename(dest)
+      node.dirname = nodePath.dirname(dest)
+      return process.nextTick(cb, 0)
+    },
+
+    unlink (path: string, cb) {
+      fuseDebug('unlink', path)
+      const node = fs.getNodeByFullpath(path)
+      if (!node) return process.nextTick(cb, -1)
+      fs.removeNodeByFullpath(path)
+      return process.nextTick(cb, 0)
+    },
+
+    mkdir (path: string, mode, cb) {
+      fuseDebug('mkdir', path, mode)
+      const node = fs.getNodeByFullpath(path)
+      if (!node) fs.addNode(path, true)
+      return process.nextTick(cb, 0)
+    },
+
+    rmdir (path: string, cb) {
+      fuseDebug('rmdir', path)
+      const node = fs.getNodeByFullpath(path)
+      if (!node) return process.nextTick(cb, Fuse.ENOENT)
+      if (!node.isDir) process.nextTick(cb, Fuse.ENOENT)
+      const children = fs.getNodesInDirectory(node.fullpath)
+      if (children.length) {
+        console.log('cannot remove, dir not empty', children)
+        return process.nextTick(cb, Fuse.ENOTEMPTY)
+      }
+      fs.removeNode(node)
+      return process.nextTick(cb, 0)
     }
   }
 
   const mountPath = isWin ? 'M:\\' : './mnt'
   if (isWin) {
-    Fuse.mount(mountPath, fuseOps)
+    console.log('mounting...')
+    Fuse.mount(mountPath, fuseOps, {
+      options: ['volname=MicroPython']
+    })
+    console.log('Mounted on', mountPath)
 
     // handle Ctrl+C
     process.on('SIGINT', function () {
@@ -325,7 +383,7 @@ export const mount = async (opts: MountOpts) => {
 
 }
 
-// mount()
+mount({ useDummyMicropython: true })
 // mount({ tty: '/dev/tty.SLAB_USBtoUART' })
 // mount({ tty: 'COM4' })
 
