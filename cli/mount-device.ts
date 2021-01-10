@@ -19,16 +19,12 @@ import * as nodePath from 'path'
 import * as crypto from 'crypto'
 import { Buffer } from 'buffer/'
 import { MicroPythonDevice, FileListEntry as UpstreamFileListEntry} from '../src/main';
-import { platform } from 'os';
 
 // const device = '/dev/tty.SLAB_USBtoUART'
 // const device = '/dev/ttyUSB0'
 
-let Fuse: any
-if (process.platform === 'darwin') {
-  // tslint:disable-next-line: no-var-requires
-  Fuse = require('fuse-native')
-}
+
+const Fuse = require('fuse-native')
 
 // Show debug output on a per-file basis. Use '*' for all files, or an empty array for no debug output.
 const SHOW_DEBUG_OUTPUT_FOR_PATHS = ['/a']

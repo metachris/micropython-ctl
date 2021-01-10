@@ -20,6 +20,7 @@
         "allowSyntheticDefaultImports": true,
         "experimentalDecorators": true,
         "sourceMap": true,
+        "allowJs": true,
         "outDir": "./dist-node/",
         "types": ["node", "jest"],
         "lib": [
@@ -32,6 +33,7 @@
     "include": [
         "src/**/*.ts",
         "cli/**/*.ts",
+        "cli/**/*.js",
         "examples/**/*.ts",
     ],
     "exclude": [
