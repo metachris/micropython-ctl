@@ -25,25 +25,28 @@ const askQuestion = (query): Promise<string> => {
   }))
 }
 
-const checkFuseOnMacOS = async () => {
+// Works for both Linux and macOS
+const checkFuseOnLinuxMacOS = async (): Promise<boolean> => {
   try {
     // tslint:disable-next-line: no-var-requires
     require('fuse-native')
+    return true
   } catch (e) {
     if (e.code !== 'MODULE_NOT_FOUND') throw e
-
-    // Module not found...
-    const useYarn = commandExists('yarn')
-    const cmd = useYarn ? 'yarn add fuse-native' : 'npm install fuse-native'
-
-    console.log('To mount a device, you need to install the fuse-native npm package.\n')
-    const answer = await askQuestion(`Execute command '${cmd}' now? [Y/n] `)
-    const doInstall = !answer || answer.toLowerCase() === 'y'
-    if (!doInstall) return
-
-    // Install the module. If it fails, the process exits
-    execSync(cmd, { stdio: 'inherit' })
   }
+
+  // Module not found...
+  const useYarn = commandExists('yarn')
+  const cmd = useYarn ? 'yarn add fuse-native' : 'npm install fuse-native'
+
+  console.log('To mount a device, you need to install the fuse-native npm package.\n')
+  const answer = await askQuestion(`Execute command '${cmd}' now? [Y/n] `)
+  const doInstall = !answer || answer.toLowerCase() === 'y'
+  if (!doInstall) return false
+
+  // Install the module. If it fails, the process exits
+  execSync(cmd, { stdio: 'inherit' })
+  return true
 }
 
 const checkFuseOnWindows = async (): Promise<boolean> => {
@@ -77,17 +80,9 @@ const checkFuseOnWindows = async (): Promise<boolean> => {
 }
 
 export const checkAndInstall = async () => {
-  if (process.platform === 'darwin') {
-    await checkFuseOnMacOS()
-  } else if (process.platform === 'linux') {
-    await checkFuseOnMacOS()
-  } else if (process.platform === 'win32') {
-    await checkFuseOnWindows()
-  } else {
-    console.error(`Platform ${process.platform} not yet supported. You can try to manually install the npm module fuse-native.`)
-    console.error(`You could open an issue in the Github project: https://github.com/metachris/micropython-ctl`)
-  }
+  const ready = process.platform === 'win32' ? await checkFuseOnWindows() : await checkFuseOnLinuxMacOS()
+  return ready
 }
 
-checkAndInstall()
+// checkAndInstall()
 // console.log(commandExists('dokanctl.exe'))

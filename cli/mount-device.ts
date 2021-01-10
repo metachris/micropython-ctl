@@ -15,16 +15,13 @@
  * - mkdir, rmdir
  */
 import * as nodePath from 'path'
-// import * as Fuse from 'fuse-native'
 import * as crypto from 'crypto'
 import { Buffer } from 'buffer/'
 import { MicroPythonDevice, FileListEntry as UpstreamFileListEntry} from '../src/main';
+import { checkAndInstall as checkAndInstallFuse } from './fuse-dependencies'
 
 // const device = '/dev/tty.SLAB_USBtoUART'
 // const device = '/dev/ttyUSB0'
-
-
-const Fuse = require('fuse-native')
 
 // Show debug output on a per-file basis. Use '*' for all files, or an empty array for no debug output.
 const SHOW_DEBUG_OUTPUT_FOR_PATHS = ['/a']
@@ -125,7 +122,19 @@ interface MountOpts {
   password?: string
 }
 
+/**
+ * Main code entry point
+ */
 export const mount = async (opts: MountOpts) => {
+  // Ensure Fuse is installed and ready
+  await checkAndInstallFuse()
+
+  // tslint:disable-next-line: no-var-requires
+  const fuseModule = process.platform === 'win32' ? 'node-fuse-bindings' : 'fuse-native'
+  const Fuse: any = require(fuseModule)
+  console.log(Fuse)
+
+  // Connect to the micropython device
   const micropython = new MicroPythonDevice();
 
   if (opts.host && opts.password) {
