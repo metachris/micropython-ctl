@@ -31,7 +31,8 @@
     },
     "include": [
         "src/**/*.ts",
-        "examples/mctl.ts"
+        "cli/**/*.ts",
+        "examples/**/*.ts",
     ],
     "exclude": [
         "node_modules",

@@ -7,7 +7,7 @@
   "main": "./dist-node/src/main.js",
   "types": "./dist-node/src/main.d.ts",
   "bin": {
-    "mctl": "./dist-node/examples/mctl.js"
+    "mctl": "./dist-node/cli/index.js"
   },
   "author": "Chris Hager <chris@linuxuser.at>",
   "license": "MIT",
@@ -17,11 +17,11 @@
     "build": "./build.sh",
     "buildNode": "tsc -p tsconfig.json",
     "buildBrowser": "webpack",
-    "test": "jest",
+    "test": "ts-node tests/basic.ts",
     "runExample": "ts-node examples/tmp.ts",
     "runTerminal": "ts-node examples/terminal.ts",
     "ts-node": "ts-node",
-    "mctl": "ts-node examples/mctl.ts",
+    "mctl": "ts-node cli/index.ts",
     "doc": "typedoc"
   },
   "dependencies": {
