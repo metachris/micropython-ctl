@@ -216,7 +216,7 @@ export const mount = async (opts: MountOpts) => {
           fileContents = await micropython.getFile(path)
         }
         node.contents = Buffer.from(fileContents)
-        node.contentsSavedHash = crypto.createHash('md5').update(node.contents).digest('hex')
+        node.contentsSavedHash = crypto.createHash('sha256').update(node.contents).digest('hex')
       }
 
       const bufferSlize = node.contents.slice(pos, pos + len)
@@ -267,7 +267,7 @@ export const mount = async (opts: MountOpts) => {
       if (!node) return process.nextTick(cb, -1)
       if (!node.contents) return process.nextTick(cb, 0)
 
-      const contentsHash = crypto.createHash('md5').update(node.contents).digest('hex')
+      const contentsHash = crypto.createHash('sha256').update(node.contents).digest('hex')
       if (contentsHash !== node.contentsSavedHash) {
         console.log(`Saving ${path} to device...`)
         node.contentsSavedHash = contentsHash

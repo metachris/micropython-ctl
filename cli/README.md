@@ -48,13 +48,14 @@ Commands:
 ### Future work
 
 * upload everything recursively ('cp -r .')
-* edit
 
 
 ### Notes
 
-`mctl mount`: mounts the device filesystem into the local filesystem:
+`mctl mount`
 
+* Mounts the device filesystem into the local filesystem
 * macOS, Linux: Works. Uses [fuse-native](https://github.com/fuse-friends/fuse-native)
 * Windows: experimental, might be buggy. Uses [node-fuse-bindings](https://github.com/direktspeed/node-fuse-bindings) and [Dokany](https://github.com/dokan-dev/dokany/wiki/Installation)
+* Keeps the device connection open, which means you cannot connect to it in parallel
 * If you encounter problems or have feedback, please [open an issue](https://github.com/metachris/micropython-ctl/issues/new)

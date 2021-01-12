@@ -1,4 +1,7 @@
+import * as path from 'path';
 import { Buffer } from 'buffer/'
+import { tmpdir } from 'os';
+import crypto from 'crypto';
 
 export const IS_NODEJS = !!globalThis.process?.release?.name
 export const IS_ELECTRON = typeof (navigator) !== 'undefined' && navigator.userAgent.indexOf('Electron/') > -1
@@ -14,6 +17,10 @@ export const debug = (...args: any) => {
 }
 
 export const delayMillis = (delayMs: number) => new Promise(resolve => setTimeout(resolve, delayMs));
+
+export const getTmpFilename = (ext: string) => {
+  return path.join(tmpdir(), crypto.randomBytes(16).toString('hex') + ext)
+}
 
 /**
  * Return trimmed, dedented text.

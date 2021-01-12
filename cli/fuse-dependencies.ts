@@ -6,7 +6,7 @@
  */
 import * as path from 'path'
 import * as readline from 'readline'
-import { spawnSync, execSync } from 'child_process';
+import { execSync } from 'child_process';
 
 // tslint:disable-next-line: no-var-requires
 const commandExists = require('./command-exists').sync

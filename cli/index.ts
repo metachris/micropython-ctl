@@ -20,12 +20,14 @@
  */
 import * as path from 'path';
 import fs from 'fs';
+import crypto from 'crypto';
+import { execSync } from 'child_process';
 import readline from 'readline'
 import { Buffer } from 'buffer/'
 import SerialPort from 'serialport';
 import { Command } from 'commander';
 import { ScriptExecutionError, MicroPythonDevice } from '../src/main';
-import { humanFileSize, delayMillis } from '../src/utils';
+import { humanFileSize, delayMillis, getTmpFilename } from '../src/utils';
 import { mount as mountWithFuse } from './mount-device'
 import { checkAndInstall as checkAndInstallFuse } from './fuse-dependencies'
 
@@ -151,6 +153,9 @@ const catFile = async (filename: string) => {
     if (e instanceof ScriptExecutionError && e.message.includes('OSError: [Errno 2] ENOENT')) {
       logError(`cat: cannot access '${filename}': No such file or directory`)
       return
+    } else if (e instanceof ScriptExecutionError && e.message.includes('OSError: [Errno 21] EISDIR')) {
+      logError(`cat: cannot read '${filename}' beacuse it is a directory`)
+      return
     }
     logError('Error:', e)
     process.exit(1)
@@ -237,6 +242,47 @@ const run = async (fileOrCommand: string) => {
     const output = await micropython.runScript(script)
     console.log(output)
   } catch (e) {
+    console.error('Error:', e)
+    process.exit(1)
+  } finally {
+    await micropython.disconnect()
+  }
+}
+
+const edit = async (filename: string) => {
+  console.log('edit', filename)
+  const baseFilename = filename.replace(/^.*[\\\/]/, '')
+  const tmpFilename = getTmpFilename(baseFilename)
+  console.log(tmpFilename)
+
+  try {
+    await ensureConnectedDevice()
+    const output = await micropython.getFile(filename)
+    const hashBefore = crypto.createHash('sha256').update(output).digest('hex')
+
+    // write to temp file and edit
+    fs.writeFileSync(tmpFilename, output)
+    const editorCmd = process.env.EDITOR || 'vim'
+    execSync(`${editorCmd} ${tmpFilename}`, { stdio: 'inherit' })
+
+    // read and compare
+    const outputAfter = fs.readFileSync(tmpFilename)
+    const hashAfter = crypto.createHash('sha256').update(outputAfter).digest('hex')
+
+    // perhaps upload
+    if (hashAfter !== hashBefore) {
+      console.log(`File contents changed, uploading ${filename}...`)
+      await micropython.putFile(filename, Buffer.from(outputAfter))
+    }
+
+  } catch (e) {
+    if (e instanceof ScriptExecutionError && e.message.includes('OSError: [Errno 2] ENOENT')) {
+      logError(`cat: cannot access '${filename}': No such file or directory`)
+      return
+    } else if (e instanceof ScriptExecutionError && e.message.includes('OSError: [Errno 21] EISDIR')) {
+      logError(`cat: cannot read '${filename}' beacuse it is a directory`)
+      return
+    }
     console.error('Error:', e)
     process.exit(1)
   } finally {
@@ -360,6 +406,13 @@ program
   .option('--soft', 'soft-reset instead of hard-reset')
   .description('Reset the MicroPython device')
   .action(reset);
+
+
+// Command: edit
+program
+  .command('edit <filename>')
+  .description('Edit a file, and if changed upload afterwards')
+  .action(edit);
 
 // Command: repl
 program
