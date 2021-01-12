@@ -170,6 +170,7 @@ I'm happy about feedback, please reach out:
 
 mctl
 
+* env vars for host, password: WEBREPL, AMPY
 * run, edit, 'cp -r .'
 * mount: testing
 * mount + repl

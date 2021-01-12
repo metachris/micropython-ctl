@@ -13,6 +13,8 @@ export const debug = (...args: any) => {
   }
 }
 
+export const delayMillis = (delayMs: number) => new Promise(resolve => setTimeout(resolve, delayMs));
+
 /**
  * Return trimmed, dedented text.
  * Just like the Python equivalent: https://docs.python.org/3/library/textwrap.html#textwrap.dedent

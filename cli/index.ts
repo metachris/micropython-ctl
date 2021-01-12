@@ -30,14 +30,11 @@ import { Buffer } from 'buffer/'
 import SerialPort from 'serialport';
 import { Command } from 'commander';
 import { ScriptExecutionError, MicroPythonDevice } from '../src/main';
-import { humanFileSize } from '../src/utils';
+import { humanFileSize, delayMillis } from '../src/utils';
 import { mount as mountWithFuse } from './mount-device'
 import { checkAndInstall as checkAndInstallFuse } from './fuse-dependencies'
 
 const program = new Command();
-
-const HOST = process.env.WEBREPL_HOST || '192.168.1.188';
-const PASSWORD = process.env.WEBREPL_PASSWORD || 'test';
 
 const micropython = new MicroPythonDevice()
 
@@ -252,6 +249,15 @@ const run = async (fileOrCommand: string) => {
   }
 }
 
+const reset = async (cmdObj) => {
+  console.log('reset')
+
+  await ensureConnectedDevice()
+  micropython.reset(cmdObj.soft)  // cannot await result because it's restarting and we loose the connection
+  await delayMillis(500)
+  process.exit(0)
+}
+
 // Mount the device
 const mountCommand = async () => {
   await checkAndInstallFuse()
@@ -295,7 +301,7 @@ const repl = async () => {
  */
 program.option('-t, --tty [device]', `Connect over serial interface (eg. /dev/tty.SLAB_USBtoUART)`)
 program.option('-h, --host <host>', `Connect over network to hostname or IP of device`)
-program.option('-p, --password <password>', `Password for network device`, PASSWORD)
+program.option('-p, --password <password>', `Password for network device`)
 program.option('-s, --silent', `Hide unnecessary output`)
 
 // Command: devices
@@ -352,6 +358,13 @@ program
   .command('run <fileOrCommand>')
   .description('Execute a Python file or command')
   .action(run);
+
+// Command: reset
+program
+  .command('reset')
+  .option('--soft', 'soft-reset instead of hard-reset')
+  .description('Reset the MicroPython device')
+  .action(reset);
 
 // Command: repl
 program

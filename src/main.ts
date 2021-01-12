@@ -537,17 +537,16 @@ export class MicroPythonDevice {
    * @param script
    * @param disableDedent
    *
-   * @throws: ScriptExecutionError on Python code execution error
+   * @throws {ScriptExecutionError} on Python code execution error
    */
-  public async runScript(script: string, disableDedent = false, exitRawRepl = true) {
+  public async runScript(script: string, options: RunScriptOptions = {}) {
     debug('runScript', script)
 
     await this.enterRawRepl()
     debug('runScript: raw mode entered')
 
     // Prepare script for execution (dedent by default)
-    if (!disableDedent) script = dedent(script)
-    // if (!script.endsWith('\n')) script += '\r\npass'
+    if (!options.disableDedent) script = dedent(script)
 
     // Send data to raw repl. Note: cannot send too much data at once over the
     // network, else the webrepl can't parse it quick enough and returns an error.
@@ -583,7 +582,7 @@ export class MicroPythonDevice {
     debug(`runScript: script done (${millisRuntime / 1000}sec)`)
     this.state.lastRunScriptTimeNeeded = millisRuntime
 
-    if (exitRawRepl) {
+    if (options.exitRawRepl) {
       // Exit raw repl mode, re-enter friendly repl
       await this.exitRawRepl()
     } else {
@@ -749,13 +748,13 @@ export class MicroPythonDevice {
     const chunkSize = this.isSerialDevice() ? 256 : 64
 
     const script1 = `import ubinascii; f = open('${targetFilename}', 'wb')`
-    await this.runScript(script1, false, false) // keeps raw repl open for next instruction
+    await this.runScript(script1, { exitRawRepl: false }) // keeps raw repl open for next instruction
 
     for (let index = 0; index < dataHex.length; index += chunkSize) {
       const chunk = dataHex.substr(index, chunkSize)
       debug('chunk', chunk)
       const scriptForChunk = `f.write(ubinascii.unhexlify("${chunk}"))`
-      await this.runScript(scriptForChunk, false, false) // keeps raw repl open for next instruction
+      await this.runScript(scriptForChunk, { exitRawRepl: false }) // keeps raw repl open for next instruction
     }
 
     await this.runScript('f.close()') // finally closes raw repl, switching back to friendly
@@ -788,9 +787,23 @@ export class MicroPythonDevice {
     const script = `import os; os.rename("${oldPath}", "${newPath}")`
     await this.runScript(script)
   }
+
+  /**
+   * Reset a device.
+   */
+  public async reset(soft = false) {
+    debug('reset')
+    const script = soft ? 'import sys; sys.exit()' : 'import machine; machine.reset()'
+    return this.runScript(script)
+  }
 }
 
 export interface ListFilesOptions {
   directory?: string
   recursive?: boolean
+}
+
+export interface RunScriptOptions {
+  disableDedent?: boolean
+  exitRawRepl?: boolean
 }
