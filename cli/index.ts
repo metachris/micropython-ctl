@@ -14,15 +14,9 @@
  *     $ mctl devices
  *     $ mctl ls -r
  *     $ mctl repl
+ *     $ mctl mount
  *
  * Using https://github.com/tj/commander.js
- *
- * See also:
- * - https://github.com/dhylands/rshell#commands
- * - https://github.com/scientifichackers/ampy/blob/master/ampy/files.py
- *
- * In progress:
- * - get
  *
  * TODO:
  * - run (script or Python file)
@@ -241,6 +235,23 @@ const mv = async (oldPath: string, newPath: string) => {
   }
 }
 
+const run = async (fileOrCommand: string) => {
+  console.log('run', fileOrCommand)
+  const script = fs.existsSync(fileOrCommand) ? fs.readFileSync(fileOrCommand).toString() : fileOrCommand
+  console.log(script)
+
+  try {
+    await ensureConnectedDevice()
+    const output = await micropython.runScript(script)
+    console.log(output)
+  } catch (e) {
+    console.error('Error:', e)
+    process.exit(1)
+  } finally {
+    await micropython.disconnect()
+  }
+}
+
 // Mount the device
 const mountCommand = async () => {
   await checkAndInstallFuse()
@@ -335,6 +346,12 @@ program
   .command('mv <oldPath> <newPath>')
   .description('Rename a file or directory')
   .action(mv);
+
+// Command: run
+program
+  .command('run <fileOrCommand>')
+  .description('Execute a Python file or command')
+  .action(run);
 
 // Command: repl
 program

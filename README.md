@@ -154,7 +154,7 @@ I'm happy about feedback, please reach out:
 ## Inspiration & References
 
 * https://github.com/micropython/webrepl ([original JS implementation](https://github.com/micropython/webrepl/blob/master/webrepl.html))
-* https://github.com/scientifichackers/ampy/blob/master/ampy/pyboard.py
+* https://github.com/scientifichackers/ampy/blob/master/ampy/files.py
 * https://github.com/dhylands/rshell#commands
 * https://pycopy.readthedocs.io/en/latest/esp32/quickref.html
 * https://github.com/micropython/micropython/pull/6375/files (mpr: fs mount PR)

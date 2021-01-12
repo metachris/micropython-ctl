@@ -171,10 +171,7 @@ export const mount = async (opts: MountOpts) => {
 
   // Create a new FileSystem instance
   const fs = new FileSystem(deviceFileList)
-  // console.log(fs.nodes)
-
-  // console.log('----------------- in / -------------')
-  console.log(fs.getNodesInDirectory('/'))
+  // console.log(fs.getNodesInDirectory('/'))
 
   const fuseOps = {
     readdir(path: string, cb) {
@@ -293,13 +290,18 @@ export const mount = async (opts: MountOpts) => {
       process.nextTick(cb, 0)
     },
 
-    rename (src: string, dest: string, cb) {
+    async rename (src: string, dest: string, cb) {
       fuseDebug('rename', src, dest)
       const node = fs.getNodeByFullpath(src)
       if (!node) return process.nextTick(cb, -1)
       node.fullpath = dest
       node.basename = nodePath.basename(dest)
       node.dirname = nodePath.dirname(dest)
+      if (!opts.useDummyMicropython) {
+        console.log(`Moving ${src} to ${dest} on device...`)
+        await micropython.rename(src, dest)
+      }
+
       return process.nextTick(cb, 0)
     },
 
