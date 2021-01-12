@@ -104,7 +104,7 @@
 
     // List all files in the root
     DIV_OUTPUT.innerHTML += '<p>Listing files...</p>'
-    const files = await micropythonDevice.listFiles({ directory: '/', recursive: true })
+    const files = await micropythonDevice.listFiles('/', { recursive: true })
     console.log('files', files)
     files.map(file => {
       if (!file.isDir) {

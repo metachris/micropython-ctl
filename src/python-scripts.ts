@@ -52,7 +52,7 @@ def listdir(directory):
         if size == -1:
             size = os.stat(f)[6]
         isdir = filetype == 0x4000
-        filename = directory + filename if directory == '/' else directory + '/' + f
+        filename = directory + filename if directory == '/' else directory + '/' + filename
         out.append((filename, isdir, size))
     return sorted(out)
 `
@@ -96,9 +96,12 @@ try:
 except ImportError:
     import uos as os
 
-s = os.stat('${path}')
-print('%s | %s' % ('f' if s[0] == 32768 else 'd', s[6]))
-`
+try:
+  s = os.stat('${path}')
+  print('%s | %s' % ('f' if s[0] == 32768 else 'd', s[6]))
+except:
+  print('x')
+#`
 }
 
 export const deleteEverythingRecurive = (path: string) => {

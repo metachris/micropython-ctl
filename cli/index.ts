@@ -97,7 +97,7 @@ const listFilesOnDevice = async (directory = '/', cmdObj) => {
   await ensureConnectedDevice()
 
   try {
-    const files = await micropython.listFiles({ directory, recursive: cmdObj.recursive })
+    const files = await micropython.listFiles(directory, { recursive: cmdObj.recursive })
     files.map(file => console.log(`${humanFileSize(file.size).padStart(5)} ${file.isDir ? CLR_FG_BLUE : ''}${file.filename}${CLR_RESET}`))
 
   } catch (e) {
@@ -169,6 +169,11 @@ const get = async (filenameOrDir: string, targetFilenameOrDir: string) => {
   try {
     await ensureConnectedDevice()
     const statResult = await micropython.statPath(filenameOrDir)
+    if (!statResult.exists) {
+      console.log(`${CLR_FG_RED}get: cannot access '${filenameOrDir}': No such file or directory${CLR_RESET}`)
+      return
+    }
+
     if (!statResult.isDir) {
       // get a file
       let targetFilename = filenameOrDir.replace(/^.*[\\\/]/, '')
@@ -184,10 +189,6 @@ const get = async (filenameOrDir: string, targetFilenameOrDir: string) => {
     }
 
   } catch (e) {
-    if (e instanceof ScriptExecutionError && e.message.includes('OSError: [Errno 2] ENOENT')) {
-      console.log(`${CLR_FG_RED}get: cannot access '${filenameOrDir}': No such file or directory${CLR_RESET}`)
-      return
-    }
     console.log('Error:', e)
     process.exit(1)
   } finally {
@@ -201,7 +202,7 @@ const rm = async (path: string, cmdObj) => {
 
   try {
     await ensureConnectedDevice()
-    await micropython.rm(path, cmdObj.recursive)
+    await micropython.remove(path, cmdObj.recursive)
   } catch (e) {
     if (e instanceof ScriptExecutionError && e.message.includes('OSError: [Errno 2] ENOENT')) {
       console.log(`${CLR_FG_RED}rm: cannot remove '${path}': No such file or directory${CLR_RESET}`)
@@ -316,13 +317,13 @@ const repl = async () => {
     // Setup keyboard capture
     readline.emitKeypressEvents(process.stdin);
     process.stdin.setRawMode(true);
-    process.stdin.on('keypress', async (str, key) => {
+    process.stdin.on('keypress', async (_str, key) => {
       // Quit on Ctrl+K
       if (key.name === 'k' && key.ctrl) process.exit(0)
 
       // Send anything to the device, if connected
       if (micropython.isConnected() && micropython.isTerminalMode()) {
-        micropython.sendData(str)
+        micropython.sendData(key.sequence)
       }
     });
 

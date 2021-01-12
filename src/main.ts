@@ -681,8 +681,7 @@ export class MicroPythonDevice {
   //   // return promise
   // }
 
-  public async listFiles(options: ListFilesOptions = {}): Promise<FileListEntry[]> {
-    const directory = options.directory || '/'
+  public async listFiles(directory: string = '/', options: ListFilesOptions = {}): Promise<FileListEntry[]> {
     const recursive = !!options.recursive
 
     debug(`listFiles: ${directory}, ${recursive}`)
@@ -708,11 +707,13 @@ export class MicroPythonDevice {
     return Buffer.from(output, 'hex')
   }
 
-  public async statPath(path: string): Promise<{ isDir: boolean, size: number }> {
+  public async statPath(path: string): Promise<{ exists: boolean, isDir: boolean, size: number }> {
     debug(`statPath: ${path}`)
-    const statOutput = this.runScript(PythonScripts.stat(path))
-    const [isDir, size] = (await statOutput).split(' | ')
-    return { isDir: isDir === 'd', size: parseInt(size, 10) }
+    const statOutput = await this.runScript(PythonScripts.stat(path))
+    if (statOutput.trim() === 'x') return { exists: false, isDir: false, size: 0 }
+
+    const [isDir, size] = statOutput.split(' | ')
+    return { exists: true, isDir: isDir === 'd', size: parseInt(size, 10) }
   }
 
   /**
@@ -770,8 +771,8 @@ export class MicroPythonDevice {
    * @throws {ScriptExecutionError} if not found: "OSError: [Errno 2] ENOENT"
    * @throws {ScriptExecutionError} if directory not empty: "OSError: 39"
    */
-  public async rm(path: string, recursive = false) {
-    debug('rm', path, recursive)
+  public async remove(path: string, recursive = false) {
+    debug('remove', path, recursive)
     const script = recursive ? PythonScripts.deleteEverythingRecurive(path) : `import os; os.remove("${path}")`
     await this.runScript(script)
   }
@@ -799,7 +800,6 @@ export class MicroPythonDevice {
 }
 
 export interface ListFilesOptions {
-  directory?: string
   recursive?: boolean
 }
 

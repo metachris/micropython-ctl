@@ -166,7 +166,7 @@ export const mount = async (opts: MountOpts) => {
       { filename: '/test2', isDir: false, size: 124}
     ]
   } else {
-    deviceFileList = await micropython.listFiles({ recursive: true })
+    deviceFileList = await micropython.listFiles('/', { recursive: true })
   }
 
   // Create a new FileSystem instance
@@ -313,7 +313,7 @@ export const mount = async (opts: MountOpts) => {
       fs.removeNodeByFullpath(path)
       if (!opts.useDummyMicropython) {
         console.log(`Removing ${path} on device...`)
-        await micropython.rm(path)
+        await micropython.remove(path)
       }
 
       return process.nextTick(cb, 0)
@@ -344,7 +344,7 @@ export const mount = async (opts: MountOpts) => {
       fs.removeNode(node)
       if (!opts.useDummyMicropython) {
         console.log(`Removing ${path} on device...`)
-        await micropython.rm(path)
+        await micropython.remove(path)
       }
 
       return process.nextTick(cb, 0)

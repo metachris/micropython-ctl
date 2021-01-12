@@ -169,14 +169,6 @@ I'm happy about feedback, please reach out:
 * putfile and getfile over network: switch to webrepl protocol instead of manual up- and download
 * Rename ScriptExecutionError to RuntimeError?
 
-mctl
-
-* env vars for host, password: WEBREPL, AMPY
-* run, edit, 'cp -r .'
-* mount: testing
-* mount + repl
-* reuse one instance (eg. in mount mode) to execute other commands
-
 Maybe (not sure it's needed, don't rush into implementing):
 
 * Vue.js example with attaching the MicroPythonDevice instance to window, so one instance can live across code hot reloads :) (almost done)
