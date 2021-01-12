@@ -776,6 +776,18 @@ export class MicroPythonDevice {
     const script = recursive ? PythonScripts.deleteEverythingRecurive(path) : `import os; os.remove("${path}")`
     await this.runScript(script)
   }
+
+  /**
+   * Rename a file or directory (uos.rename)
+   *
+   * @throws {ScriptExecutionError} if not found: "OSError: [Errno 2] ENOENT"
+   * @throws {ScriptExecutionError} if directory not empty: "OSError: 39"
+   */
+  public async rename(oldPath: string, newPath: string) {
+    debug('rename', oldPath, newPath)
+    const script = `import os; os.rename("${oldPath}", "${newPath}")`
+    await this.runScript(script)
+  }
 }
 
 export interface ListFilesOptions {

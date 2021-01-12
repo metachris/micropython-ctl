@@ -162,9 +162,18 @@ I'm happy about feedback, please reach out:
 
 ## Future work
 
-* `getFile` improvement. It's currently a naive implementation that fills the device RAM and probably works badly with large file
+* test suite
+* cp -r
+* `getFile` improvement - currently it fills the device RAM and probably works badly with large file
 * putfile and getfile over network: switch to webrepl protocol instead of manual up- and download
 * Rename ScriptExecutionError to RuntimeError?
+
+mctl
+
+* run, edit, 'cp -r .'
+* mount: testing
+* mount + repl
+* reuse one instance (eg. in mount mode) to execute other commands
 
 Maybe (not sure it's needed, don't rush into implementing):
 

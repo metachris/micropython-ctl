@@ -79,10 +79,11 @@ const checkFuseOnWindows = async (): Promise<boolean> => {
 }
 
 export const checkAndInstall = async () => {
+  // Run check and installation process
   const ready = process.platform === 'win32' ? await checkFuseOnWindows() : await checkFuseOnLinuxMacOS()
+
+  // Verify that everything has been installed, else exits process with nice error message
   require(isWin ? 'node-fuse-bindings' : 'fuse-native')
-  return ready
 }
 
 // checkAndInstall()
-// console.log(commandExists('dokanctl.exe'))

@@ -27,7 +27,7 @@
  * TODO:
  * - run (script or Python file)
  * - edit
- * - rsync?
+ * - 'cp -r .': upload everything recursively
  */
 import * as path from 'path';
 import fs from 'fs';
@@ -98,6 +98,12 @@ const ensureConnectedDevice = async () => {
   }
 }
 
+// mctl devices
+const listSerialDevices = async () => {
+  (await listMicroPythonDevices()).map(device => console.log(device.path, '\t', device.manufacturer))
+}
+
+// mctl ls [-r]
 const listFilesOnDevice = async (directory = '/', cmdObj) => {
   // console.log('listFilesOnDevice', directory)
   await ensureConnectedDevice()
@@ -206,6 +212,10 @@ const rm = async (path: string, cmdObj) => {
     await ensureConnectedDevice()
     await micropython.rm(path, cmdObj.recursive)
   } catch (e) {
+    if (e instanceof ScriptExecutionError && e.message.includes('OSError: [Errno 2] ENOENT')) {
+      console.log(`${CLR_FG_RED}rm: cannot remove '${path}': No such file or directory${CLR_RESET}`)
+      return
+    }
     console.error('Error:', e)
     process.exit(1)
   } finally {
@@ -213,11 +223,25 @@ const rm = async (path: string, cmdObj) => {
   }
 }
 
-// mctl devices
-const listSerialDevices = async () => {
-  (await listMicroPythonDevices()).map(device => console.log(device.path, '\t', device.manufacturer))
+const mv = async (oldPath: string, newPath: string) => {
+  console.log('mv', oldPath, newPath)
+
+  try {
+    await ensureConnectedDevice()
+    await micropython.rename(oldPath, newPath)
+  } catch (e) {
+    if (e instanceof ScriptExecutionError && e.message.includes('OSError: [Errno 2] ENOENT')) {
+      console.log(`${CLR_FG_RED}mv: cannot rename '${oldPath}': No such file or directory${CLR_RESET}`)
+      return
+    }
+    console.error('Error:', e)
+    process.exit(1)
+  } finally {
+    await micropython.disconnect()
+  }
 }
 
+// Mount the device
 const mountCommand = async () => {
   await checkAndInstallFuse()
   await ensureConnectedDevice()
@@ -305,6 +329,12 @@ program
   .option('-r, --recursive', 'Delete recursively')
   .description('Delete a file or directory')
   .action(rm);
+
+// Command: mv
+program
+  .command('mv <oldPath> <newPath>')
+  .description('Rename a file or directory')
+  .action(mv);
 
 // Command: repl
 program

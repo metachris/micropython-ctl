@@ -272,7 +272,7 @@ export const mount = async (opts: MountOpts) => {
 
       const contentsHash = crypto.createHash('md5').update(node.contents).digest('hex')
       if (contentsHash !== node.contentsSavedHash) {
-        console.log('writing file to device...')
+        console.log(`Saving ${path} to device...`)
         node.contentsSavedHash = contentsHash
         if (!opts.useDummyMicropython) {
           await micropython.putFile(path, node.contents)
@@ -303,22 +303,33 @@ export const mount = async (opts: MountOpts) => {
       return process.nextTick(cb, 0)
     },
 
-    unlink (path: string, cb) {
+    async unlink (path: string, cb) {
       fuseDebug('unlink', path)
       const node = fs.getNodeByFullpath(path)
       if (!node) return process.nextTick(cb, -1)
+
       fs.removeNodeByFullpath(path)
+      if (!opts.useDummyMicropython) {
+        console.log(`Removing ${path} on device...`)
+        await micropython.rm(path)
+      }
+
       return process.nextTick(cb, 0)
     },
 
-    mkdir (path: string, mode, cb) {
+    async mkdir (path: string, mode, cb) {
       fuseDebug('mkdir', path, mode)
       const node = fs.getNodeByFullpath(path)
       if (!node) fs.addNode(path, true)
+      if (!opts.useDummyMicropython) {
+        console.log(`mkdir ${path} on device...`)
+        await micropython.mkdir(path)
+      }
+
       return process.nextTick(cb, 0)
     },
 
-    rmdir (path: string, cb) {
+    async rmdir (path: string, cb) {
       fuseDebug('rmdir', path)
       const node = fs.getNodeByFullpath(path)
       if (!node) return process.nextTick(cb, Fuse.ENOENT)
@@ -329,6 +340,11 @@ export const mount = async (opts: MountOpts) => {
         return process.nextTick(cb, Fuse.ENOTEMPTY)
       }
       fs.removeNode(node)
+      if (!opts.useDummyMicropython) {
+        console.log(`Removing ${path} on device...`)
+        await micropython.rm(path)
+      }
+
       return process.nextTick(cb, 0)
     }
   }
@@ -383,7 +399,7 @@ export const mount = async (opts: MountOpts) => {
 
 }
 
-mount({ useDummyMicropython: true })
+// mount({ useDummyMicropython: true })
 // mount({ tty: '/dev/tty.SLAB_USBtoUART' })
 // mount({ tty: 'COM4' })
 
