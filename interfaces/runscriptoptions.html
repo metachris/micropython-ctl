@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>ReplMode | micropython-ctl - v1.7.0</title>
+	<title>RunScriptOptions | micropython-ctl - v1.7.0</title>
 	<meta name="description" content="Documentation for micropython-ctl - v1.7.0">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -55,82 +55,57 @@
 					<a href="../modules.html">micropython-ctl - v1.7.0</a>
 				</li>
 				<li>
-					<a href="replmode.html">ReplMode</a>
+					<a href="runscriptoptions.html">RunScriptOptions</a>
 				</li>
 			</ul>
-			<h1>Enumeration ReplMode</h1>
+			<h1>Interface RunScriptOptions</h1>
 		</div>
 	</div>
 </header>
 <div class="container container-main">
 	<div class="row">
 		<div class="col-8 col-content">
+			<section class="tsd-panel tsd-hierarchy">
+				<h3>Hierarchy</h3>
+				<ul class="tsd-hierarchy">
+					<li>
+						<span class="target">RunScriptOptions</span>
+					</li>
+				</ul>
+			</section>
 			<section class="tsd-panel-group tsd-index-group">
 				<h2>Index</h2>
 				<section class="tsd-panel tsd-index-panel">
 					<div class="tsd-index-content">
 						<section class="tsd-index-section ">
-							<h3>Enumeration members</h3>
+							<h3>Properties</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="replmode.html#getver_waiting_response" class="tsd-kind-icon">GETVER_<wbr>WAITING_<wbr>RESPONSE</a></li>
-								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="replmode.html#putfile_waiting_final_response" class="tsd-kind-icon">PUTFILE_<wbr>WAITING_<wbr>FINAL_<wbr>RESPONSE</a></li>
-								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="replmode.html#putfile_waiting_first_response" class="tsd-kind-icon">PUTFILE_<wbr>WAITING_<wbr>FIRST_<wbr>RESPONSE</a></li>
-								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="replmode.html#script_raw_mode" class="tsd-kind-icon">SCRIPT_<wbr>RAW_<wbr>MODE</a></li>
-								<li class="tsd-kind-enum-member tsd-parent-kind-enum"><a href="replmode.html#terminal" class="tsd-kind-icon">TERMINAL</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="runscriptoptions.html#disablededent" class="tsd-kind-icon">disable<wbr>Dedent</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="runscriptoptions.html#exitrawrepl" class="tsd-kind-icon">exit<wbr>Raw<wbr>Repl</a></li>
 							</ul>
 						</section>
 					</div>
 				</section>
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
-				<h2>Enumeration members</h2>
-				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum">
-					<a name="getver_waiting_response" class="tsd-anchor"></a>
-					<h3>GETVER_<wbr>WAITING_<wbr>RESPONSE</h3>
-					<div class="tsd-signature tsd-kind-icon">GETVER_<wbr>WAITING_<wbr>RESPONSE<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> = &quot;GETVER_WAITING_RESPONSE&quot;</span></div>
+				<h2>Properties</h2>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+					<a name="disablededent" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> disable<wbr>Dedent</h3>
+					<div class="tsd-signature tsd-kind-icon">disable<wbr>Dedent<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/4bed234/src/main.ts#L33">src/main.ts:33</a></li>
+							<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/4bed234/src/main.ts#L798">src/main.ts:798</a></li>
 						</ul>
 					</aside>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum">
-					<a name="putfile_waiting_final_response" class="tsd-anchor"></a>
-					<h3>PUTFILE_<wbr>WAITING_<wbr>FINAL_<wbr>RESPONSE</h3>
-					<div class="tsd-signature tsd-kind-icon">PUTFILE_<wbr>WAITING_<wbr>FINAL_<wbr>RESPONSE<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> = &quot;PUTFILE_WAITING_FINAL_RESPONSE&quot;</span></div>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+					<a name="exitrawrepl" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> exit<wbr>Raw<wbr>Repl</h3>
+					<div class="tsd-signature tsd-kind-icon">exit<wbr>Raw<wbr>Repl<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/4bed234/src/main.ts#L35">src/main.ts:35</a></li>
-						</ul>
-					</aside>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum">
-					<a name="putfile_waiting_first_response" class="tsd-anchor"></a>
-					<h3>PUTFILE_<wbr>WAITING_<wbr>FIRST_<wbr>RESPONSE</h3>
-					<div class="tsd-signature tsd-kind-icon">PUTFILE_<wbr>WAITING_<wbr>FIRST_<wbr>RESPONSE<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> = &quot;PUTFILE_WAITING_FIRST_RESPONSE&quot;</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/4bed234/src/main.ts#L34">src/main.ts:34</a></li>
-						</ul>
-					</aside>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum">
-					<a name="script_raw_mode" class="tsd-anchor"></a>
-					<h3>SCRIPT_<wbr>RAW_<wbr>MODE</h3>
-					<div class="tsd-signature tsd-kind-icon">SCRIPT_<wbr>RAW_<wbr>MODE<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> = &quot;SCRIPT_RAW_MODE&quot;</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/4bed234/src/main.ts#L31">src/main.ts:31</a></li>
-						</ul>
-					</aside>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-enum-member tsd-parent-kind-enum">
-					<a name="terminal" class="tsd-anchor"></a>
-					<h3>TERMINAL</h3>
-					<div class="tsd-signature tsd-kind-icon">TERMINAL<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol"> = &quot;TERMINAL&quot;</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/4bed234/src/main.ts#L30">src/main.ts:30</a></li>
+							<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/4bed234/src/main.ts#L799">src/main.ts:799</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -150,7 +125,7 @@
 						<a href="../classes/micropythondevice.html" class="tsd-kind-icon">Micro<wbr>Python<wbr>Device</a>
 					</li>
 					<li class=" tsd-kind-interface">
-						<a href="../interfaces/devicestate.html" class="tsd-kind-icon">Device<wbr>State</a>
+						<a href="devicestate.html" class="tsd-kind-icon">Device<wbr>State</a>
 					</li>
 				</ul>
 			</nav>
