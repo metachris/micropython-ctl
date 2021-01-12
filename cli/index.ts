@@ -16,12 +16,7 @@
  *     $ mctl repl
  *     $ mctl mount
  *
- * Using https://github.com/tj/commander.js
- *
- * TODO:
- * - run (script or Python file)
- * - edit
- * - 'cp -r .': upload everything recursively
+ * Uses https://github.com/tj/commander.js
  */
 import * as path from 'path';
 import fs from 'fs';

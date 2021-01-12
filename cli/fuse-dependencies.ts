@@ -4,6 +4,7 @@
  * Linux + macOS: https://github.com/fuse-friends/fuse-native
  * Windows: https://github.com/dokan-dev/dokany + https://github.com/direktspeed/node-fuse-bindings
  */
+import * as path from 'path'
 import * as readline from 'readline'
 import { spawnSync, execSync } from 'child_process';
 
@@ -44,7 +45,10 @@ const checkFuseOnLinuxMacOS = async (): Promise<boolean> => {
   if (!doInstall) return false
 
   // Install the module. If it fails, the process exits
-  execSync(cmd, { stdio: 'inherit' })
+  execSync(cmd, {
+    stdio: 'inherit',
+    cwd: path.resolve(__dirname)
+  })
   return true
 }
 
@@ -74,7 +78,10 @@ const checkFuseOnWindows = async (): Promise<boolean> => {
   if (!doInstall) return false
 
   // Install the module. If it fails, the process exits
-  execSync(cmd, { stdio: 'inherit' })
+  execSync(cmd, {
+    stdio: 'inherit',
+    cwd: path.resolve(__dirname)
+  })
   return true
 }
 

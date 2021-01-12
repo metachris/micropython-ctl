@@ -10,7 +10,7 @@ A library to interface with MicroPython devices over serial and network connecti
   * Run Python scripts, await the output
   * List files, upload and download files
   * Terminal (REPL) interaction
-  * [`mctl`](https://github.com/metachris/micropython-ctl/blob/master/cli/index.ts) command line utility
+  * [`mctl`](https://github.com/metachris/micropython-ctl/blob/master/cli) command line utility
   * Mount the micropython device into the local filesystem (`mctl mount`)
 * Main code file: [`main.ts`](https://github.com/metachris/micropython-ctl/blob/master/src/main.ts)
 * Links: [Github](https://github.com/metachris/micropython-ctl), [Documentation](https://metachris.github.io/micropython-ctl/), [npm package](https://www.npmjs.com/package/micropython-ctl)

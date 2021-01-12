@@ -1,11 +1,12 @@
 # mctl - command line interface for MicroPython devices
 
-With `mctl` you can
+With `mctl` you can:
 
 * manipulate files and directories
+* list all serial devices
 * enter the REPL
 * mount the device into the local filesystem
-* all over serial or network connection
+* use serial or network connection
 
 ### Installation
 
@@ -40,3 +41,17 @@ Commands:
   version                                      Print the version of mctl
   help [command]                               display help for command
 ```
+
+
+### Future work
+
+* upload everything recursively ('cp -r .')
+* edit
+
+
+### Notes
+
+Mounting the device into the local filesystem:
+
+* uses fuse-natuve on osx, linux, works
+* windows: experimental, might be buggy
