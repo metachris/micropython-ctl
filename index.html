@@ -64,14 +64,15 @@
 				<p>A library to interface with MicroPython devices over serial and network connections (REPL and WebREPL)</p>
 				<ul>
 					<li>Easily build websites/webapps and Node.js programs that talk with MicroPython devices</li>
-					<li>Typed and fully async (you can use <code>await</code> with <code>connect</code>,  executing REPL commands, etc.)</li>
-					<li>Tested with ESP32 &amp; ESP8266</li>
+					<li>Typed and fully async (you can use <code>await</code> with all the commands)</li>
+					<li>Works on Linux, macOS and Windows, tested with ESP32 &amp; ESP8266</li>
 					<li>Functionality:<ul>
-							<li>Connect over network and serial interface</li>
-							<li>Run Python scripts and await the output</li>
+							<li>Connect to device over serial or network</li>
+							<li>Run Python scripts, await the output</li>
 							<li>List files, upload and download files</li>
 							<li>Terminal (REPL) interaction</li>
 							<li><a href="https://github.com/metachris/micropython-ctl/blob/master/cli/index.ts"><code>mctl</code></a> command line utility</li>
+							<li>Mount the micropython device into the local filesystem (<code>mctl mount</code>)</li>
 						</ul>
 					</li>
 					<li>Main code file: <a href="https://github.com/metachris/micropython-ctl/blob/master/src/main.ts"><code>main.ts</code></a></li>
