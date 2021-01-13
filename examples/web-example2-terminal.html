@@ -121,6 +121,7 @@
 
     // When receiving terminal data, send to xterm.js
     micropythonDevice.onTerminalData = (data) => term.write(data)
+    micropythonDevice.onclose = () => DIV_STATUS.innerHTML = "Disconnected"
 
     // Send Ctrl+B to device
     micropythonDevice.sendData('\x02')
