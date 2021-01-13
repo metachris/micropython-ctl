@@ -18,10 +18,32 @@ const getSerialDevice = async () => {
   return goodDevices[0].path
 }
 
-const runBasicTests = async (micropython: MicroPythonDevice ) => {
+const runBasicTests = async (micropython: MicroPythonDevice) => {
   try {
     assert(micropython.isConnected())
     assert(micropython.isTerminalMode())
+
+    console.log('- testing repl mode')
+    let terminalDataReceived = ''
+    micropython.onTerminalData = (data) => terminalDataReceived += data
+    micropython.sendData('\x03\x02')
+    micropython.sendData('foo')
+    await delayMillis(1000)
+    // console.log('terminalDataReceived', terminalDataReceived)
+    assert(terminalDataReceived.trim().endsWith('>>> foo'))
+    micropython.onTerminalData = (_data: string) => {}
+
+    if (micropython.isSerialDevice()) {
+      // Serial device keeps connection alive on reset
+      console.log('- testing hard reset')
+      let terminalData = ''
+      micropython.onTerminalData = (data) => terminalData += data
+      await micropython.reset({ broadcastOutputAsTerminalData: true })
+      // await delayMillis(1000)
+      assert(terminalData.includes('cpu_start:'))
+      assert(terminalData.includes('heap_init:'))
+      micropython.onTerminalData = (_data: string) => {}
+    }
 
     console.log('- creating test directory')
     const testPath = '/MicroPythonCtlTestRun'
@@ -86,22 +108,26 @@ const runBasicTests = async (micropython: MicroPythonDevice ) => {
     assert(onlyDirs5.length === 2)
     assert(onlyFiles5.length === 1)
 
-    console.log('- testing repl mode')
-    let terminalDataReceived = ''
-    micropython.onTerminalData = (data) => terminalDataReceived += data
-    micropython.sendData('\x02')
-    micropython.sendData('foo')
-    await delayMillis(500)
-    console.log('terminalDataReceived', terminalDataReceived)
-    assert(terminalDataReceived.trim().endsWith('>>> foo'))
-    micropython.onTerminalData = (_data: string) => void
+    console.log('- statPath')
+    const stat1 = await micropython.statPath(testPath)
+    assert(stat1.exists && stat1.isDir)
+    const stat2 = await micropython.statPath(b2fn)
+    assert(stat2.exists && !stat2.isDir && stat2.size === b2.length)
+
+    console.log('- rename')
+    await micropython.rename(b2fn, b2fn + 'xxx')
+    const statOld = await micropython.statPath(b2fn)
+    const statNew = await micropython.statPath(b2fn + 'xxx')
+    assert(!statOld.exists)
+    assert(statNew.exists && !statNew.isDir && statNew.size === b2.length)
 
     console.log('- disconnect')
-
-
-    // ADD TESTS HERE ...
-    // TODO: runScript options, statPath, rename, reset
-
+    let isClosed = false
+    micropython.onclose = () => isClosed = true
+    await micropython.disconnect()
+    await delayMillis(100)
+    assert(isClosed)
+    assert(!micropython.isConnected())
 
     // ALL DONE
     console.log('\n✅ all checks completed')

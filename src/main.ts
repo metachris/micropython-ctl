@@ -74,6 +74,7 @@ export interface DeviceState {
   lastCommand: string
   inputBuffer: string
   errorBuffer: string
+  broadcastCommandOutputAsTerminalData: boolean
 
   dataRawBuffer: Buffer
 
@@ -136,6 +137,7 @@ export class MicroPythonDevice {
       lastCommand: '',
       inputBuffer: '',
       errorBuffer: '',
+      broadcastCommandOutputAsTerminalData: false,
       dataRawBuffer: new Buffer(0),
 
       replPromise: null,
@@ -469,12 +471,14 @@ export class MicroPythonDevice {
 
           } else {
             // Incoming data (stdout or stderr output). Just add to buffer
+            const char = String.fromCharCode(entry)
+            if (this.state.broadcastCommandOutputAsTerminalData && this.onTerminalData) this.onTerminalData(char)
             if (this.state.receivingResponseSubState === RawReplReceivingResponseSubState.SCRIPT_RECEIVING_OUTPUT) {
               // debug('adding to buffer:', entry)
-              this.state.inputBuffer += String.fromCharCode(entry)
+              this.state.inputBuffer += char
             } else {
               // debug('adding to error buffer:', entry)
-              this.state.errorBuffer += String.fromCharCode(entry)
+              this.state.errorBuffer += char
             }
           }
         }
@@ -544,7 +548,7 @@ export class MicroPythonDevice {
    *
    * @throws {ScriptExecutionError} on Python code execution error
    */
-  public async runScript(script: string, options: RunScriptOptions = {}) {
+  public async runScript(script: string, options: RunScriptOptions = {}): Promise<string> {
     debug('runScript', script)
 
     await this.enterRawRepl()
@@ -572,12 +576,15 @@ export class MicroPythonDevice {
     const millisStart = Date.now()
 
     // Update state and create a new promise that will be fulfilled when script has run
+    this.state.broadcastCommandOutputAsTerminalData = !!options.broadcastOutputAsTerminalData
     this.state.rawReplState = RawReplState.SCRIPT_SENT
     const promise = this.createReplPromise()
 
     // Send ctrl+D to execute the uploaded script in the raw repl
     this.sendData('\x04')
     debug('runScript: script sent, waiting for response')
+
+    if (options.exitAfterSending) return ''
 
     // wait for script execution
     const scriptOutput = await promise
@@ -797,10 +804,18 @@ export class MicroPythonDevice {
   /**
    * Reset a device.
    */
-  public async reset(soft = false) {
-    debug('reset')
-    const script = soft ? 'import sys; sys.exit()' : 'import machine; machine.reset()'
-    return this.runScript(script)
+  public async reset(options: ResetOptions = {}) {
+    const script = options.softReset ? 'import sys; sys.exit()' : 'import machine; machine.reset()'
+    debug('reset', script, options)
+
+    // Need to exit after sending, because it will not exit the RAW repl mode like any other script
+    // since the device is actually restarting.
+    await this.runScript(script, {
+      broadcastOutputAsTerminalData: options.broadcastOutputAsTerminalData,
+      exitAfterSending: true
+    })
+    await delayMillis(1000)
+    await this.exitRawRepl()
   }
 }
 
@@ -811,4 +826,11 @@ export interface ListFilesOptions {
 export interface RunScriptOptions {
   disableDedent?: boolean
   exitRawRepl?: boolean
+  broadcastOutputAsTerminalData?: boolean  // typically output is collected and returned, but it can also be broadcast as terminal data as it is received, char by char
+  exitAfterSending?: boolean
+}
+
+export interface ResetOptions {
+  softReset?: boolean
+  broadcastOutputAsTerminalData?: boolean
 }
