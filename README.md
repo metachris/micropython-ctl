@@ -182,7 +182,11 @@ Maybe (not sure it's needed, don't rush into implementing):
 
 ```shell
 # Update CHANGELOG
-vi CHANGELOG.md
+code CHANGELOG.md
+
+# Update cli README
+yarn mctl help
+code cli/README.md
 
 # make sure all is committed in git
 git status

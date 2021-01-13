@@ -1,3 +1,9 @@
+1.7.2 (2021-01-13)
+------------------
+* many improvements and adding missing commands to the module and mctl
+* mounting the device with FUSE
+
+
 1.7.0 (2021-01-08)
 ------------------
 * `putFile`
