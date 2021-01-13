@@ -27,7 +27,8 @@ import { Buffer } from 'buffer/'
 import SerialPort from 'serialport';
 import { Command } from 'commander';
 import { ScriptExecutionError, MicroPythonDevice } from '../src/main';
-import { humanFileSize, delayMillis, getTmpFilename } from '../src/utils';
+import { humanFileSize, delayMillis } from '../src/utils';
+import { getTmpFilename } from '../src/utils-node';
 import { mount as mountWithFuse } from './mount-device'
 import { checkAndInstall as checkAndInstallFuse } from './fuse-dependencies'
 

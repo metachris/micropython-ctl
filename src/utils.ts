@@ -1,7 +1,4 @@
-import * as path from 'path';
 import { Buffer } from 'buffer/'
-import { tmpdir } from 'os';
-import crypto from 'crypto';
 
 export const IS_NODEJS = !!globalThis.process?.release?.name
 export const IS_ELECTRON = typeof (navigator) !== 'undefined' && navigator.userAgent.indexOf('Electron/') > -1
@@ -17,10 +14,6 @@ export const debug = (...args: any) => {
 }
 
 export const delayMillis = (delayMs: number) => new Promise(resolve => setTimeout(resolve, delayMs));
-
-export const getTmpFilename = (ext: string) => {
-  return path.join(tmpdir(), crypto.randomBytes(16).toString('hex') + ext)
-}
 
 /**
  * Return trimmed, dedented text.
@@ -72,18 +65,4 @@ export const humanFileSize = (bytes, si = true, dp = 1) => {
 
 
   return bytes.toFixed(dp) + units[u];
-}
-
-/**
- * Turn a string or buffer into a hex string
- */
-export const hexlify = (data: string | Buffer) => {
-  return Buffer.isBuffer(data) ? data.toString('hex') : Buffer.from(data).toString('hex')
-}
-
-/**
- * Turn hexlified data into a string
- */
-export const unhexlify = (str: string) => {
-  return Buffer.from(str, 'hex').toString()
 }

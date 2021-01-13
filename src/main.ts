@@ -8,7 +8,7 @@
 import WebSocket from 'isomorphic-ws'
 import { Buffer } from 'buffer/'
 import { InvalidPassword, CouldNotConnect, ScriptExecutionError } from './errors'
-import { debug, dedent, hexlify, IS_ELECTRON, IS_NODEJS, unhexlify } from './utils';
+import { debug, dedent, IS_ELECTRON, IS_NODEJS } from './utils';
 import * as PythonScripts from './python-scripts';
 
 export { InvalidPassword, CouldNotConnect, ScriptExecutionError }  // allows easy importing from user scripts

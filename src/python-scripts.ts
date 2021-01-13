@@ -1,8 +1,3 @@
-export const lsSimple = `
-import os
-print(os.listdir())
-`
-
 // https://github.com/scientifichackers/ampy/blob/master/ampy/files.py#L88
 export const ls = (args = { directory: "/", recursive: false }) => {
   const { directory, recursive } = args
@@ -66,7 +61,6 @@ for (filename, isdir, size) in listdir('${finalDir}'):
 
   return command
 }
-
 
 export const manyPrints = (lines = 200) => {
   let ret = ''

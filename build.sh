@@ -1,4 +1,5 @@
 #!/bin/bash
+set -eu -o pipefail  # Abort on errors, disallow undefined variables
 yarn clean
 
 # Build Node.js version
