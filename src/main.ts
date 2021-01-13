@@ -220,7 +220,12 @@ export class MicroPythonDevice {
       this.handleProtocolData(data)
     })
 
-    this.state.port!.write('\x02')  // Required to send Ctrl+B, so we receive the info that we are in REPL mode
+    this.state.port.on('close', () => {
+      this.state.connectionState = ConnectionState.CLOSED
+      if (this.onclose) this.onclose()
+    })
+
+    this.state.port.write('\x03\x02')  // Sending Ctrl+C and Ctrl+B, to receive the info that we are in REPL mode
     return this.createReplPromise()
   }
 
@@ -719,7 +724,7 @@ export class MicroPythonDevice {
   /**
    *
    * @param name
-   * @throws ScriptExecutionError
+   * @throws {ScriptExecutionError}
    */
   public async mkdir(name: string): Promise<boolean> {
     debug(`mkdir: ${name}`)

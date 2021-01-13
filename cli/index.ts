@@ -302,8 +302,16 @@ const reset = async (cmdObj) => {
 
 // Mount the device
 const mountCommand = async () => {
+  // Make sure FUSE dependencies are installed
   await checkAndInstallFuse()
+
+  // Connect to the device
   await ensureConnectedDevice()
+
+  // If device is disconnected, send SIGINT to self, which is handled by mount-device.ts (unmounts FUSE device)
+  micropython.onclose = () => process.kill(process.pid, "SIGINT")
+
+  // Mount now
   await mountWithFuse({ micropythonDevice: micropython })
 }
 

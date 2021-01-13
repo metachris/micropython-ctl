@@ -164,7 +164,7 @@ I'm happy about feedback, please reach out:
 ## Future work
 
 * test suite
-* cp -r
+* put/get recursively
 * `getFile` improvement - currently it fills the device RAM and probably works badly with large file
 * putfile and getfile over network: switch to webrepl protocol instead of manual up- and download
 * Rename ScriptExecutionError to RuntimeError?

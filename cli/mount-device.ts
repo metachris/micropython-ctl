@@ -200,7 +200,7 @@ export const mount = async (opts: MountOpts) => {
     },
 
     async read(path: string, fd: number, buf, len: number, pos: number, cb) {
-      fuseDebug('read', path, `fd=${fd}`, buf, `len=${len}, pos=${pos}`)
+      fuseDebug('read', path, `fd=${fd}`, `len=${len}, pos=${pos}`)
       const node = fs.getNodeByFullpath(path)
       if (!node) {
         fuseDebug('read', path, '- file not found')
@@ -226,7 +226,7 @@ export const mount = async (opts: MountOpts) => {
       }
 
       const str = bufferSlize.toString()
-      fuseDebug('read', path, '-> output:', str)
+      // fuseDebug('read', path, '-> output:', str)
       buf.write(str)
       return process.nextTick(cb, str.length)
     },
@@ -398,7 +398,6 @@ export const mount = async (opts: MountOpts) => {
       })
     })
   }
-
 }
 
 // mount({ useDummyMicropython: true })
