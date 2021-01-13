@@ -6,21 +6,22 @@ import { MicroPythonDevice } from '../src/main';
 import assert from 'assert'
 import crypto from 'crypto';
 import { Buffer } from 'buffer/'
+import SerialPort from 'serialport';
+import { delayMillis } from '../src/utils';
 
-// const HOST = process.env.WEBREPL_HOST || '10.12.50.101';
-// const PASSWORD = process.env.WEBREPL_PASSWORD || 'test';
+// Get first serial device
+const getSerialDevice = async () => {
+  if (process.env.DEVICE_SERIAL) return process.env.DEVICE_SERIAL
+  const devices = await SerialPort.list();
+  const goodDevices = devices.filter(device => device.manufacturer || device.serialNumber)
+  if (!goodDevices.length) throw new Error('No serial devices found')
+  return goodDevices[0].path
+}
 
 const runBasicTests = async (micropython: MicroPythonDevice ) => {
   try {
     assert(micropython.isConnected())
     assert(micropython.isTerminalMode())
-
-    // console.log('Running a Python script...')
-    // const output = await micropython.runScript('import os; print(os.listdir())')
-    // console.log('runScript output:', output)
-
-    // const files = await micropython.listFiles()
-    // console.log(files)
 
     console.log('- creating test directory')
     const testPath = '/MicroPythonCtlTestRun'
@@ -85,7 +86,21 @@ const runBasicTests = async (micropython: MicroPythonDevice ) => {
     assert(onlyDirs5.length === 2)
     assert(onlyFiles5.length === 1)
 
+    console.log('- testing repl mode')
+    let terminalDataReceived = ''
+    micropython.onTerminalData = (data) => terminalDataReceived += data
+    micropython.sendData('\x02')
+    micropython.sendData('foo')
+    await delayMillis(500)
+    console.log('terminalDataReceived', terminalDataReceived)
+    assert(terminalDataReceived.trim().endsWith('>>> foo'))
+    micropython.onTerminalData = (_data: string) => void
+
+    console.log('- disconnect')
+
+
     // ADD TESTS HERE ...
+    // TODO: runScript options, statPath, rename, reset
 
 
     // ALL DONE
@@ -104,7 +119,9 @@ const runBasicTests = async (micropython: MicroPythonDevice ) => {
   const micropython = new MicroPythonDevice();
 
   // Run tests over serial connection
-  await micropython.connectSerial('/dev/tty.SLAB_USBtoUART')
+  const serialDevice = await getSerialDevice()
+  console.log('Testing serial device', serialDevice)
+  await micropython.connectSerial(serialDevice)
   assert(micropython.isSerialDevice())
   runBasicTests(micropython)
 })()
