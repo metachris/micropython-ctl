@@ -814,8 +814,12 @@ export class MicroPythonDevice {
       broadcastOutputAsTerminalData: options.broadcastOutputAsTerminalData,
       exitAfterSending: true
     })
-    await delayMillis(1000)
-    await this.exitRawRepl()
+
+    // Serial connection stays open after reset, webrepl closes
+    if (this.isSerialDevice()) {
+      await delayMillis(1000)
+      await this.exitRawRepl()
+    }
   }
 }
 

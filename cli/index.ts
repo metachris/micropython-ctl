@@ -148,6 +148,7 @@ const mkdir = async (name: string) => {
 const catFile = async (filename: string) => {
   try {
     await ensureConnectedDevice()
+    if (!filename.startsWith('/')) filename = '/' + filename
     const contents = await micropython.getFile(filename)
     console.log(contents.toString())
   } catch (e) {
@@ -169,6 +170,7 @@ const get = async (filenameOrDir: string, targetFilenameOrDir: string) => {
   // console.log('get', filenameOrDir, targetFilenameOrDir)
   try {
     await ensureConnectedDevice()
+    if (!filenameOrDir.startsWith('/')) filenameOrDir = '/' + filenameOrDir
     const statResult = await micropython.statPath(filenameOrDir)
     if (!statResult.exists) {
       console.log(`${CLR_FG_RED}get: cannot access '${filenameOrDir}': No such file or directory${CLR_RESET}`)
@@ -199,6 +201,7 @@ const get = async (filenameOrDir: string, targetFilenameOrDir: string) => {
 
 
 const rm = async (path: string, cmdObj) => {
+  if (!path.startsWith('/')) path = '/' + path
   console.log('rm', path)
 
   try {
@@ -296,7 +299,7 @@ const reset = async (cmdObj) => {
   console.log('reset')
 
   await ensureConnectedDevice()
-  micropython.reset(cmdObj.soft)  // cannot await result because it's restarting and we loose the connection
+  await micropython.reset({ softReset: !!cmdObj.soft })  // cannot await result because it's restarting and we loose the connection
   await delayMillis(500)
   process.exit(0)
 }

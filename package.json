@@ -17,7 +17,7 @@
     "build": "./build.sh",
     "buildNode": "tsc -p tsconfig.json",
     "buildBrowser": "webpack",
-    "test": "ts-node tests/basic.ts",
+    "test": "ts-node tests/testsuite.ts",
     "runExample": "ts-node examples/tmp.ts",
     "runTerminal": "ts-node examples/terminal.ts",
     "ts-node": "ts-node",

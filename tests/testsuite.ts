@@ -8,6 +8,7 @@ import crypto from 'crypto';
 import { Buffer } from 'buffer/'
 import SerialPort from 'serialport';
 import { delayMillis } from '../src/utils';
+import { Command } from 'commander';
 
 // Get first serial device
 const getSerialDevice = async () => {
@@ -18,7 +19,7 @@ const getSerialDevice = async () => {
   return goodDevices[0].path
 }
 
-const runBasicTests = async (micropython: MicroPythonDevice) => {
+const runTests = async (micropython: MicroPythonDevice) => {
   try {
     assert(micropython.isConnected())
     assert(micropython.isTerminalMode())
@@ -141,13 +142,35 @@ const runBasicTests = async (micropython: MicroPythonDevice) => {
   }
 }
 
-(async () => {
-  const micropython = new MicroPythonDevice();
-
+const runTestsOnSerial = async (ttyPath?: string) => {
   // Run tests over serial connection
-  const serialDevice = await getSerialDevice()
-  console.log('Testing serial device', serialDevice)
+  const serialDevice = ttyPath || await getSerialDevice()
+  console.log('Running tests on device over serial connection', serialDevice)
+  const micropython = new MicroPythonDevice();
   await micropython.connectSerial(serialDevice)
   assert(micropython.isSerialDevice())
-  runBasicTests(micropython)
-})()
+  await runTests(micropython)
+}
+
+const runTestsOnNetwork = async (host: string, password: string) => {
+  console.log('Runnig tests on device over network connection', host)
+  const micropython = new MicroPythonDevice();
+  await micropython.connectNetwork(host, password)
+  await runTests(micropython)
+}
+
+const program = new Command();
+program.option('-t, --tty [device]', `Connect over serial interface (eg. /dev/tty.SLAB_USBtoUART)`)
+program.option('-h, --host <host>', `Connect over network to hostname or IP of device`)
+program.option('-p, --password <password>', `Password for network device`);
+
+
+(async () => {
+  await program.parseAsync(process.argv);
+  if (program.host) {
+    if (!program.password) { return console.error('Password missing') }
+    await runTestsOnNetwork(program.host, program.password)
+  } else {
+    await runTestsOnSerial(program.tty)
+  }
+})();
