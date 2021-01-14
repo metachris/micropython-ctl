@@ -2,10 +2,10 @@
 
 With `mctl` you can:
 
-* manipulate files and directories
-* list all serial devices
-* enter the REPL
-* mount the device into the local filesystem
+* manipulate files and directories: `mctl ls -r`, ...
+* list all serial devices: `mctl devices`
+* enter the REPL: `mctl repl`
+* mount the device into the local filesystem: `mctl mount`
 * use serial or network connection
 
 Code: [cli/index.ts](https://github.com/metachris/micropython-ctl/blob/master/cli/index.ts)

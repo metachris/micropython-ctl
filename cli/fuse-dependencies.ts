@@ -9,9 +9,16 @@ import * as readline from 'readline'
 import { execSync } from 'child_process';
 
 // tslint:disable-next-line: no-var-requires
-const commandExists = require('./command-exists').sync
+const commandExists = require('./lib/command-exists').sync
+// const globalDirs = require('./lib/global-dirs')
 
 const isWin = process.platform === 'win32'
+const isLinux = process.platform === 'linux'
+
+// const isInstalledGlobally = (): boolean => {
+//   const dir = path.dirname(__dirname)
+//   return (globalDirs.yarn.packages.indexOf())
+// }
 
 const askQuestion = (query): Promise<string> => {
   const rl = readline.createInterface({
@@ -82,15 +89,24 @@ const checkFuseOnWindows = async (): Promise<boolean> => {
     stdio: 'inherit',
     cwd: path.resolve(__dirname)
   })
+
+  if (isLinux && !process.env.MCTL_MOUNT_RISK_SEGFAULT) {
+    // In Linux we need to exit here, because when installed globally, the next require will cause a segfault
+    console.log(`Successfully installed dependencies. Please re-run 'mctl mount' now`)
+    process.exit(0)
+  }
   return true
 }
 
 export const checkAndInstall = async () => {
   // Run check and installation process
-  const ready = process.platform === 'win32' ? await checkFuseOnWindows() : await checkFuseOnLinuxMacOS()
-
-  // Verify that everything has been installed, else exits process with nice error message
-  require(isWin ? 'node-fuse-bindings' : 'fuse-native')
+  if (isWin) {
+    await checkFuseOnWindows()
+    require('node-fuse-bindings')
+  } else {
+    await checkFuseOnLinuxMacOS()
+    require('fuse-native')  // TODO: here gives a segfault on Linux
+  }
 }
 
 // checkAndInstall()
