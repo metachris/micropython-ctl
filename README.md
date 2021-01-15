@@ -203,15 +203,12 @@ Maybe (not sure it's needed, don't rush into implementing):
 
 #### Testing
 
-1. Run the tests with a Device: `yarn test`
-1. Test package installation:
-1.1. Prepare: `yarn build && yarn pack`
-1.1. macOS & Linux: run `tests/test-package-installation.sh`
-1.1. Windows: run `E:/tests/test-package-installation.bat`
-
-Website integration:
-- In the html files, change imports to local
-- Open in Browser
+- Run the tests with a Device: `yarn test`
+- Test package installation:
+  - Prepare: `yarn build && yarn pack`
+  - macOS & Linux: run `tests/test-package-installation.sh`
+  - Windows: run `E:/tests/test-package-installation.bat`
+- Test web examples: In the html files, change imports to local and open in Browser
 
 #### Release
 
@@ -233,8 +230,7 @@ yarn version
 ./build.sh
 
 # check the final package
-yarn pack && tar -xvf micropython-ctl-v*
-ll package/
+yarn pack && tar -xvf micropython-ctl-v* && ll package/
 rm -rf package/ micropython-ctl-v*
 
 # publish
@@ -245,14 +241,18 @@ git push && git push --tags
 ```
 
 
-Update [live web-example.html](http://current.at/micropython-ctl/web-example.html) with code from Github `master` branch:
+Update live web examples with code from Github `master` branch:
 
 ```
 ssh nova "cd /server/websites/current.at/micropython-ctl && git pull"
 ```
 
+Test the live web examples:
+* [web-example.html](http://current.at/micropython-ctl/examples/web-example.html)
+* [web-example2-terminal.html](http://current.at/micropython-ctl/examples/web-example2-terminal.html)
+
+
 Notes:
 
-* Update browser lib versions in this repo: search for `micropython-ctl@`
 * Help for writing release notes: https://github.com/metachris/micropython-ctl/compare
 * Purge CDN cache: https://purge.jsdelivr.net/npm/micropython-ctl@latest
