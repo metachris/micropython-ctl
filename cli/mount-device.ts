@@ -16,7 +16,7 @@ import { MicroPythonDevice, FileListEntry as UpstreamFileListEntry } from '../sr
 import { checkAndInstall as checkAndInstallFuse } from './fuse-dependencies'
 
 // Show debug output on a per-file basis. Use '*' for all files, or an empty array for no debug output.
-const SHOW_DEBUG_OUTPUT_FOR_PATHS = ['/foo.txt']
+const SHOW_DEBUG_OUTPUT_FOR_PATHS = ['*']
 if (process.env.DEBUG_OUTPUT_FOR) { SHOW_DEBUG_OUTPUT_FOR_PATHS.push(process.env.DEBUG_OUTPUT_FOR) }
 
 // For testing it can be useful to always download contents on read (skip caching)
