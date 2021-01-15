@@ -291,18 +291,26 @@
 <span style="color: #008000"># create the builds for node and browser</span>
 <span style="color: #000000">./build.sh</span>
 
+<span style="color: #008000"># check the final package</span>
+<span style="color: #000000">yarn pack &amp;&amp; tar -xvf micropython-ctl-v* &amp;&amp; ll package/</span>
+<span style="color: #000000">rm -rf package/ micropython-ctl-v*</span>
+
 <span style="color: #008000"># publish</span>
 <span style="color: #000000">yarn publish</span>
 
 <span style="color: #008000"># push to git</span>
 <span style="color: #000000">git push &amp;&amp; git push --tags</span>
 </code></pre>
-				<p>Update <a href="http://current.at/micropython-ctl/web-example.html">live web-example.html</a> with code from Github <code>master</code> branch:</p>
+				<p>Update live web examples with code from Github <code>master</code> branch:</p>
 				<pre><code><span style="color: #001080">ssh</span><span style="color: #000000"> </span><span style="color: #001080">nova</span><span style="color: #000000"> </span><span style="color: #A31515">&quot;cd /server/websites/current.at/micropython-ctl &amp;&amp; git pull&quot;</span>
 </code></pre>
+				<p>Test the live web examples:</p>
+				<ul>
+					<li><a href="http://current.at/micropython-ctl/examples/web-example.html">web-example.html</a></li>
+					<li><a href="http://current.at/micropython-ctl/examples/web-example2-terminal.html">web-example2-terminal.html</a></li>
+				</ul>
 				<p>Notes:</p>
 				<ul>
-					<li>Update browser lib versions in this repo: search for <code>micropython-ctl@</code></li>
 					<li>Help for writing release notes: <a href="https://github.com/metachris/micropython-ctl/compare">https://github.com/metachris/micropython-ctl/compare</a></li>
 					<li>Purge CDN cache: <a href="https://purge.jsdelivr.net/npm/micropython-ctl@latest">https://purge.jsdelivr.net/npm/micropython-ctl@latest</a></li>
 				</ul>
