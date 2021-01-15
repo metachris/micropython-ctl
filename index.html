@@ -63,9 +63,7 @@
 				</a>
 				<p>A library to interface with MicroPython devices over serial and network connections (REPL and WebREPL)</p>
 				<ul>
-					<li>Easily build websites/webapps and Node.js programs that talk with MicroPython devices</li>
-					<li>Typed and fully async (you can use <code>await</code> with all the commands)</li>
-					<li>Works on Linux, macOS and Windows, tested with ESP32 &amp; ESP8266</li>
+					<li>Easily build websites/webapps and Node.js programs that talk to MicroPython devices</li>
 					<li>Functionality:<ul>
 							<li>Connect to device over serial or network</li>
 							<li>Run Python scripts, await the output</li>
@@ -73,9 +71,11 @@
 							<li>Terminal (REPL) interaction</li>
 							<li><a href="https://github.com/metachris/micropython-ctl/blob/master/cli"><code>mctl</code></a> command line utility</li>
 							<li>Mount the micropython device into the local filesystem (<code>mctl mount</code>, experimental)</li>
+							<li>See all features in the <a href="https://metachris.github.io/micropython-ctl/classes/micropythondevice.html">documentation</a>, <a href="https://github.com/metachris/micropython-ctl/tree/master/examples">examples</a> and <a href="https://github.com/metachris/micropython-ctl/blob/master/cli"><code>cli/</code></a></li>
 						</ul>
 					</li>
-					<li>See all features in the <a href="https://metachris.github.io/micropython-ctl/classes/micropythondevice.html">documentation</a>, <a href="https://github.com/metachris/micropython-ctl/tree/master/examples">examples</a> and <a href="https://github.com/metachris/micropython-ctl/blob/master/cli"><code>mctl</code></a></li>
+					<li>Works on Linux, macOS and Windows, tested with ESP32 &amp; ESP8266</li>
+					<li>Typed and fully async (you can use <code>await</code> with all the commands)</li>
 					<li>Main code files: <a href="https://github.com/metachris/micropython-ctl/blob/master/src/main.ts"><code>main.ts</code></a>, <a href="https://github.com/metachris/micropython-ctl/blob/master/cli/index.ts"><code>cli/index.ts</code></a></li>
 					<li>Links: <a href="https://github.com/metachris/micropython-ctl">Github</a>, <a href="https://metachris.github.io/micropython-ctl/">Documentation</a>, <a href="https://www.npmjs.com/package/micropython-ctl">npm package</a></li>
 				</ul>
@@ -100,7 +100,7 @@
 
 <span style="color: #008000">// Set a terminal (REPL) data handler, and send data to the REPL</span>
 <span style="color: #001080">micropython</span><span style="color: #000000">.</span><span style="color: #795E26">onTerminalData</span><span style="color: #000000"> = (</span><span style="color: #001080">data</span><span style="color: #000000">) </span><span style="color: #0000FF">=&gt;</span><span style="color: #000000"> </span><span style="color: #001080">process</span><span style="color: #000000">.</span><span style="color: #001080">stdout</span><span style="color: #000000">.</span><span style="color: #795E26">write</span><span style="color: #000000">(</span><span style="color: #001080">data</span><span style="color: #000000">)</span>
-<span style="color: #001080">micropython</span><span style="color: #000000">.</span><span style="color: #795E26">sendData</span><span style="color: #000000">(</span><span style="color: #A31515">&#039;</span><span style="color: #EE0000">\x02</span><span style="color: #A31515">&#039;</span><span style="color: #000000">)  </span><span style="color: #008000">// Ctrl+B to enter friendly repl and print version</span>
+<span style="color: #001080">micropython</span><span style="color: #000000">.</span><span style="color: #795E26">sendData</span><span style="color: #000000">(</span><span style="color: #A31515">&#039;</span><span style="color: #EE0000">\x03\x02</span><span style="color: #A31515">&#039;</span><span style="color: #000000">)  </span><span style="color: #008000">// Ctrl+C and Ctrl+B to enter friendly repl and print version</span>
 </code></pre>
 				<p>Note on network connection: To access the webrepl over the network, you need to enable it first through the serial REPL: <code>import webrepl_setup</code> (see <a href="https://docs.micropython.org/en/latest/esp8266/tutorial/repl.html#webrepl-a-prompt-over-wifi">docs</a>). Also, make sure you can ping the device first.</p>
 				<p><strong>Code examples:</strong></p>
