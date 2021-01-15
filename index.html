@@ -217,12 +217,23 @@
 				<a href="#future-work" id="future-work" style="color: inherit; text-decoration: none;">
 					<h2>Future work</h2>
 				</a>
+				<p>Code library:</p>
 				<ul>
 					<li><code>getFileHash</code> - get a sha256 hash of a file without downloading</li>
 					<li>put/get recursively</li>
 					<li><code>getFile</code> improvement - currently it fills the device RAM and probably works badly with large file</li>
 					<li>putfile and getfile over network: switch to webrepl protocol instead of manual up- and download</li>
+					<li>Document all functions in <a href="https://github.com/metachris/micropython-ctl/blob/master/src/main.ts">https://github.com/metachris/micropython-ctl/blob/master/src/main.ts</a></li>
+				</ul>
+				<p><code>mctl</code>:</p>
+				<ul>
 					<li><code>mctl mount</code> issues (<a href="https://github.com/metachris/micropython-ctl/issues/3">see here</a>)</li>
+					<li>env vars for host, password: WEBREPL, AMPY</li>
+					<li>upload everything recursively (&#39;cp -r .&#39;)</li>
+					<li>wifi status, connect, disconnect</li>
+					<li>mount: testing</li>
+					<li>mount + repl</li>
+					<li>reuse one instance (eg. in mount mode) to execute other commands</li>
 				</ul>
 				<p>Maybe (not sure it&#39;s needed, don&#39;t rush into implementing):</p>
 				<ul>
@@ -236,6 +247,52 @@
 				<hr>
 				<a href="#release-process" id="release-process" style="color: inherit; text-decoration: none;">
 					<h2>Release process</h2>
+				</a>
+				<a href="#testing" id="testing" style="color: inherit; text-decoration: none;">
+					<h4>Testing</h4>
+				</a>
+				<ol>
+					<li>Run the tests with a Device: <code>yarn test</code></li>
+					<li>Test module installation:</li>
+				</ol>
+				<p>Prepare: <code>yarn build &amp;&amp; yarn pack</code></p>
+				<p>macOS &amp; Linux:</p>
+				<pre><code class="language-shell"><span style="color: #008000"># Create empty project directory</span>
+<span style="color: #000000">DIR=</span><span style="color: #A31515">&quot;/tmp/mctl-test&quot;</span>
+<span style="color: #000000">rm -rf </span><span style="color: #001080">$DIR</span><span style="color: #000000"> &amp;&amp; mkdir </span><span style="color: #001080">$DIR</span><span style="color: #000000"> &amp;&amp; </span><span style="color: #795E26">cd</span><span style="color: #000000"> </span><span style="color: #001080">$DIR</span><span style="color: #000000"> &amp;&amp; npm init -y</span>
+
+<span style="color: #008000"># Uninstall and clear caches</span>
+<span style="color: #000000">npm uninstall --global micropython-ctl fuse-native</span>
+<span style="color: #795E26">cd</span><span style="color: #000000"> </span><span style="color: #A31515">`yarn cache dir`</span><span style="color: #000000"> &amp;&amp; rm -rf npm-micropython-ctl-*</span>
+
+<span style="color: #008000"># Install package</span>
+<span style="color: #000000">yarn add ~/Projects/micropython/micropython-ctl/micropython-ctl-*.tgz</span>
+
+<span style="color: #008000"># Test</span>
+<span style="color: #000000">./node_modules/.bin/mctl ls</span>
+<span style="color: #000000">./node_modules/.bin/mctl mount</span>
+<span style="color: #000000">./node_modules/.bin/mctl run-tests</span>
+
+<span style="color: #008000"># Now testing the global installation</span>
+<span style="color: #795E26">cd</span><span style="color: #000000"> /tmp &amp;&amp; rm -rf </span><span style="color: #001080">$DIR</span>
+<span style="color: #000000">npm install -g ~/Projects/micropython/micropython-ctl/micropython-ctl-*.tgz</span>
+
+<span style="color: #008000"># Test</span>
+<span style="color: #000000">which mctl</span>
+<span style="color: #000000">mctl ls</span>
+<span style="color: #000000">mctl mount</span>
+<span style="color: #000000">mctl run-tests</span>
+</code></pre>
+				<ol>
+					<li>Windows: local and global</li>
+				</ol>
+				<p>Website integration:</p>
+				<ul>
+					<li>In the html files, change imports to local</li>
+					<li>Open in Browser</li>
+				</ul>
+				<a href="#release" id="release" style="color: inherit; text-decoration: none;">
+					<h4>Release</h4>
 				</a>
 				<pre><code class="language-shell"><span style="color: #008000"># Update CHANGELOG</span>
 <span style="color: #000000">code CHANGELOG.md</span>
