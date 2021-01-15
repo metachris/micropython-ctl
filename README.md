@@ -232,6 +232,11 @@ yarn version
 # create the builds for node and browser
 ./build.sh
 
+# check the final package
+yarn pack && tar -xvf micropython-ctl-v*
+ll package/
+rm -rf package/ micropython-ctl-v*
+
 # publish
 yarn publish
 

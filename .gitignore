@@ -5,6 +5,8 @@
 /dist-*/
 /docs/
 /tmp/
+/mnt/
+/package/
 .idea/*
 
 coverage

@@ -12,3 +12,5 @@ coverage
 package-lock.json
 /*.tgz
 /tmp*
+/mnt/
+/package/
