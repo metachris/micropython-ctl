@@ -291,11 +291,6 @@
 <span style="color: #008000"># create the builds for node and browser</span>
 <span style="color: #000000">./build.sh</span>
 
-<span style="color: #008000"># check the final package</span>
-<span style="color: #000000">yarn pack &amp;&amp; tar -xvf micropython-ctl-v*</span>
-<span style="color: #000000">ll package/</span>
-<span style="color: #000000">rm -rf package/ micropython-ctl-v*</span>
-
 <span style="color: #008000"># publish</span>
 <span style="color: #000000">yarn publish</span>
 
