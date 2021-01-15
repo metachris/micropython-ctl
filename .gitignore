@@ -11,3 +11,5 @@ coverage
 *.log
 
 package-lock.json
+/*.tgz
+/tmp*

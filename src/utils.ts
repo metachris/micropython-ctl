@@ -44,25 +44,3 @@ export const dedent = (text: string): string => {
   const result = lines.map(l => l.slice(mindent!)).join("\n");
   return result.trim()
 }
-
-export const humanFileSize = (bytes, si = true, dp = 1) => {
-  const thresh = si ? 1000 : 1024;
-
-  if (Math.abs(bytes) < thresh) {
-    return bytes + 'b';
-  }
-
-  const units = si
-    ? ['K', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
-    : ['KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB'];
-  let u = -1;
-  const r = 10 ** dp;
-
-  do {
-    bytes /= thresh;
-    ++u;
-  } while (Math.round(Math.abs(bytes) * r) / r >= thresh && u < units.length - 1);
-
-
-  return bytes.toFixed(dp) + units[u];
-}

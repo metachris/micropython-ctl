@@ -6,21 +6,13 @@
  */
 import * as path from 'path'
 import * as readline from 'readline'
+import { isInstalledGlobally } from './utils'
 import { execSync } from 'child_process';
-
-// tslint:disable-next-line: no-var-requires
-const commandExists = require('./lib/command-exists').sync
-// const globalDirs = require('./lib/global-dirs')
 
 const isWin = process.platform === 'win32'
 const isLinux = process.platform === 'linux'
 
-// const isInstalledGlobally = (): boolean => {
-//   const dir = path.dirname(__dirname)
-//   return (globalDirs.yarn.packages.indexOf())
-// }
-
-const askQuestion = (query): Promise<string> => {
+const askQuestion = (query: string): Promise<string> => {
   const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
@@ -43,9 +35,7 @@ const checkFuseOnLinuxMacOS = async (): Promise<boolean> => {
   }
 
   // Module not found...
-  const useYarn = commandExists('yarn')
-  const cmd = useYarn ? 'yarn add fuse-native' : 'npm install fuse-native'
-
+  const cmd = isInstalledGlobally() ? 'npm install -g fuse-native' : 'npm install fuse-native'
   console.log('To mount a device, you need to install the fuse-native npm package.\n')
   const answer = await askQuestion(`Execute command '${cmd}' now? [Y/n] `)
   const doInstall = !answer || answer.toLowerCase() === 'y'
@@ -77,8 +67,7 @@ const checkFuseOnWindows = async (): Promise<boolean> => {
   }
 
   // Install node-fuse-bindings
-  const useYarn = commandExists('yarn')
-  const cmd = useYarn ? 'yarn add node-fuse-bindings' : 'npm install node-fuse-bindings'
+  const cmd = isInstalledGlobally() ? 'npm install -g node-fuse-bindings' : 'npm install node-fuse-bindings'
   console.log('To mount a device, you need to install https://github.com/direktspeed/node-fuse-bindings\n')
   const answer = await askQuestion(`Execute command '${cmd}'? [Y/n] `)
   const doInstall = !answer || answer.toLowerCase() === 'y'
