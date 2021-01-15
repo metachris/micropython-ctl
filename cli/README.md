@@ -29,18 +29,19 @@ Options:
 
 Commands:
   devices                                      List serial devices
+  repl                                         Open a REPL terminal
+  run <fileOrCommand>                          Execute a Python file or command
   ls [options] [directory]                     List files on a device
   cat <filename>                               Print content of a file on the device
   get <file_or_dirname> [out_file_or_dirname]  Download a file or directory from the device
   put <filename> [<destFilename>]              Copy a file onto the device
+  edit <filename>                              Edit a file, and if changed upload afterwards
   mkdir <name>                                 Create a directory
   rm [options] <path>                          Delete a file or directory
   mv <oldPath> <newPath>                       Rename a file or directory
-  run <fileOrCommand>                          Execute a Python file or command
   reset [options]                              Reset the MicroPython device
-  edit <filename>                              Edit a file, and if changed upload afterwards
-  repl                                         Open a REPL terminal
   mount                                        Mount a MicroPython device (over serial or network)
+  run-tests                                    Run micropython-ctl tests on a device
   version                                      Print the version of mctl
   help [command]                               display help for command
 ```
@@ -52,8 +53,8 @@ Note: without tty / host+password options, `mctl` will try to connect to the fir
 
 `mctl mount`
 
-* Mounts the device filesystem into the local filesystem
+* Mounts the device filesystem into the local filesystem. Highly experimental! Doesn't yet work well with binary files, and Windows. Not recommended for production use. Might result in data loss.
 * macOS, Linux: Works. Uses [fuse-native](https://github.com/fuse-friends/fuse-native)
 * Windows: experimental, might be buggy. Uses [node-fuse-bindings](https://github.com/direktspeed/node-fuse-bindings) and [Dokany](https://github.com/dokan-dev/dokany/wiki/Installation)
 * Keeps the device connection open, which means you cannot connect to it in parallel
-* If you encounter problems or have feedback, please [open an issue](https://github.com/metachris/micropython-ctl/issues/new)
+* If you encounter problems or have feedback, please post here: https://github.com/metachris/micropython-ctl/issues/3

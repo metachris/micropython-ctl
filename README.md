@@ -57,7 +57,7 @@ Note on network connection: To access the webrepl over the network, you need to 
 In websites/webapps, simply include the latest release via CDN (~13kb gzipped):
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/micropython-ctl@1.5.2/dist-browser/main.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/micropython-ctl@1.7.3/dist-browser/main.js"></script>
 ```
 
 Then you can use it like this:

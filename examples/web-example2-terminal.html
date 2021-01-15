@@ -13,7 +13,7 @@
   <script src="https://cdn.jsdelivr.net/npm/xterm@4.9.0/lib/xterm.js"></script>
 
   <!-- MicroPythonCtl JS -->
-  <script src="https://cdn.jsdelivr.net/npm/micropython-ctl@1.5.2/dist-browser/main.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/micropython-ctl@1.7.3/dist-browser/main.js"></script>
   <!-- <script src="../dist-browser/main.js"></script> -->
 
   <title>MicroPythonCtl Example</title>
@@ -82,6 +82,7 @@
   const DIV_STATUS = document.getElementById('status')
   const INPUT_HOST = document.getElementById('txtHost')
   const INPUT_PASS = document.getElementById('txtPassword')
+  const BTN_CONNECT = document.getElementById('btnConnect')
 
   INPUT_HOST.value = localStorage.getItem('MicroPythonCtl:Host')
   INPUT_PASS.value = localStorage.getItem('MicroPythonCtl:Password')
@@ -103,7 +104,7 @@
   async function connect() {
     const host = INPUT_HOST.value
     const password = INPUT_PASS.value
-    DIV_STATUS.innerHTML = `Connecting to ${host}...`
+    DIV_STATUS.textContent = BTN_CONNECT.textContent = 'Connecting...'
 
     // Save for next page load
     localStorage.setItem('MicroPythonCtl:Host', host)
@@ -115,13 +116,14 @@
       await micropythonDevice.connectNetwork(host, password)
     } catch (e) {
       DIV_STATUS.innerHTML = `Error: ${e.message}`
+      BTN_CONNECT.textContent = 'Connect'
       return
     }
-    DIV_STATUS.innerHTML = "Connected"
+    DIV_STATUS.innerHTML = BTN_CONNECT.textContent = 'Connected'
 
     // When receiving terminal data, send to xterm.js
     micropythonDevice.onTerminalData = (data) => term.write(data)
-    micropythonDevice.onclose = () => DIV_STATUS.innerHTML = "Disconnected"
+    micropythonDevice.onclose = () => DIV_STATUS.textContent = BTN_CONNECT.textContent = "Disconnected"
 
     // Send Ctrl+B to device
     micropythonDevice.sendData('\x02')

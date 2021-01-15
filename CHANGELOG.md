@@ -1,3 +1,10 @@
+1.7.3 (2021-01-15)
+------------------
+First pretty feature-complete, allround tested version.
+
+`mctl` works on Windows, Linux and macOS!
+
+
 1.7.2 (2021-01-13)
 ------------------
 * many improvements and adding missing commands to the module and mctl
