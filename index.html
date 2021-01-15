@@ -3,8 +3,8 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>micropython-ctl - v1.7.2</title>
-	<meta name="description" content="Documentation for micropython-ctl - v1.7.2">
+	<title>micropython-ctl - v1.7.3</title>
+	<meta name="description" content="Documentation for micropython-ctl - v1.7.3">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="assets/css/main.css">
 	<script async src="assets/js/search.js" id="search-script"></script>
@@ -23,7 +23,7 @@
 						<li class="state loading">Preparing search index...</li>
 						<li class="state failure">The search index is not available</li>
 					</ul>
-					<a href="index.html" class="title">micropython-ctl - v1.7.2</a>
+					<a href="index.html" class="title">micropython-ctl - v1.7.3</a>
 				</div>
 				<div class="table-cell" id="tsd-widgets">
 					<div id="tsd-filter">
@@ -50,7 +50,7 @@
 	</div>
 	<div class="tsd-page-title">
 		<div class="container">
-			<h1>Project micropython-ctl - v1.7.2</h1>
+			<h1>Project micropython-ctl - v1.7.3</h1>
 		</div>
 	</div>
 </header>
@@ -115,7 +115,7 @@
 					<h2>Browser / Webapps</h2>
 				</a>
 				<p>In websites/webapps, simply include the latest release via CDN (~13kb gzipped):</p>
-				<pre><code class="language-html"><span style="color: #800000">&lt;script</span><span style="color: #000000FF"> </span><span style="color: #FF0000">src</span><span style="color: #000000FF">=</span><span style="color: #0000FF">&quot;https://cdn.jsdelivr.net/npm/micropython-ctl@1.5.2/dist-browser/main.js&quot;</span><span style="color: #800000">&gt;&lt;/script&gt;</span>
+				<pre><code class="language-html"><span style="color: #800000">&lt;script</span><span style="color: #000000FF"> </span><span style="color: #FF0000">src</span><span style="color: #000000FF">=</span><span style="color: #0000FF">&quot;https://cdn.jsdelivr.net/npm/micropython-ctl@1.7.3/dist-browser/main.js&quot;</span><span style="color: #800000">&gt;&lt;/script&gt;</span>
 </code></pre>
 				<p>Then you can use it like this:</p>
 				<pre><code class="language-js"><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">micropython</span><span style="color: #000000"> = </span><span style="color: #0000FF">new</span><span style="color: #000000"> </span><span style="color: #267F99">MicroPythonCtl</span><span style="color: #000000">.</span><span style="color: #267F99">MicroPythonDevice</span><span style="color: #000000">()</span>
@@ -253,38 +253,19 @@
 				</a>
 				<ol>
 					<li>Run the tests with a Device: <code>yarn test</code></li>
-					<li>Test module installation:</li>
-				</ol>
-				<p>Prepare: <code>yarn build &amp;&amp; yarn pack</code></p>
-				<p>macOS &amp; Linux:</p>
-				<pre><code class="language-shell"><span style="color: #008000"># Create empty project directory</span>
-<span style="color: #000000">DIR=</span><span style="color: #A31515">&quot;/tmp/mctl-test&quot;</span>
-<span style="color: #000000">rm -rf </span><span style="color: #001080">$DIR</span><span style="color: #000000"> &amp;&amp; mkdir </span><span style="color: #001080">$DIR</span><span style="color: #000000"> &amp;&amp; </span><span style="color: #795E26">cd</span><span style="color: #000000"> </span><span style="color: #001080">$DIR</span><span style="color: #000000"> &amp;&amp; npm init -y</span>
-
-<span style="color: #008000"># Uninstall and clear caches</span>
-<span style="color: #000000">npm uninstall --global micropython-ctl fuse-native</span>
-<span style="color: #795E26">cd</span><span style="color: #000000"> </span><span style="color: #A31515">`yarn cache dir`</span><span style="color: #000000"> &amp;&amp; rm -rf npm-micropython-ctl-*</span>
-
-<span style="color: #008000"># Install package</span>
-<span style="color: #000000">yarn add ~/Projects/micropython/micropython-ctl/micropython-ctl-*.tgz</span>
-
-<span style="color: #008000"># Test</span>
-<span style="color: #000000">./node_modules/.bin/mctl ls</span>
-<span style="color: #000000">./node_modules/.bin/mctl mount</span>
-<span style="color: #000000">./node_modules/.bin/mctl run-tests</span>
-
-<span style="color: #008000"># Now testing the global installation</span>
-<span style="color: #795E26">cd</span><span style="color: #000000"> /tmp &amp;&amp; rm -rf </span><span style="color: #001080">$DIR</span>
-<span style="color: #000000">npm install -g ~/Projects/micropython/micropython-ctl/micropython-ctl-*.tgz</span>
-
-<span style="color: #008000"># Test</span>
-<span style="color: #000000">which mctl</span>
-<span style="color: #000000">mctl ls</span>
-<span style="color: #000000">mctl mount</span>
-<span style="color: #000000">mctl run-tests</span>
-</code></pre>
-				<ol>
-					<li>Windows: local and global</li>
+					<li>Test package installation:</li>
+					<li><ol>
+							<li>Prepare: <code>yarn build &amp;&amp; yarn pack</code></li>
+						</ol>
+					</li>
+					<li><ol>
+							<li>macOS &amp; Linux: run <code>tests/test-package-installation.sh</code></li>
+						</ol>
+					</li>
+					<li><ol>
+							<li>Windows: run <code>E:/tests/test-package-installation.bat</code></li>
+						</ol>
+					</li>
 				</ol>
 				<p>Website integration:</p>
 				<ul>
@@ -309,6 +290,11 @@
 
 <span style="color: #008000"># create the builds for node and browser</span>
 <span style="color: #000000">./build.sh</span>
+
+<span style="color: #008000"># check the final package</span>
+<span style="color: #000000">yarn pack &amp;&amp; tar -xvf micropython-ctl-v*</span>
+<span style="color: #000000">ll package/</span>
+<span style="color: #000000">rm -rf package/ micropython-ctl-v*</span>
 
 <span style="color: #008000"># publish</span>
 <span style="color: #000000">yarn publish</span>
