@@ -33,9 +33,17 @@ import { getTmpFilename } from '../src/utils-node';
 import { mount as mountWithFuse } from './mount-device'
 import { checkAndInstall as checkAndInstallFuse } from './fuse-dependencies'
 
+// https://github.com/tj/commander.js
 const program = new Command();
 
+// https://metachris.github.io/micropython-ctl/classes/micropythondevice.html
 const micropython = new MicroPythonDevice()
+
+process.on('unhandledRejection', error => {
+  console.log(error)
+  console.log('Please open an issue at https://github.com/metachris/micropython-ctl/issues')
+  process.exit(2)
+})
 
 const CLR_RESET = "\x1b[0m";
 const CLR_FG_BLUE = "\x1b[34m";
@@ -116,10 +124,12 @@ const listFilesOnDevice = async (directory = '/', cmdObj) => {
 
 const putFile = async (filename: string, destFilename?: string) => {
   if (!destFilename) destFilename = path.basename(filename)
-  console.log(filename, '->', destFilename)
+  console.log('putFile', filename, '->', destFilename)
 
+  // Read the file
   const data = Buffer.from(fs.readFileSync(filename))
 
+  // Connect and upload
   try {
     await ensureConnectedDevice()
     await micropython.putFile(destFilename, data)
@@ -129,7 +139,7 @@ const putFile = async (filename: string, destFilename?: string) => {
 }
 
 const mkdir = async (name: string) => {
-  console.log('mkdir', name)
+  logVerbose('mkdir', name)
 
   await ensureConnectedDevice()
 
@@ -138,6 +148,7 @@ const mkdir = async (name: string) => {
   } catch (e) {
     if (e instanceof ScriptExecutionError && e.message.includes('OSError: [Errno 17] EEXIST')) {
       console.log(`${CLR_FG_RED}mkdir: cannot create directory '${name}': File exists${CLR_RESET}`)
+      return
     }
     console.log('Error:', e)
     process.exit(1)
@@ -201,16 +212,16 @@ const get = async (filenameOrDir: string, targetFilenameOrDir: string) => {
 }
 
 
-const rm = async (path: string, cmdObj) => {
-  if (!path.startsWith('/')) path = '/' + path
-  console.log('rm', path)
+const rm = async (targetPath: string, cmdObj) => {
+  if (!targetPath.startsWith('/')) targetPath = '/' + targetPath
+  logVerbose('rm', targetPath)
 
   try {
     await ensureConnectedDevice()
-    await micropython.remove(path, cmdObj.recursive)
+    await micropython.remove(targetPath, cmdObj.recursive)
   } catch (e) {
     if (e instanceof ScriptExecutionError && e.message.includes('OSError: [Errno 2] ENOENT')) {
-      console.log(`${CLR_FG_RED}rm: cannot remove '${path}': No such file or directory${CLR_RESET}`)
+      console.log(`${CLR_FG_RED}rm: cannot remove '${targetPath}': No such file or directory${CLR_RESET}`)
       return
     }
     console.error('Error:', e)
@@ -221,7 +232,7 @@ const rm = async (path: string, cmdObj) => {
 }
 
 const mv = async (oldPath: string, newPath: string) => {
-  console.log('mv', oldPath, newPath)
+  logVerbose('mv', oldPath, newPath)
 
   try {
     await ensureConnectedDevice()
@@ -239,9 +250,9 @@ const mv = async (oldPath: string, newPath: string) => {
 }
 
 const run = async (fileOrCommand: string) => {
-  console.log('run', fileOrCommand)
+  logVerbose('run', fileOrCommand)
   const script = fs.existsSync(fileOrCommand) ? fs.readFileSync(fileOrCommand).toString() : fileOrCommand
-  console.log(script)
+  logVerbose(script)
 
   try {
     await ensureConnectedDevice()
@@ -256,10 +267,9 @@ const run = async (fileOrCommand: string) => {
 }
 
 const edit = async (filename: string) => {
-  console.log('edit', filename)
+  logVerbose('edit', filename)
   const baseFilename = filename.replace(/^.*[\\\/]/, '')
   const tmpFilename = getTmpFilename(baseFilename)
-  console.log(tmpFilename)
 
   try {
     await ensureConnectedDevice()
@@ -297,7 +307,7 @@ const edit = async (filename: string) => {
 }
 
 const reset = async (cmdObj) => {
-  console.log('reset')
+  logVerbose('reset')
 
   await ensureConnectedDevice()
   await micropython.reset({ softReset: !!cmdObj.soft })  // cannot await result because it's restarting and we loose the connection

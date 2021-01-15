@@ -125,12 +125,17 @@ interface MountOpts {
   tty?: string
   host?: string
   password?: string
+  mountPath?: string
 }
 
 /**
- * Main code entry point
+ * Main code entry point.
+ *
+ * By default mounts the device to ./mnt/ on Linux/macOS, and to M:\ on Windows
  */
 export const mount = async (opts: MountOpts) => {
+  const mountPath = opts.mountPath || isWin ? 'M:\\' : './mnt'
+
   // Ensure Fuse is installed and ready
   await checkAndInstallFuse()
 
@@ -351,17 +356,19 @@ export const mount = async (opts: MountOpts) => {
     }
   }
 
-  const mountPath = isWin ? 'M:\\' : './mnt'
   if (isWin) {
-    console.log('mounting...')
+    /**
+     * Mounting the device on Windows
+     */
+    console.log('Mounting a device on Windows is experimental. One bug causes crashes when reading a file. See more here: https://github.com/metachris/micropython-ctl/issues/2')
     Fuse.mount(mountPath, fuseOps, {
       options: ['volname=MicroPython']
     })
     console.log('Mounted on', mountPath)
 
     // handle Ctrl+C
-    process.on('SIGINT', function () {
-      Fuse.unmount(mountPath, function (err) {
+    process.on('SIGINT', () => {
+      Fuse.unmount(mountPath, (err: any) => {
         if (err) {
           console.error('filesystem at ' + mountPath + ' not unmounted')
           console.error(err)
@@ -382,7 +389,7 @@ export const mount = async (opts: MountOpts) => {
 
     fuse.mount(err => {
       if (err) throw err
-      console.log('filesystem mounted on ' + fuse.mnt)
+      console.log('Mounted on ' + fuse.mnt)
     })
 
     // handle Ctrl+C
