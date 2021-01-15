@@ -8,7 +8,11 @@
  * - https://github.com/dokan-dev/dokany
  *
  * TODO:
+ * - Write binary files from shell seems to not work?
+ *
+ * TODO cannotfix:
  * - Windows support: almost working, but crash on repeated read https://github.com/direktspeed/node-fuse-bindings/issues/11
+ *
  */
 import * as nodePath from 'path'
 import * as crypto from 'crypto'
@@ -17,7 +21,11 @@ import { MicroPythonDevice, FileListEntry as UpstreamFileListEntry } from '../sr
 import { checkAndInstall as checkAndInstallFuse } from './fuse-dependencies'
 
 // Show debug output on a per-file basis. Use '*' for all files, or an empty array for no debug output.
-const SHOW_DEBUG_OUTPUT_FOR_PATHS = ['/_mctl*']
+const SHOW_DEBUG_OUTPUT_FOR_PATHS = ['/foo.txt']
+if (process.env.DEBUG_OUTPUT_FOR) { SHOW_DEBUG_OUTPUT_FOR_PATHS.push(process.env.DEBUG_OUTPUT_FOR) }
+
+// For testing it can be useful to always download contents on read (skip caching)
+const ALWAYS_DOWNLOAD_ON_READ = !!process.env.ALWAYS_DOWNLOAD_ON_READ
 
 const fuseDebug = (op: string, path: string, ...args: any) => {
   const shouldShowMessage = (): boolean => {
@@ -235,7 +243,8 @@ export const mount = async (opts: MountOpts) => {
         return process.nextTick(cb, -1)
       }
 
-      if (node.contents === null) {
+      // Perhaps download data
+      if (node.contents === null || ALWAYS_DOWNLOAD_ON_READ) {
         console.log(`Downloading ${path} from device...`)
         let fileContents: Buffer
         if (opts.useDummyMicropython) {
@@ -247,16 +256,15 @@ export const mount = async (opts: MountOpts) => {
         node.contentsSavedHash = crypto.createHash('sha256').update(node.contents).digest('hex')
       }
 
-      const bufferSlize = node.contents.slice(pos, pos + len)
-      if (!bufferSlize.length) {
+      const bufferSlice = node.contents.slice(pos, pos + len)
+      if (!bufferSlice.length) {
         console.log('endRead')
         return process.nextTick(cb, 0)  // end of contents
       }
 
-      const str = bufferSlize.toString()
-      // fuseDebug('read', path, '-> output:', str)
-      buf.write(str)
-      return process.nextTick(cb, str.length)
+      fuseDebug('read', path, node.contents, '-> output:', bufferSlice)
+      buf.write(bufferSlice.toString())
+      return process.nextTick(cb, bufferSlice.length)
     },
 
     create(path: string, flags, cb) {
