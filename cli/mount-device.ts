@@ -13,14 +13,37 @@
 import * as nodePath from 'path'
 import * as crypto from 'crypto'
 import { Buffer } from 'buffer/'
-import { MicroPythonDevice, FileListEntry as UpstreamFileListEntry} from '../src/main';
+import { MicroPythonDevice, FileListEntry as UpstreamFileListEntry } from '../src/main';
 import { checkAndInstall as checkAndInstallFuse } from './fuse-dependencies'
 
 // Show debug output on a per-file basis. Use '*' for all files, or an empty array for no debug output.
-const SHOW_DEBUG_OUTPUT_FOR_PATHS = ['*']
+const SHOW_DEBUG_OUTPUT_FOR_PATHS = ['/_mctl*']
 
 const fuseDebug = (op: string, path: string, ...args: any) => {
-  if (SHOW_DEBUG_OUTPUT_FOR_PATHS.indexOf('*') > -1 || SHOW_DEBUG_OUTPUT_FOR_PATHS.indexOf(path) > -1) {
+  const shouldShowMessage = (): boolean => {
+    // Full wildcard
+    if (SHOW_DEBUG_OUTPUT_FOR_PATHS.indexOf('*') > -1) { return true }
+
+    // Filename exact match
+    if (SHOW_DEBUG_OUTPUT_FOR_PATHS.indexOf(path) > -1) { return true }
+
+    // Filename wildcard match: iterate over all debug filenames
+    for (const debugPath of SHOW_DEBUG_OUTPUT_FOR_PATHS) {
+      // wildcard with trailing *
+      if (debugPath.endsWith('*')) {
+        if (path.startsWith(debugPath.substr(0, debugPath.length - 1))) { return true }
+      }
+
+      // wildcard with leading *
+      if (debugPath.startsWith('*')) {
+        if (path.endsWith(debugPath.substr(1))) { return true }
+      }
+    }
+
+    return false
+  }
+
+  if (shouldShowMessage()) {
     console.log(op, path, ...args)
   }
 }
@@ -167,8 +190,8 @@ export const mount = async (opts: MountOpts) => {
   let deviceFileList: UpstreamFileListEntry[]
   if (opts.useDummyMicropython) {
     deviceFileList = [
-      { filename: '/', isDir: true, size: 100},
-      { filename: '/test2', isDir: false, size: 124}
+      { filename: '/', isDir: true, size: 100 },
+      { filename: '/test2', isDir: false, size: 124 }
     ]
   } else {
     deviceFileList = await micropython.listFiles('/', { recursive: true })
@@ -236,13 +259,13 @@ export const mount = async (opts: MountOpts) => {
       return process.nextTick(cb, str.length)
     },
 
-    create (path: string, flags, cb) {
+    create(path: string, flags, cb) {
       fuseDebug('create', path, flags)
       fs.addNode(path)
       return process.nextTick(cb, 0, 42)  // 42 is fd
     },
 
-    write (path: string, fd, buf: Buffer, len, pos, cb) {
+    write(path: string, fd, buf: Buffer, len, pos, cb) {
       fuseDebug('write', path, `fd=${fd}`, buf, buf.length, `len=${len}, pos=${pos}`)
       const node = fs.getNodeByFullpath(path)
       if (!node) return process.nextTick(cb, -1)
@@ -260,11 +283,11 @@ export const mount = async (opts: MountOpts) => {
       buf.slice(0, len).copy(node.contents, pos)
       node.size = newBufferSize
 
-      fuseDebug('write', path, '->', node.contents.slice(0, node.size), node.contents.toString())
+      // fuseDebug('write', path, '->', node.contents.slice(0, node.size), node.contents.toString())
       process.nextTick(cb, len)
     },
 
-    async release (path: string, fd, cb) {
+    async release(path: string, fd, cb) {
       fuseDebug('release', path, fd)
 
       // on file release, save to device
@@ -285,7 +308,7 @@ export const mount = async (opts: MountOpts) => {
       process.nextTick(cb, 0)
     },
 
-    truncate (path: string, size: number, cb) {
+    truncate(path: string, size: number, cb) {
       fuseDebug('truncate', path, size)
       const node = fs.getNodeByFullpath(path)
       if (!node) return process.nextTick(cb, -1)
@@ -295,7 +318,7 @@ export const mount = async (opts: MountOpts) => {
       process.nextTick(cb, 0)
     },
 
-    async rename (src: string, dest: string, cb) {
+    async rename(src: string, dest: string, cb) {
       fuseDebug('rename', src, dest)
       const node = fs.getNodeByFullpath(src)
       if (!node) return process.nextTick(cb, -1)
@@ -310,7 +333,7 @@ export const mount = async (opts: MountOpts) => {
       return process.nextTick(cb, 0)
     },
 
-    async unlink (path: string, cb) {
+    async unlink(path: string, cb) {
       fuseDebug('unlink', path)
       const node = fs.getNodeByFullpath(path)
       if (!node) return process.nextTick(cb, -1)
@@ -324,7 +347,7 @@ export const mount = async (opts: MountOpts) => {
       return process.nextTick(cb, 0)
     },
 
-    async mkdir (path: string, mode, cb) {
+    async mkdir(path: string, mode, cb) {
       fuseDebug('mkdir', path, mode)
       const node = fs.getNodeByFullpath(path)
       if (!node) fs.addNode(path, true)
@@ -336,7 +359,15 @@ export const mount = async (opts: MountOpts) => {
       return process.nextTick(cb, 0)
     },
 
-    async rmdir (path: string, cb) {
+    /**
+     * rm -rf works, as it deletes each entry separately
+     * fs.rmdirSync(..., { recursive: true }) calls rmdir on the root, which doesn't work if files exist
+     * (TODO: make compatible with fs.rmdirSync)
+     *
+     * @param path
+     * @param cb
+     */
+    async rmdir(path: string, cb) {
       fuseDebug('rmdir', path)
       const node = fs.getNodeByFullpath(path)
       if (!node) return process.nextTick(cb, Fuse.ENOENT)
