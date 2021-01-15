@@ -2,7 +2,7 @@
 /**
  * Command line interface for talking to MicroPython devices over serial or network (webrepl)
  *
- * Part of https://github.com/metachris/micropython-ctl
+ * https://github.com/metachris/micropython-ctl/tree/master/cli
  *
  * Installed as `mctl`. Install with:
  *
@@ -16,7 +16,7 @@
  *     $ mctl repl
  *     $ mctl mount
  *
- * Uses https://github.com/tj/commander.js
+ * Issues & TODO: https://github.com/metachris/micropython-ctl/issues/3
  */
 import * as path from 'path';
 import fs from 'fs';
