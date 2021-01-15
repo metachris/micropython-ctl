@@ -74,8 +74,8 @@
 							<li>See all features in the <a href="https://metachris.github.io/micropython-ctl/classes/micropythondevice.html">documentation</a>, <a href="https://github.com/metachris/micropython-ctl/tree/master/examples">examples</a> and <a href="https://github.com/metachris/micropython-ctl/blob/master/cli"><code>cli/</code></a></li>
 						</ul>
 					</li>
-					<li>Works on Linux, macOS and Windows, tested with ESP32 &amp; ESP8266</li>
-					<li>Typed and fully async (you can use <code>await</code> with all the commands)</li>
+					<li>Works on Linux, macOS and Windows. Tested with ESP32 &amp; ESP8266.</li>
+					<li>Typed and fully async (use <code>await</code> with any command)</li>
 					<li>Main code files: <a href="https://github.com/metachris/micropython-ctl/blob/master/src/main.ts"><code>main.ts</code></a>, <a href="https://github.com/metachris/micropython-ctl/blob/master/cli/index.ts"><code>cli/index.ts</code></a></li>
 					<li>Links: <a href="https://github.com/metachris/micropython-ctl">Github</a>, <a href="https://metachris.github.io/micropython-ctl/">Documentation</a>, <a href="https://www.npmjs.com/package/micropython-ctl">npm package</a></li>
 				</ul>
@@ -186,6 +186,12 @@
 <span style="color: #000000">$ </span><span style="color: #795E26">cd</span><span style="color: #000000"> micropython-ctl</span>
 <span style="color: #000000">$ yarn</span>
 <span style="color: #000000">$ yarn build</span>
+<span style="color: #000000">$ yarn lint</span>
+<span style="color: #000000">$ yarn doc</span>
+<span style="color: #000000">$ yarn ts-node examples/basic.ts</span>
+
+<span style="color: #008000"># Run the test suite (needs a micropython device)</span>
+<span style="color: #000000">$ yarn </span><span style="color: #795E26">test</span><span style="color: #000000"> --help</span>
 </code></pre>
 				<hr>
 				<p>Enjoy and do cool things with this code! 🚀</p>
