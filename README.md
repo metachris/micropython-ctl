@@ -203,22 +203,21 @@ Maybe (not sure it's needed, don't rush into implementing):
 
 #### Testing
 
-Run the tests with a Device: `yarn test`
+1. Run the tests with a Device: `yarn test`
+2. Test module installation:
 
-Test module installation:
+Prepare: `yarn build && yarn pack`
 
-`yarn build && yarn pack`
-
-macOS:
+macOS & Linux:
 
 ```shell
-# Uninstall and clear caches
-npm uninstall --global micropython-ctl fuse-native
-cd `yarn cache dir` && rm -rf npm-micropython-ctl-*
-
 # Create empty project directory
 DIR="/tmp/mctl-test"
 rm -rf $DIR && mkdir $DIR && cd $DIR && npm init -y
+
+# Uninstall and clear caches
+npm uninstall --global micropython-ctl fuse-native
+cd `yarn cache dir` && rm -rf npm-micropython-ctl-*
 
 # Install package
 yarn add ~/Projects/micropython/micropython-ctl/micropython-ctl-*.tgz
@@ -226,15 +225,19 @@ yarn add ~/Projects/micropython/micropython-ctl/micropython-ctl-*.tgz
 # Test
 ./node_modules/.bin/mctl ls
 ./node_modules/.bin/mctl mount
+./node_modules/.bin/mctl run-tests
+
+# Now testing the global installation
+cd /tmp && rm -rf $DIR
+npm install -g ~/Projects/micropython/micropython-ctl/micropython-ctl-*.tgz
+
+# Test
+which mctl
+mctl ls
+mctl mount
+mctl run-tests
 ```
 
-local and global
-- - `yarn add ~/Projects/micropython/micropython-ctl/micropython-ctl-*.tgz`
-- - `./node_modules/.bin/mctl ls`
-- - `./node_modules/.bin/mctl mount`
-- - ``
-- - ``
-1. Linux: local and global
 1. Windows: local and global
 
 Website integration:

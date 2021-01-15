@@ -4,8 +4,11 @@
 /build/
 /tmp/
 .idea/*
+/docs/
 
 coverage
 *.log
 
 package-lock.json
+/*.tgz
+/tmp*

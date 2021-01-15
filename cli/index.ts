@@ -384,6 +384,18 @@ program
   .command('devices')
   .description('List serial devices').action(listSerialDevices);
 
+// Command: repl
+program
+  .command('repl')
+  .description('Open a REPL terminal')
+  .action(repl);
+
+// Command: run
+program
+  .command('run <fileOrCommand>')
+  .description('Execute a Python file or command')
+  .action(run);
+
 // Command: ls
 program
   .command('ls [directory]')
@@ -409,6 +421,12 @@ program
   .description('Copy a file onto the device')
   .action(putFile);
 
+// Command: edit
+program
+  .command('edit <filename>')
+  .description('Edit a file, and if changed upload afterwards')
+  .action(edit);
+
 // Command: mkdir
 program
   .command('mkdir <name>')
@@ -428,31 +446,12 @@ program
   .description('Rename a file or directory')
   .action(mv);
 
-// Command: run
-program
-  .command('run <fileOrCommand>')
-  .description('Execute a Python file or command')
-  .action(run);
-
 // Command: reset
 program
   .command('reset')
   .option('--soft', 'soft-reset instead of hard-reset')
   .description('Reset the MicroPython device')
   .action(reset);
-
-
-// Command: edit
-program
-  .command('edit <filename>')
-  .description('Edit a file, and if changed upload afterwards')
-  .action(edit);
-
-// Command: repl
-program
-  .command('repl')
-  .description('Open a REPL terminal')
-  .action(repl);
 
 // Command: mount
 program

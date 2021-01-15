@@ -122,6 +122,9 @@ const runTests = async (micropython: MicroPythonDevice) => {
     assert(!statOld.exists)
     assert(statNew.exists && !statNew.isDir && statNew.size === b2.length)
 
+    console.log('- cleanup...')
+    await micropython.remove(testPath, true)
+
     console.log('- disconnect')
     let isClosed = false
     micropython.onclose = () => isClosed = true
