@@ -48,6 +48,7 @@ process.on('unhandledRejection', error => {
 const CLR_RESET = "\x1b[0m";
 const CLR_FG_BLUE = "\x1b[34m";
 const CLR_FG_RED = "\x1b[31m";
+const CLR_FG_YELLOW = "\x1b[33m";
 
 const logError = (...msg: any) => {
   process.stderr.write(CLR_FG_RED)
@@ -317,6 +318,8 @@ const reset = async (cmdObj) => {
 
 // Mount the device
 const mountCommand = async () => {
+  console.log(`${CLR_FG_YELLOW}Mounting devices with FUSE is currently experimental! Please be careful, data might be corrupted. Reading files with binary data does not work, and maybe other things. -> https://github.com/metachris/micropython-ctl/issues/3${CLR_RESET}`)
+
   // Make sure FUSE dependencies are installed
   await checkAndInstallFuse()
 

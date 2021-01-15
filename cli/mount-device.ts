@@ -7,12 +7,7 @@
  * - https://github.com/direktspeed/node-fuse-bindings (fuse-bindings is outdated - see https://github.com/mafintosh/fuse-bindings/issues/77)
  * - https://github.com/dokan-dev/dokany
  *
- * TODO:
- * - Write binary files from shell seems to not work?
- *
- * TODO cannotfix:
- * - Windows support: almost working, but crash on repeated read https://github.com/direktspeed/node-fuse-bindings/issues/11
- *
+ * Issues & TODO: https://github.com/metachris/micropython-ctl/issues/3
  */
 import * as nodePath from 'path'
 import * as crypto from 'crypto'
@@ -38,14 +33,10 @@ const fuseDebug = (op: string, path: string, ...args: any) => {
     // Filename wildcard match: iterate over all debug filenames
     for (const debugPath of SHOW_DEBUG_OUTPUT_FOR_PATHS) {
       // wildcard with trailing *
-      if (debugPath.endsWith('*')) {
-        if (path.startsWith(debugPath.substr(0, debugPath.length - 1))) { return true }
-      }
+      if (debugPath.endsWith('*') && path.startsWith(debugPath.substr(0, debugPath.length - 1))) { return true }
 
       // wildcard with leading *
-      if (debugPath.startsWith('*')) {
-        if (path.endsWith(debugPath.substr(1))) { return true }
-      }
+      if (debugPath.startsWith('*') && path.endsWith(debugPath.substr(1))) { return true }
     }
 
     return false
