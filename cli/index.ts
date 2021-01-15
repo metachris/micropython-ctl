@@ -32,6 +32,7 @@ import { humanFileSize } from './utils';
 import { getTmpFilename } from '../src/utils-node';
 import { mount as mountWithFuse } from './mount-device'
 import { checkAndInstall as checkAndInstallFuse } from './fuse-dependencies'
+import { run as runInternalTests } from '../tests/testsuite'
 
 // https://github.com/tj/commander.js
 const program = new Command();
@@ -363,6 +364,12 @@ const repl = async () => {
   }
 }
 
+
+// Mount the device
+const runTests = async () => {
+  runInternalTests()
+}
+
 /**
  * Setup command line commands, using commander.js
  * https://github.com/tj/commander.js
@@ -452,6 +459,12 @@ program
   .command('mount')
   .description('Mount a MicroPython device (over serial or network)')
   .action(mountCommand);
+
+// Command: run-tests
+program
+  .command('run-tests')
+  .description('Run micropython-ctl tests on a device')
+  .action(runTests);
 
 // Command: version
 program

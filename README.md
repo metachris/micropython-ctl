@@ -170,11 +170,23 @@ I'm happy about feedback, please reach out:
 
 ## Future work
 
+Code library:
+
 * `getFileHash` - get a sha256 hash of a file without downloading
 * put/get recursively
 * `getFile` improvement - currently it fills the device RAM and probably works badly with large file
 * putfile and getfile over network: switch to webrepl protocol instead of manual up- and download
+* Document all functions in https://github.com/metachris/micropython-ctl/blob/master/src/main.ts
+
+`mctl`:
+
 * `mctl mount` issues ([see here](https://github.com/metachris/micropython-ctl/issues/3))
+* env vars for host, password: WEBREPL, AMPY
+* upload everything recursively ('cp -r .')
+* wifi status, connect, disconnect
+* mount: testing
+* mount + repl
+* reuse one instance (eg. in mount mode) to execute other commands
 
 Maybe (not sure it's needed, don't rush into implementing):
 
@@ -188,6 +200,48 @@ Maybe (not sure it's needed, don't rush into implementing):
 ---
 
 ## Release process
+
+#### Testing
+
+Run the tests with a Device: `yarn test`
+
+Test module installation:
+
+`yarn build && yarn pack`
+
+macOS:
+
+```shell
+# Uninstall and clear caches
+npm uninstall --global micropython-ctl fuse-native
+cd `yarn cache dir` && rm -rf npm-micropython-ctl-*
+
+# Create empty project directory
+DIR="/tmp/mctl-test"
+rm -rf $DIR && mkdir $DIR && cd $DIR && npm init -y
+
+# Install package
+yarn add ~/Projects/micropython/micropython-ctl/micropython-ctl-*.tgz
+
+# Test
+./node_modules/.bin/mctl ls
+./node_modules/.bin/mctl mount
+```
+
+local and global
+- - `yarn add ~/Projects/micropython/micropython-ctl/micropython-ctl-*.tgz`
+- - `./node_modules/.bin/mctl ls`
+- - `./node_modules/.bin/mctl mount`
+- - ``
+- - ``
+1. Linux: local and global
+1. Windows: local and global
+
+Website integration:
+- In the html files, change imports to local
+- Open in Browser
+
+#### Release
 
 ```shell
 # Update CHANGELOG

@@ -165,7 +165,7 @@ program.option('-h, --host <host>', `Connect over network to hostname or IP of d
 program.option('-p, --password <password>', `Password for network device`);
 
 
-(async () => {
+export const run = async () => {
   await program.parseAsync(process.argv);
   if (program.host) {
     if (!program.password) { return console.error('Password missing') }
@@ -173,4 +173,8 @@ program.option('-p, --password <password>', `Password for network device`);
   } else {
     await runTestsOnSerial(program.tty)
   }
-})();
+}
+
+if (require.main === module) {
+  run()
+}

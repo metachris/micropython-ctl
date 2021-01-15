@@ -57,13 +57,3 @@ Note: without tty / host+password options, `mctl` will try to connect to the fir
 * Windows: experimental, might be buggy. Uses [node-fuse-bindings](https://github.com/direktspeed/node-fuse-bindings) and [Dokany](https://github.com/dokan-dev/dokany/wiki/Installation)
 * Keeps the device connection open, which means you cannot connect to it in parallel
 * If you encounter problems or have feedback, please [open an issue](https://github.com/metachris/micropython-ctl/issues/new)
-
-
-### Future work
-
-* env vars for host, password: WEBREPL, AMPY
-* upload everything recursively ('cp -r .')
-* wifi status, connect, disconnect
-* mount: testing
-* mount + repl
-* reuse one instance (eg. in mount mode) to execute other commands
