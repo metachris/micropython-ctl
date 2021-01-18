@@ -219,21 +219,20 @@
 				</a>
 				<p>Code library:</p>
 				<ul>
-					<li><code>getFileHash</code> - get a sha256 hash of a file without downloading</li>
-					<li>put/get recursively</li>
-					<li><code>getFile</code> improvement - currently it fills the device RAM and probably works badly with large file</li>
-					<li>putfile and getfile over network: switch to webrepl protocol instead of manual up- and download</li>
 					<li>Document all functions in <a href="https://github.com/metachris/micropython-ctl/blob/master/src/main.ts">https://github.com/metachris/micropython-ctl/blob/master/src/main.ts</a></li>
+					<li>putfile and getfile over network: switch to webrepl protocol instead of manual up- and download</li>
+					<li><code>getFile</code> improvement - currently it fills the device RAM and probably works badly with large file</li>
+					<li>put/get recursively (only upload if changed, build on <code>getFileHash</code> (eg. check filesize first, if size the same then check hash))</li>
 				</ul>
 				<p><code>mctl</code>:</p>
 				<ul>
-					<li><code>mctl mount</code> issues (<a href="https://github.com/metachris/micropython-ctl/issues/3">see here</a>)</li>
 					<li>env vars for host, password: WEBREPL, AMPY</li>
 					<li>upload everything recursively (&#39;cp -r .&#39;)</li>
 					<li>wifi status, connect, disconnect</li>
 					<li>mount: testing</li>
 					<li>mount + repl</li>
 					<li>reuse one instance (eg. in mount mode) to execute other commands</li>
+					<li><code>mctl mount</code> issues (<a href="https://github.com/metachris/micropython-ctl/issues/3">see here</a>)</li>
 				</ul>
 				<p>Maybe (not sure it&#39;s needed, don&#39;t rush into implementing):</p>
 				<ul>
