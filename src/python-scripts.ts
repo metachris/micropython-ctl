@@ -83,6 +83,22 @@ with open('${filename}', 'rb') as infile:
 #`  // this # is needed, else we get an error (SyntaxError: invalid syntax)
 }
 
+export const getFileHash = (filename: string) => {
+  return `
+import sys
+import ubinascii
+import uhashlib
+hasher = uhashlib.sha256()
+with open('${filename}', 'rb') as infile:
+    while True:
+        result = infile.read(32)
+        if result == b'':
+            break
+        hasher.update(result)
+sys.stdout.write(ubinascii.hexlify(hasher.digest()))
+`  // this # is needed, else we get an error (SyntaxError: invalid syntax)
+}
+
 export const stat = (path: string) => {
   return `
 try:

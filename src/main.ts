@@ -821,6 +821,18 @@ export class MicroPythonDevice {
       await this.exitRawRepl()
     }
   }
+
+  /**
+   * Get SHA256 hash of a file contents
+   *
+   * @throws {ScriptExecutionError} if not found: "OSError: [Errno 2] ENOENT"
+   */
+  public async getFileHash(filename: string): Promise<string> {
+    debug('getFileHash', filename)
+    const script = PythonScripts.getFileHash(filename)
+    const sha256HexDigest = await this.runScript(script)
+    return sha256HexDigest
+  }
 }
 
 export interface ListFilesOptions {

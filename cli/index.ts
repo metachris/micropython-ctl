@@ -317,6 +317,25 @@ const reset = async (cmdObj) => {
   process.exit(0)
 }
 
+const sha256hash = async (filename) => {
+  logVerbose('sha256hash', filename)
+
+  try {
+    await ensureConnectedDevice()
+    const hash = await micropython.getFileHash(filename)
+    console.log(hash)
+  } catch (e) {
+    if (e instanceof ScriptExecutionError && e.message.includes('OSError: [Errno 2] ENOENT')) {
+      logError(`sha256: cannot access '${filename}': No such file or directory`)
+      return
+    }
+    console.error('Error:', e)
+    process.exit(1)
+  } finally {
+    await micropython.disconnect()
+  }
+}
+
 // Mount the device
 const mountCommand = async () => {
   console.log(`${CLR_FG_YELLOW}Mounting devices with FUSE is currently experimental! Please be careful, data might be corrupted. Reading files with binary data does not work, and maybe other things. -> https://github.com/metachris/micropython-ctl/issues/3${CLR_RESET}`)
@@ -445,6 +464,12 @@ program
   .command('mv <oldPath> <newPath>')
   .description('Rename a file or directory')
   .action(mv);
+
+// Command: filehash
+program
+  .command('sha256 <filename>')
+  .description('Get the SHA256 hash of a file')
+  .action(sha256hash);
 
 // Command: reset
 program
