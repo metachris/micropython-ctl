@@ -114,6 +114,35 @@ except:
 #`
 }
 
+export const isFileTheSame = (filename: string, fileSize: number, sha256Hash: string) => {
+  return `
+try:
+    import os
+except ImportError:
+    import uos as os
+import sys
+import ubinascii
+import uhashlib
+
+def getHash():
+    hasher = uhashlib.sha256()
+    with open('${filename}', 'rb') as infile:
+        while True:
+            result = infile.read(32)
+            if result == b'':
+                break
+            hasher.update(result)
+    return ubinascii.hexlify(hasher.digest())
+
+s = os.stat('${filename}')
+if ${fileSize} != s[6]:
+    print('0')
+else:
+    hash = getHash().decode()
+    print("1" if hash == '${sha256Hash}' else "0")
+#`
+}
+
 export const deleteEverythingRecurive = (path: string) => {
   return `
 try:

@@ -6,6 +6,7 @@
  * - Author: chris@linuxuser.at / https://twitter.com/metachris
  */
 import WebSocket from 'isomorphic-ws'
+import crypto from 'crypto';
 import { Buffer } from 'buffer/'
 import { InvalidPassword, CouldNotConnect, ScriptExecutionError } from './errors'
 import { debug, dedent, IS_ELECTRON, IS_NODEJS } from './utils';
@@ -117,9 +118,25 @@ declare const window: WindowWithWebRepl;
  * ```
  */
 export class MicroPythonDevice {
-  onclose: () => void
-  onTerminalData: (data: string) => void  // user callback
   private state: DeviceState
+
+  /**
+   * Callback that is triggered when the connection is lost or closed.
+   *
+   * ```typescript
+   * micropython.onclose = () => console.log('connection closed')
+   * ```
+   */
+  onclose: () => void
+
+  /**
+   * Callback to receive terminal (REPL) data
+   *
+   * ```typescript
+   * micropython.onTerminalData = (data) => process.stdout.write(data)
+   * ```
+   */
+  onTerminalData: (data: string) => void  // user callback
 
   private getInitState(): DeviceState {
     return {
@@ -159,6 +176,9 @@ export class MicroPythonDevice {
     this.state = this.getInitState()
   }
 
+  /**
+   * Whether currently connected to a device.
+   */
   isConnected() {
     return this.state.connectionState === ConnectionState.OPEN
   }
@@ -171,6 +191,9 @@ export class MicroPythonDevice {
     return this.state.replMode === ReplMode.TERMINAL
   }
 
+  /**
+   * Get the state object. Mostly used for debugging purposes.
+   */
   getState() {
     return this.state
   }
@@ -542,11 +565,12 @@ export class MicroPythonDevice {
   }
 
   /**
+   * Execute a Python script on the device, wait and return the output.
    *
-   * @param script
-   * @param disableDedent
+   * @param script the python code
+   * @param options
    *
-   * @throws {ScriptExecutionError} on Python code execution error
+   * @throws {ScriptExecutionError} on Python code execution error. Includes the Python traceback.
    */
   public async runScript(script: string, options: RunScriptOptions = {}): Promise<string> {
     debug('runScript', script)
@@ -584,7 +608,7 @@ export class MicroPythonDevice {
     this.sendData('\x04')
     debug('runScript: script sent, waiting for response')
 
-    if (options.exitAfterSending) return ''
+    if (options.resolveBeforeResult) return ''
 
     // wait for script execution
     const scriptOutput = await promise
@@ -594,14 +618,13 @@ export class MicroPythonDevice {
     debug(`runScript: script done (${millisRuntime / 1000}sec)`)
     this.state.lastRunScriptTimeNeeded = millisRuntime
 
-    if (options.exitRawRepl) {
-      // Exit raw repl mode, re-enter friendly repl
-      await this.exitRawRepl()
-    } else {
+    if (options.stayInRawRepl) {
       // Stay in raw repl; clear the buffer now
       this.clearBuffer()
+    } else {
+      // Exit raw repl mode, re-enter friendly repl
+      await this.exitRawRepl()
     }
-    // debug('runScript: exited RAW repl')
 
     return scriptOutput
   }
@@ -637,6 +660,10 @@ export class MicroPythonDevice {
     return promise
   }
 
+  /**
+   * GET_VER webrepl command. Returns the micropython version.
+   * Only works with network connections, not with serial.
+   */
   public async getVer(): Promise<string> {
     // debug(`getVer`)
     if (this.isSerialDevice()) {
@@ -713,6 +740,17 @@ export class MicroPythonDevice {
     return ret
   }
 
+  /**
+   * Get the contents of a file.
+   *
+   * ```typescript
+   * const data = await micropython.getFile('boot.py')
+   * ```
+   *
+   * @returns {Buffer} contents of the file in a Buffer
+   * @param filename filename of file to download
+   * @throws {ScriptExecutionError} if not found: "`OSError: [Errno 2] ENOENT`"
+   */
   public async getFile(filename: string): Promise<Buffer> {
     debug(`getFile: ${filename}`)
     const output = await this.runScript(PythonScripts.getFile(filename))
@@ -753,21 +791,26 @@ export class MicroPythonDevice {
    * @param targetFilename
    * @param data
    */
-  public async putFile(targetFilename: string, data: Buffer) {
+  public async putFile(targetFilename: string, data: Buffer, options: PutFileOptions = {}) {
     debug(`putFile: ${targetFilename} (${data.length})`)
+
+    if (options.checkIfSimilarBeforeUpload) {
+      const isAlreadyTheSame = await this.isFileTheSame(targetFilename, data)
+      if (isAlreadyTheSame) return true
+    }
 
     const promise = this.createReplPromise()
     const dataHex = data.toString('hex')
     const chunkSize = this.isSerialDevice() ? 256 : 64
 
     const script1 = `import ubinascii; f = open('${targetFilename}', 'wb')`
-    await this.runScript(script1, { exitRawRepl: false }) // keeps raw repl open for next instruction
+    await this.runScript(script1, { stayInRawRepl: true }) // keeps raw repl open for next instruction
 
     for (let index = 0; index < dataHex.length; index += chunkSize) {
       const chunk = dataHex.substr(index, chunkSize)
       debug('chunk', chunk)
       const scriptForChunk = `f.write(ubinascii.unhexlify("${chunk}"))`
-      await this.runScript(scriptForChunk, { exitRawRepl: false }) // keeps raw repl open for next instruction
+      await this.runScript(scriptForChunk, { stayInRawRepl: true }) // keeps raw repl open for next instruction
     }
 
     await this.runScript('f.close()') // finally closes raw repl, switching back to friendly
@@ -812,7 +855,7 @@ export class MicroPythonDevice {
     // since the device is actually restarting.
     await this.runScript(script, {
       broadcastOutputAsTerminalData: options.broadcastOutputAsTerminalData,
-      exitAfterSending: true
+      resolveBeforeResult: true
     })
 
     // Serial connection stays open after reset, webrepl closes
@@ -823,15 +866,39 @@ export class MicroPythonDevice {
   }
 
   /**
-   * Get SHA256 hash of a file contents
+   * Get SHA256 hash of a file contents.
    *
-   * @throws {ScriptExecutionError} if not found: "OSError: [Errno 2] ENOENT"
+   * ```typescript
+   * const data = await micropython.getFileHash('boot.py')
+   * ```
+   *
+   * @param filename filename of target file
+   * @returns sha256 hash, hexlified
+   * @throws {ScriptExecutionError} if not found: "`OSError: [Errno 2] ENOENT`"
    */
   public async getFileHash(filename: string): Promise<string> {
     debug('getFileHash', filename)
     const script = PythonScripts.getFileHash(filename)
     const sha256HexDigest = await this.runScript(script)
     return sha256HexDigest
+  }
+
+  /**
+   * Check whether a file is the same as provided, within a single `runScript` execution.
+   *
+   * - If filesize is different, then file is different
+   * - If filesize equal then compare sha256 hash
+   *
+   * This is a helper for bulk uploading directories, but only if they have changed.
+   *
+   * @throws {ScriptExecutionError} if not found: "OSError: [Errno 2] ENOENT"
+   */
+  public async isFileTheSame(filename: string, data: Buffer) {
+    debug('isFileTheSame', filename, data.length)
+    const localHash = crypto.createHash('sha256').update(data).digest('hex')
+    const script = PythonScripts.isFileTheSame(filename, data.length, localHash)
+    const output = await this.runScript(script)
+    return output === '1'
   }
 }
 
@@ -840,13 +907,24 @@ export interface ListFilesOptions {
 }
 
 export interface RunScriptOptions {
+  /** Whether unnecessary indentation should be kept in the script (default: `false`) */
   disableDedent?: boolean
-  exitRawRepl?: boolean
-  broadcastOutputAsTerminalData?: boolean  // typically output is collected and returned, but it can also be broadcast as terminal data as it is received, char by char
-  exitAfterSending?: boolean
+
+  /** Whether to stay in RAW repl mode after execution. Useful for large scripts that need to get executed piece by piece (uploading files, etc.) (default: `false`) */
+  stayInRawRepl?: boolean
+
+  /** Whether to broadcast the received data to the {@linkCode MicroPythonDevice.onTerminalData} callback while receiving (default: `false`) */
+  broadcastOutputAsTerminalData?: boolean
+
+  /** Whether to resolve the promise before waiting for the result (default: `false`) */
+  resolveBeforeResult?: boolean
 }
 
 export interface ResetOptions {
   softReset?: boolean
   broadcastOutputAsTerminalData?: boolean
+}
+
+export interface PutFileOptions {
+  checkIfSimilarBeforeUpload?: boolean
 }

@@ -1,3 +1,11 @@
+dev
+---
+* `MicroPythonDevice.getFileHash(filename: string)` / `mctl sha256 <filename>`
+* Check if file is already the same
+  * `MicroPythonDevice.isFileTheSame(filename: string, data: Buffer)`
+  * `putFile` option `checkIfSimilarBeforeUpload` to avoid uploading another the file if it's already there (requires one more `runScript` if uploading)
+
+
 1.7.3 (2021-01-15)
 ------------------
 First pretty feature-complete, allround tested version.
