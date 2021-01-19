@@ -1,18 +1,18 @@
-# TypeScript MicroPython Interface
+# MicroPython-Ctl: MicroPython ❤️ TypeScript
 
-A library to interface with MicroPython devices over serial and network connections (REPL and WebREPL)
+Build things that talk to MicroPython devices: websites/webapps, Node.js programs, Electron applications, VS Code extensions, and more.
 
-* Easily build websites/webapps and Node.js programs that talk to MicroPython devices
+* Modern TypeScript library and cli.
+* Connect to devices over serial and network (REPL and WebREPL).
 * Functionality:
-  * Connect to device over serial or network
   * Run Python scripts, await the output
-  * List files, upload and download files
+  * Manipulate files and directories
   * Terminal (REPL) interaction
   * [`mctl`](https://github.com/metachris/micropython-ctl/blob/master/cli) command line utility
   * Mount the micropython device into the local filesystem (`mctl mount`, experimental)
-  * See all features in the [documentation](https://metachris.github.io/micropython-ctl/classes/micropythondevice.html), [examples](https://github.com/metachris/micropython-ctl/tree/master/examples) and [`cli/`](https://github.com/metachris/micropython-ctl/blob/master/cli)
+* See all the features in the [documentation](https://metachris.github.io/micropython-ctl/classes/micropythondevice.html), [examples](https://github.com/metachris/micropython-ctl/tree/master/examples) and [`cli/`](https://github.com/metachris/micropython-ctl/blob/master/cli)
+* Typed and fully async (use `await` with any command).
 * Works on Linux, macOS and Windows. Tested with ESP32 & ESP8266.
-* Typed and fully async (use `await` with any command)
 * Main code files: [`main.ts`](https://github.com/metachris/micropython-ctl/blob/master/src/main.ts), [`cli/index.ts`](https://github.com/metachris/micropython-ctl/blob/master/cli/index.ts)
 * Links: [Github](https://github.com/metachris/micropython-ctl), [Documentation](https://metachris.github.io/micropython-ctl/), [npm package](https://www.npmjs.com/package/micropython-ctl)
 
@@ -36,12 +36,18 @@ console.log('runScript output:', output)
 const files = await micropython.listFiles()
 console.log('files:', files)
 
+// Get file contents
+const fileContents = await micropython.getFile('boot.py')
+console.log(fileContents)
+
 // Set a terminal (REPL) data handler, and send data to the REPL
 micropython.onTerminalData = (data) => process.stdout.write(data)
 micropython.sendData('\x03\x02')  // Ctrl+C and Ctrl+B to enter friendly repl and print version
 ```
 
-Note on network connection: To access the webrepl over the network, you need to enable it first through the serial REPL: `import webrepl_setup` (see [docs](https://docs.micropython.org/en/latest/esp8266/tutorial/repl.html#webrepl-a-prompt-over-wifi)). Also, make sure you can ping the device first.
+See also the [MicroPythonDevice docs](https://metachris.github.io/micropython-ctl/classes/micropythondevice.html).
+
+Note: to connect over the network, you need to enable it on the device first, through the serial REPL: `import webrepl_setup` (see [docs](https://docs.micropython.org/en/latest/esp8266/tutorial/repl.html#webrepl-a-prompt-over-wifi)). Also, make sure you can ping the device first.
 
 
 **Code examples:**
@@ -246,7 +252,8 @@ Update live web examples with code from Github `master` branch:
 ssh nova "cd /server/websites/current.at/micropython-ctl && git pull"
 ```
 
-Test the live web examples:
+Test the live web examples with Chrome, Firefox, Safari, Edge (on OSX, Linux, Windows and Mobile):
+
 * [web-example.html](http://current.at/micropython-ctl/examples/web-example.html)
 * [web-example2-terminal.html](http://current.at/micropython-ctl/examples/web-example2-terminal.html)
 
