@@ -180,10 +180,11 @@ I'm happy about feedback, please reach out:
 
 Code library:
 
+* put/get recursively (only upload if changed, build on `getFileHash` (eg. check filesize first, if size the same then check hash))
 * Document all functions in https://github.com/metachris/micropython-ctl/blob/master/src/main.ts
 * putfile and getfile over network: switch to webrepl protocol instead of manual up- and download
 * `getFile` improvement - currently it fills the device RAM and probably works badly with large file
-* put/get recursively (only upload if changed, build on `getFileHash` (eg. check filesize first, if size the same then check hash))
+* put & get with folders: join path parts windows compatible
 
 `mctl`:
 

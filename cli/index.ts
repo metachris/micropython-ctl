@@ -26,7 +26,7 @@ import readline from 'readline'
 import { Buffer } from 'buffer/'
 import SerialPort from 'serialport';
 import { Command } from 'commander';
-import { ScriptExecutionError, MicroPythonDevice } from '../src/main';
+import { ScriptExecutionError, MicroPythonDevice, ConnectionMode } from '../src/main';
 import { delayMillis } from '../src/utils';
 import { humanFileSize } from './utils';
 import { getTmpFilename } from '../src/utils-node';
@@ -125,7 +125,11 @@ const listFilesOnDevice = async (directory = '/', cmdObj) => {
 }
 
 const putFile = async (filename: string, destFilename?: string) => {
-  if (!destFilename) destFilename = path.basename(filename)
+  if (destFilename) {
+    if (destFilename.endsWith('/')) destFilename += filename
+  } else {
+    destFilename = path.basename(filename)
+  }
   console.log('putFile', filename, '->', destFilename)
 
   // Read the file
@@ -180,29 +184,90 @@ const catFile = async (filename: string) => {
   }
 }
 
-const get = async (filenameOrDir: string, targetFilenameOrDir: string) => {
+const get = async (filenameOrDir: string, targetFilenameOrDir: string, cmdObj) => {
   // console.log('get', filenameOrDir, targetFilenameOrDir)
   try {
     await ensureConnectedDevice()
+
+    // . is an alias for: `get -r .` is `get -r /`
+    if (filenameOrDir === '.') filenameOrDir = '/'
+
+    // filename must have trailing slash
     if (!filenameOrDir.startsWith('/')) filenameOrDir = '/' + filenameOrDir
+
+    // check if path exists
     const statResult = await micropython.statPath(filenameOrDir)
     if (!statResult.exists) {
       console.log(`${CLR_FG_RED}get: cannot access '${filenameOrDir}': No such file or directory${CLR_RESET}`)
       return
     }
 
-    if (!statResult.isDir) {
-      // get a file
-      let targetFilename = filenameOrDir.replace(/^.*[\\\/]/, '')
+    if (statResult.isDir) {
+      // It is a directory, must be recursive
+      const dir = filenameOrDir
+      // console.log('get dir', dir, cmdObj.recursive)
+      if (!cmdObj.recursive) {
+        console.log(`${CLR_FG_RED}get: -r not specified; omitting directory '${dir}'${CLR_RESET}`)
+        return
+      }
+
+      if (!targetFilenameOrDir) {
+        targetFilenameOrDir = '.'
+      }
+
+      // remove possible trailing slash
+      if (targetFilenameOrDir.endsWith('/')) targetFilenameOrDir = targetFilenameOrDir.substr(0, targetFilenameOrDir.length - 1)
+
+      // make sure target directory exists
+      if (!fs.existsSync(targetFilenameOrDir)) {
+        // console.log('- mkdir', targetFilenameOrDir)
+        fs.mkdirSync(targetFilenameOrDir)
+      }
+
+      const downloadDirectory = async (downloadDir: string) => {
+        // console.log('downloadDir',  downloadDir)
+
+        if (!fs.existsSync(targetFilenameOrDir + downloadDir)) {
+          // console.log('- mkdir', targetFilenameOrDir + downloadDir)
+          fs.mkdirSync(targetFilenameOrDir + downloadDir)
+        }
+
+        // copy everything recursively!
+        const filesAndDirectories = await micropython.listFiles(downloadDir, { recursive: true })
+        // console.log(filesAndDirectories)
+
+        for (const item of filesAndDirectories) {
+          const targetFileName = targetFilenameOrDir + item.filename
+          if (item.filename === downloadDir) continue  // don't re-download self
+          if (item.isDir) {
+            if (!fs.existsSync(targetFileName)) {
+              // console.log('- mkdir', targetFileName)
+              fs.mkdirSync(targetFileName)
+            }
+          } else {
+            console.log('get:', item.filename, '->', targetFileName)
+            const contents = await micropython.getFile(item.filename)
+            fs.writeFileSync(targetFileName, contents)
+          }
+        }
+      }
+
+      await downloadDirectory(dir)
+
+    } else {
+      // It is a file.
+
+      // Define the target filename
+      let targetFilename = path.basename(filenameOrDir) // removed the directory
+
+      // If explicit target is supplied, it can be a directory or a filename
       if (targetFilenameOrDir) {
         targetFilename = targetFilenameOrDir.endsWith('/') ? targetFilenameOrDir + targetFilename : targetFilenameOrDir
       }
+
       console.log(`get: ${filenameOrDir} -> ${targetFilename}`)
       const contents = await micropython.getFile(filenameOrDir)
       fs.writeFileSync(targetFilename, contents)
-    } else {
-      logError('get: download of directory not yet implemented')
-      return
     }
 
   } catch (e) {
@@ -430,8 +495,8 @@ program
 // Command: get
 program
   .command('get <file_or_dirname> [out_file_or_dirname]')
-  // .option('-r, --recursive', 'List recursively')
-  .description('Download a file or directory from the device')
+  .option('-r, --recursive', 'Get everything recursively')
+  .description(`Download a file or directory from the device. Download everything with 'get -r .'`)
   .action(get);
 
 // Command: put
@@ -501,4 +566,10 @@ program
 
 (async () => {
   await program.parseAsync(process.argv);
+
+  // await ensureConnectedDevice()
+  // const data = Buffer.from(fs.readFileSync('boot.py'))
+  // const isSame = await micropython.isFileTheSame('boot.py', data)
+  // console.log('isSame', isSame)
+  // await micropython.disconnect()
 })();

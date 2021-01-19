@@ -48,6 +48,15 @@ Commands:
 
 Note: without tty / host+password options, `mctl` will try to connect to the first found serial device.
 
+### Examples
+
+```shell
+# Download all files and directories recursively, into the current directory
+mctl get -r /
+
+# Download all files and directories recursively, into /tmp/
+mctl get -r / /tmp/
+```
 
 ### Notes
 
