@@ -2,6 +2,8 @@
 
 Build things that talk to MicroPython devices: websites/webapps, Node.js programs, Electron applications, VS Code extensions, and more.
 
+[![Build and test status](https://github.com/metachris/micropython-ctl/workflows/Build%20and%20test/badge.svg)](https://github.com/metachris/micropython-ctl/actions?query=workflow%3A%22Build+and+test%22)
+
 * Modern TypeScript library and cli.
 * Connect to devices over serial and network (REPL and WebREPL).
 * Functionality:
