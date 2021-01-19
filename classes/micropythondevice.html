@@ -122,6 +122,7 @@
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="micropythondevice.html#getstate" class="tsd-kind-icon">get<wbr>State</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="micropythondevice.html#getver" class="tsd-kind-icon">get<wbr>Ver</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="micropythondevice.html#isconnected" class="tsd-kind-icon">is<wbr>Connected</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="micropythondevice.html#isfilethesame" class="tsd-kind-icon">is<wbr>File<wbr>The<wbr>Same</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="micropythondevice.html#isserialdevice" class="tsd-kind-icon">is<wbr>Serial<wbr>Device</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="micropythondevice.html#isterminalmode" class="tsd-kind-icon">is<wbr>Terminal<wbr>Mode</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="micropythondevice.html#listfiles" class="tsd-kind-icon">list<wbr>Files</a></li>
@@ -150,7 +151,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/b0c257f/src/main.ts#L156">src/main.ts:156</a></li>
+									<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/d091f9f/src/main.ts#L173">src/main.ts:173</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <a href="micropythondevice.html" class="tsd-signature-type" data-tsd-kind="Class">MicroPythonDevice</a></h4>
@@ -166,9 +167,16 @@
 					<div class="tsd-signature tsd-kind-icon">on<wbr>Terminal<wbr>Data<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">(</span>data<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">void</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/b0c257f/src/main.ts#L121">src/main.ts:121</a></li>
+							<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/d091f9f/src/main.ts#L139">src/main.ts:139</a></li>
 						</ul>
 					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>Callback to receive terminal (REPL) data</p>
+						</div>
+						<pre><code class="language-typescript"><span style="color: #001080">micropython</span><span style="color: #000000">.</span><span style="color: #795E26">onTerminalData</span><span style="color: #000000"> = (</span><span style="color: #001080">data</span><span style="color: #000000">) </span><span style="color: #0000FF">=&gt;</span><span style="color: #000000"> </span><span style="color: #001080">process</span><span style="color: #000000">.</span><span style="color: #001080">stdout</span><span style="color: #000000">.</span><span style="color: #795E26">write</span><span style="color: #000000">(</span><span style="color: #001080">data</span><span style="color: #000000">)</span>
+</code></pre>
+					</div>
 					<div class="tsd-type-declaration">
 						<h4>Type declaration</h4>
 						<ul class="tsd-parameters">
@@ -197,9 +205,16 @@
 					<div class="tsd-signature tsd-kind-icon">onclose<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">void</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/b0c257f/src/main.ts#L120">src/main.ts:120</a></li>
+							<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/d091f9f/src/main.ts#L130">src/main.ts:130</a></li>
 						</ul>
 					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>Callback that is triggered when the connection is lost or closed.</p>
+						</div>
+						<pre><code class="language-typescript"><span style="color: #001080">micropython</span><span style="color: #000000">.</span><span style="color: #795E26">onclose</span><span style="color: #000000"> = () </span><span style="color: #0000FF">=&gt;</span><span style="color: #000000"> </span><span style="color: #001080">console</span><span style="color: #000000">.</span><span style="color: #795E26">log</span><span style="color: #000000">(</span><span style="color: #A31515">&#039;connection closed</span><span style="color: #CD3131">)</span>
+</code></pre>
+					</div>
 					<div class="tsd-type-declaration">
 						<h4>Type declaration</h4>
 						<ul class="tsd-parameters">
@@ -229,7 +244,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/b0c257f/src/main.ts#L242">src/main.ts:242</a></li>
+									<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/d091f9f/src/main.ts#L265">src/main.ts:265</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -277,7 +292,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/b0c257f/src/main.ts#L192">src/main.ts:192</a></li>
+									<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/d091f9f/src/main.ts#L215">src/main.ts:215</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -313,7 +328,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/b0c257f/src/main.ts#L523">src/main.ts:523</a></li>
+									<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/d091f9f/src/main.ts#L546">src/main.ts:546</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
@@ -330,16 +345,32 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/b0c257f/src/main.ts#L716">src/main.ts:716</a></li>
+									<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/d091f9f/src/main.ts#L754">src/main.ts:754</a></li>
 								</ul>
 							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Get the contents of a file.</p>
+								</div>
+								<pre><code class="language-typescript"><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">data</span><span style="color: #000000"> = </span><span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #001080">micropython</span><span style="color: #000000">.</span><span style="color: #795E26">getFile</span><span style="color: #000000">(</span><span style="color: #A31515">&#039;boot.py&#039;</span><span style="color: #000000">)</span>
+</code></pre>
+								<dl class="tsd-comment-tags">
+									<dt>throws</dt>
+									<dd><p>{ScriptExecutionError} if not found: &quot;<code>OSError: [Errno 2] ENOENT</code>&quot;</p>
+									</dd>
+								</dl>
+							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
 									<h5>filename: <span class="tsd-signature-type">string</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>filename of file to download</p>
+									</div>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Buffer</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<p>contents of the file in a Buffer</p>
 						</li>
 					</ul>
 				</section>
@@ -353,16 +384,18 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/b0c257f/src/main.ts#L830">src/main.ts:830</a></li>
+									<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/d091f9f/src/main.ts#L879">src/main.ts:879</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>Get SHA256 hash of a file contents</p>
+									<p>Get SHA256 hash of a file contents.</p>
 								</div>
+								<pre><code class="language-typescript"><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">data</span><span style="color: #000000"> = </span><span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #001080">micropython</span><span style="color: #000000">.</span><span style="color: #795E26">getFileHash</span><span style="color: #000000">(</span><span style="color: #A31515">&#039;boot.py&#039;</span><span style="color: #000000">)</span>
+</code></pre>
 								<dl class="tsd-comment-tags">
 									<dt>throws</dt>
-									<dd><p>{ScriptExecutionError} if not found: &quot;OSError: [Errno 2] ENOENT&quot;</p>
+									<dd><p>{ScriptExecutionError} if not found: &quot;<code>OSError: [Errno 2] ENOENT</code>&quot;</p>
 									</dd>
 								</dl>
 							</div>
@@ -370,9 +403,13 @@
 							<ul class="tsd-parameters">
 								<li>
 									<h5>filename: <span class="tsd-signature-type">string</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>filename of target file</p>
+									</div>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<p>sha256 hash, hexlified</p>
 						</li>
 					</ul>
 				</section>
@@ -386,9 +423,14 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/b0c257f/src/main.ts#L174">src/main.ts:174</a></li>
+									<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/d091f9f/src/main.ts#L197">src/main.ts:197</a></li>
 								</ul>
 							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Get the state object. Mostly used for debugging purposes.</p>
+								</div>
+							</div>
 							<h4 class="tsd-returns-title">Returns <a href="../interfaces/devicestate.html" class="tsd-signature-type" data-tsd-kind="Interface">DeviceState</a></h4>
 						</li>
 					</ul>
@@ -403,9 +445,15 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/b0c257f/src/main.ts#L640">src/main.ts:640</a></li>
+									<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/d091f9f/src/main.ts#L667">src/main.ts:667</a></li>
 								</ul>
 							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>GET_VER webrepl command. Returns the micropython version.
+									Only works with network connections, not with serial.</p>
+								</div>
+							</div>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">&gt;</span></h4>
 						</li>
 					</ul>
@@ -420,10 +468,56 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/b0c257f/src/main.ts#L162">src/main.ts:162</a></li>
+									<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/d091f9f/src/main.ts#L182">src/main.ts:182</a></li>
 								</ul>
 							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Whether currently connected to a device.</p>
+								</div>
+							</div>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="isfilethesame" class="tsd-anchor"></a>
+					<h3>is<wbr>File<wbr>The<wbr>Same</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">is<wbr>File<wbr>The<wbr>Same<span class="tsd-signature-symbol">(</span>filename<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, data<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Buffer</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/d091f9f/src/main.ts#L896">src/main.ts:896</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Check whether a file is the same as provided, within a single <code>runScript</code> execution.</p>
+								</div>
+								<ul>
+									<li>If filesize is different, then file is different</li>
+									<li>If filesize equal then compare sha256 hash</li>
+								</ul>
+								<p>This is a helper for bulk uploading directories, but only if they have changed.</p>
+								<dl class="tsd-comment-tags">
+									<dt>throws</dt>
+									<dd><p>{ScriptExecutionError} if not found: &quot;OSError: [Errno 2] ENOENT&quot;</p>
+									</dd>
+								</dl>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>filename: <span class="tsd-signature-type">string</span></h5>
+								</li>
+								<li>
+									<h5>data: <span class="tsd-signature-type">Buffer</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">&gt;</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -437,7 +531,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/b0c257f/src/main.ts#L166">src/main.ts:166</a></li>
+									<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/d091f9f/src/main.ts#L186">src/main.ts:186</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
@@ -454,7 +548,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/b0c257f/src/main.ts#L170">src/main.ts:170</a></li>
+									<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/d091f9f/src/main.ts#L190">src/main.ts:190</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
@@ -471,7 +565,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/b0c257f/src/main.ts#L696">src/main.ts:696</a></li>
+									<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/d091f9f/src/main.ts#L723">src/main.ts:723</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -497,7 +591,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/b0c257f/src/main.ts#L736">src/main.ts:736</a></li>
+									<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/d091f9f/src/main.ts#L774">src/main.ts:774</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -521,13 +615,13 @@
 					<a name="putfile" class="tsd-anchor"></a>
 					<h3>put<wbr>File</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">put<wbr>File<span class="tsd-signature-symbol">(</span>targetFilename<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, data<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Buffer</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">put<wbr>File<span class="tsd-signature-symbol">(</span>targetFilename<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, data<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Buffer</span>, options<span class="tsd-signature-symbol">?: </span><a href="../interfaces/putfileoptions.html" class="tsd-signature-type" data-tsd-kind="Interface">PutFileOptions</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/b0c257f/src/main.ts#L756">src/main.ts:756</a></li>
+									<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/d091f9f/src/main.ts#L794">src/main.ts:794</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -552,6 +646,9 @@
 									<div class="tsd-comment tsd-typography">
 									</div>
 								</li>
+								<li>
+									<h5>options: <a href="../interfaces/putfileoptions.html" class="tsd-signature-type" data-tsd-kind="Interface">PutFileOptions</a><span class="tsd-signature-symbol"> = ...</span></h5>
+								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">&gt;</span></h4>
 						</li>
@@ -567,7 +664,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/b0c257f/src/main.ts#L786">src/main.ts:786</a></li>
+									<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/d091f9f/src/main.ts#L829">src/main.ts:829</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -609,7 +706,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/b0c257f/src/main.ts#L798">src/main.ts:798</a></li>
+									<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/d091f9f/src/main.ts#L841">src/main.ts:841</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -648,7 +745,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/b0c257f/src/main.ts#L807">src/main.ts:807</a></li>
+									<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/d091f9f/src/main.ts#L850">src/main.ts:850</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -676,13 +773,16 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/b0c257f/src/main.ts#L551">src/main.ts:551</a></li>
+									<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/d091f9f/src/main.ts#L575">src/main.ts:575</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Execute a Python script on the device, wait and return the output.</p>
+								</div>
 								<dl class="tsd-comment-tags">
 									<dt>throws</dt>
-									<dd><p>{ScriptExecutionError} on Python code execution error</p>
+									<dd><p>{ScriptExecutionError} on Python code execution error. Includes the Python traceback.</p>
 									</dd>
 								</dl>
 							</div>
@@ -690,9 +790,14 @@
 							<ul class="tsd-parameters">
 								<li>
 									<h5>script: <span class="tsd-signature-type">string</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>the python code</p>
+									</div>
 								</li>
 								<li>
 									<h5>options: <a href="../interfaces/runscriptoptions.html" class="tsd-signature-type" data-tsd-kind="Interface">RunScriptOptions</a><span class="tsd-signature-symbol"> = ...</span></h5>
+									<div class="tsd-comment tsd-typography">
+									</div>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">&gt;</span></h4>
@@ -709,7 +814,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/b0c257f/src/main.ts#L498">src/main.ts:498</a></li>
+									<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/d091f9f/src/main.ts#L521">src/main.ts:521</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -732,7 +837,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/b0c257f/src/main.ts#L722">src/main.ts:722</a></li>
+									<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/d091f9f/src/main.ts#L760">src/main.ts:760</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -794,6 +899,9 @@
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="micropythondevice.html#isconnected" class="tsd-kind-icon">is<wbr>Connected</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="micropythondevice.html#isfilethesame" class="tsd-kind-icon">is<wbr>File<wbr>The<wbr>Same</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="micropythondevice.html#isserialdevice" class="tsd-kind-icon">is<wbr>Serial<wbr>Device</a>

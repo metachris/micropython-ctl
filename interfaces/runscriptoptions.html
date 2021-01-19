@@ -83,7 +83,7 @@
 								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="runscriptoptions.html#broadcastoutputasterminaldata" class="tsd-kind-icon">broadcast<wbr>Output<wbr>AsTerminal<wbr>Data</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="runscriptoptions.html#disablededent" class="tsd-kind-icon">disable<wbr>Dedent</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="runscriptoptions.html#exitaftersending" class="tsd-kind-icon">exit<wbr>After<wbr>Sending</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="runscriptoptions.html#exitrawrepl" class="tsd-kind-icon">exit<wbr>Raw<wbr>Repl</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="runscriptoptions.html#stayinrawrepl" class="tsd-kind-icon">stay<wbr>InRaw<wbr>Repl</a></li>
 							</ul>
 						</section>
 					</div>
@@ -97,9 +97,14 @@
 					<div class="tsd-signature tsd-kind-icon">broadcast<wbr>Output<wbr>AsTerminal<wbr>Data<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/b0c257f/src/main.ts#L845">src/main.ts:845</a></li>
+							<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/d091f9f/src/main.ts#L917">src/main.ts:917</a></li>
 						</ul>
 					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>Whether to broadcast the received data to the <a href="../classes/micropythondevice.html#onterminaldata">MicroPythonDevice.onTerminalData</a> callback while receiving (default: <code>false</code>)</p>
+						</div>
+					</div>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
 					<a name="disablededent" class="tsd-anchor"></a>
@@ -107,9 +112,14 @@
 					<div class="tsd-signature tsd-kind-icon">disable<wbr>Dedent<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/b0c257f/src/main.ts#L843">src/main.ts:843</a></li>
+							<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/d091f9f/src/main.ts#L911">src/main.ts:911</a></li>
 						</ul>
 					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>Whether unnecessary indentation should be kept in the script (default: <code>false</code>)</p>
+						</div>
+					</div>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
 					<a name="exitaftersending" class="tsd-anchor"></a>
@@ -117,19 +127,29 @@
 					<div class="tsd-signature tsd-kind-icon">exit<wbr>After<wbr>Sending<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/b0c257f/src/main.ts#L846">src/main.ts:846</a></li>
+							<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/d091f9f/src/main.ts#L920">src/main.ts:920</a></li>
 						</ul>
 					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>Whether to resolve the promise before waiting for the response, directly after sending (default: <code>false</code>)</p>
+						</div>
+					</div>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-					<a name="exitrawrepl" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagOptional">Optional</span> exit<wbr>Raw<wbr>Repl</h3>
-					<div class="tsd-signature tsd-kind-icon">exit<wbr>Raw<wbr>Repl<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
+					<a name="stayinrawrepl" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> stay<wbr>InRaw<wbr>Repl</h3>
+					<div class="tsd-signature tsd-kind-icon">stay<wbr>InRaw<wbr>Repl<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/b0c257f/src/main.ts#L844">src/main.ts:844</a></li>
+							<li>Defined in <a href="https://github.com/metachris/micropython-ctl/blob/d091f9f/src/main.ts#L914">src/main.ts:914</a></li>
 						</ul>
 					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>Whether to stay in RAW repl mode after execution. Useful for large scripts that need to get executed piece by piece (uploading files, etc.) (default: <code>false</code>)</p>
+						</div>
+					</div>
 				</section>
 			</section>
 		</div>
