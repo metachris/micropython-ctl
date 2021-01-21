@@ -180,30 +180,41 @@ I'm happy about feedback, please reach out:
 
 Code library:
 
-* put/get recursively (only upload if changed, build on `getFileHash` (eg. check filesize first, if size the same then check hash))
-* Document all functions in https://github.com/metachris/micropython-ctl/blob/master/src/main.ts
+* getDeviceInfo (device type, mpy version, etc)
+* put/get recursively (only upload if changed?)
 * putfile and getfile over network: switch to webrepl protocol instead of manual up- and download
 * `getFile` improvement - currently it fills the device RAM and probably works badly with large file
 * put & get with folders: join path parts windows compatible
+* Document all functions with examples (in https://github.com/metachris/micropython-ctl/blob/master/src/main.ts)
 
 `mctl`:
 
-* env vars for host, password: WEBREPL, AMPY
-* upload everything recursively ('cp -r .')
+* env vars for device: serial / host, password (see also WEBREPL, AMPY env vars)
+* upload everything recursively ('put -r .')
 * wifi status, connect, disconnect
-* mount: testing
-* mount + repl
-* reuse one instance (eg. in mount mode) to execute other commands
-* `mctl mount` issues ([see here](https://github.com/metachris/micropython-ctl/issues/3))
+
+Tests:
+
+* getFileHash, isFileTheSame
+* `mctl get -r .`, `mctl put -r .`
+* automated browser testing (selenium [[1](https://developer.mozilla.org/en-US/docs/Learn/Tools_and_testing/Cross_browser_testing/Your_own_automation_environment)])
+* Test most important `mctl` commands
+
+Various:
+
+* Electron example app
 
 Maybe (not sure it's needed, don't rush into implementing):
 
+* mount related
+  * mount: testing
+  * mount + repl
+  * reuse one instance (eg. in mount mode) to execute other commands
+  * `mctl mount` issues ([see here](https://github.com/metachris/micropython-ctl/issues/3))
 * Vue.js example with attaching the MicroPythonDevice instance to window, so one instance can live across code hot reloads :) (almost done)
 * A slim version for the browser with minimal footprint (only core code, no listfiles etc.)
-* Allow receiving output of running Python script (don't wait for finishing)
 * Support new raw-paste mode: https://github.com/micropython/micropython/blob/master/docs/reference/repl.rst#raw-mode-and-raw-paste-mode (only in master, should be part of MicroPython 1.14)
 * Rename ScriptExecutionError to RuntimeError?
-* Extend test suite
 
 ---
 
