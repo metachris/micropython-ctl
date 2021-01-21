@@ -225,30 +225,43 @@
 				</a>
 				<p>Code library:</p>
 				<ul>
-					<li>put/get recursively (only upload if changed, build on <code>getFileHash</code> (eg. check filesize first, if size the same then check hash))</li>
-					<li>Document all functions in <a href="https://github.com/metachris/micropython-ctl/blob/master/src/main.ts">https://github.com/metachris/micropython-ctl/blob/master/src/main.ts</a></li>
+					<li>getDeviceInfo (device type, mpy version, etc)</li>
+					<li>put/get recursively (only upload if changed?)</li>
 					<li>putfile and getfile over network: switch to webrepl protocol instead of manual up- and download</li>
 					<li><code>getFile</code> improvement - currently it fills the device RAM and probably works badly with large file</li>
 					<li>put &amp; get with folders: join path parts windows compatible</li>
+					<li>Document all functions with examples (in <a href="https://github.com/metachris/micropython-ctl/blob/master/src/main.ts">https://github.com/metachris/micropython-ctl/blob/master/src/main.ts</a>)</li>
 				</ul>
 				<p><code>mctl</code>:</p>
 				<ul>
-					<li>env vars for host, password: WEBREPL, AMPY</li>
-					<li>upload everything recursively (&#39;cp -r .&#39;)</li>
+					<li>env vars for device: serial / host, password (see also WEBREPL, AMPY env vars)</li>
+					<li>upload everything recursively (&#39;put -r .&#39;)</li>
 					<li>wifi status, connect, disconnect</li>
-					<li>mount: testing</li>
-					<li>mount + repl</li>
-					<li>reuse one instance (eg. in mount mode) to execute other commands</li>
-					<li><code>mctl mount</code> issues (<a href="https://github.com/metachris/micropython-ctl/issues/3">see here</a>)</li>
+				</ul>
+				<p>Tests:</p>
+				<ul>
+					<li>getFileHash, isFileTheSame</li>
+					<li><code>mctl get -r .</code>, <code>mctl put -r .</code></li>
+					<li>automated browser testing (selenium [<a href="https://developer.mozilla.org/en-US/docs/Learn/Tools_and_testing/Cross_browser_testing/Your_own_automation_environment">1</a>])</li>
+					<li>Test most important <code>mctl</code> commands</li>
+				</ul>
+				<p>Various:</p>
+				<ul>
+					<li>Electron example app</li>
 				</ul>
 				<p>Maybe (not sure it&#39;s needed, don&#39;t rush into implementing):</p>
 				<ul>
+					<li>mount related<ul>
+							<li>mount: testing</li>
+							<li>mount + repl</li>
+							<li>reuse one instance (eg. in mount mode) to execute other commands</li>
+							<li><code>mctl mount</code> issues (<a href="https://github.com/metachris/micropython-ctl/issues/3">see here</a>)</li>
+						</ul>
+					</li>
 					<li>Vue.js example with attaching the MicroPythonDevice instance to window, so one instance can live across code hot reloads :) (almost done)</li>
 					<li>A slim version for the browser with minimal footprint (only core code, no listfiles etc.)</li>
-					<li>Allow receiving output of running Python script (don&#39;t wait for finishing)</li>
 					<li>Support new raw-paste mode: <a href="https://github.com/micropython/micropython/blob/master/docs/reference/repl.rst#raw-mode-and-raw-paste-mode">https://github.com/micropython/micropython/blob/master/docs/reference/repl.rst#raw-mode-and-raw-paste-mode</a> (only in master, should be part of MicroPython 1.14)</li>
 					<li>Rename ScriptExecutionError to RuntimeError?</li>
-					<li>Extend test suite</li>
 				</ul>
 				<hr>
 				<a href="#release-process" id="release-process" style="color: inherit; text-decoration: none;">
