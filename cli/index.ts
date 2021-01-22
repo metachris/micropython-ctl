@@ -127,39 +127,72 @@ const listFilesOnDevice = async (directory = '/', cmdObj) => {
 /**
  * Upload a file
  *
- * local:boot.py -> device:boot.py
- * local:test/foo.py -> device:foo.py
+ * filenames when copying from local -> device:
+ * - boot.py     -> boot.py
+ * - test/foo.py -> foo.py
+ * - test/       -> test/foo.py
  *
- * @param filename filename or glob
+ * @param filename filename, glob or directory name
  * @param dest filename or path
  */
-const putFile = async (filename: string, dest?: string) => {
-  console.log('putFile', filename, '->', dest)
+const put = async (filename: string, dest?: string) => {
+  logVerbose('put', filename, '->', dest)
 
-  const upload = async (_filename: string) => {
+  // helper to perform individual upload
+  const uploadSingleFile = async (_filename: string, _dest = dest) => {
     let target = path.basename(_filename)
-    if (dest) {
-      target = dest.endsWith('/') ? dest + target : dest
+    if (_dest) {
+      target = _dest.endsWith('/') ? _dest + target : _dest
     }
     console.log('put:', _filename, '->', target)
     const data = Buffer.from(fs.readFileSync(_filename))
     await micropython.putFile(target, data)
   }
 
+  const uploadDirectory = async (_dirname: string) => {
+    if (_dirname.endsWith('/')) _dirname = _dirname.substr(0, _dirname.length - 1)
+    // console.log('uploadDir', _dirname)
+
+    // create dir on device, if not exists
+    const deviceStat = await micropython.statPath(_dirname)
+    if (!deviceStat.exists) {
+      await micropython.mkdir(_dirname)
+    }
+
+    // Iterate over all files and directories, and upload
+    for (const _filename of fs.readdirSync(_dirname)) {
+      const fn = path.join(_dirname, _filename)
+      const stat = fs.statSync(fn)
+
+      if (stat.isFile()) {
+        await uploadSingleFile(fn, _dirname + '/')
+      } else if (stat.isDirectory()) {
+        await uploadDirectory(fn)
+      }
+    }
+  }
+
   // Connect and upload
   try {
     await ensureConnectedDevice()
+
+    // Is argument glob?
     if (filename.indexOf('*') > -1) {
-      // glob
       const filesDir = path.dirname(filename)
       const filesRegex = globToRegExp(path.basename(filename))
       const files = fs.readdirSync(filesDir).filter(dir => filesRegex.test(dir))
       for (const _filename of files) {
-        await upload(_filename)
+        await uploadSingleFile(_filename)
       }
-    } else {
-      // direct filename
-      await upload(filename)
+      return
+    }
+
+    // Else file or directory
+    const stat = fs.statSync(filename)
+    if (stat.isFile()) {
+      await uploadSingleFile(filename)
+    } else if (stat.isDirectory()) {
+      await uploadDirectory(filename)
     }
   } finally {
     await micropython.disconnect()
@@ -206,7 +239,7 @@ const catFile = async (filename: string) => {
   }
 }
 
-const get = async (filenameOrDir: string, targetFilenameOrDir: string, cmdObj) => {
+const get = async (filenameOrDir: string, targetFilenameOrDir: string) => {
   // console.log('get', filenameOrDir, targetFilenameOrDir)
   try {
     await ensureConnectedDevice()
@@ -225,14 +258,6 @@ const get = async (filenameOrDir: string, targetFilenameOrDir: string, cmdObj) =
     }
 
     if (statResult.isDir) {
-      // It is a directory, must be recursive
-      const dir = filenameOrDir
-      // console.log('get dir', dir, cmdObj.recursive)
-      if (!cmdObj.recursive) {
-        console.log(`${CLR_FG_RED}get: -r not specified; omitting directory '${dir}'${CLR_RESET}`)
-        return
-      }
-
       if (!targetFilenameOrDir) {
         targetFilenameOrDir = '.'
       }
@@ -249,9 +274,10 @@ const get = async (filenameOrDir: string, targetFilenameOrDir: string, cmdObj) =
       const downloadDirectory = async (downloadDir: string) => {
         // console.log('downloadDir',  downloadDir)
 
-        if (!fs.existsSync(targetFilenameOrDir + downloadDir)) {
+        const fullTargetDir = path.join(targetFilenameOrDir, downloadDir)
+        if (!fs.existsSync(fullTargetDir)) {
           // console.log('- mkdir', targetFilenameOrDir + downloadDir)
-          fs.mkdirSync(targetFilenameOrDir + downloadDir)
+          fs.mkdirSync(fullTargetDir)
         }
 
         // copy everything recursively!
@@ -259,7 +285,7 @@ const get = async (filenameOrDir: string, targetFilenameOrDir: string, cmdObj) =
         // console.log(filesAndDirectories)
 
         for (const item of filesAndDirectories) {
-          const targetFileName = targetFilenameOrDir + item.filename
+          const targetFileName = path.join(targetFilenameOrDir, item.filename)
           if (item.filename === downloadDir) continue  // don't re-download self
           if (item.isDir) {
             if (!fs.existsSync(targetFileName)) {
@@ -274,10 +300,11 @@ const get = async (filenameOrDir: string, targetFilenameOrDir: string, cmdObj) =
         }
       }
 
-      await downloadDirectory(dir)
+      await downloadDirectory(filenameOrDir)
 
     } else {
       // It is a file.
+      // TODO: handle glob, like in `putFile`
 
       // Define the target filename
       let targetFilename = path.basename(filenameOrDir) // removed the directory
@@ -517,15 +544,14 @@ program
 // Command: get
 program
   .command('get <file_or_dirname> [out_file_or_dirname]')
-  .option('-r, --recursive', 'Get everything recursively')
-  .description(`Download a file or directory from the device. Download everything with 'get -r .'`)
+  .description(`Download a file or directory from the device. Download everything with 'get /'.`)
   .action(get);
 
 // Command: put
 program
-  .command('put <filename> [<destFilename>]')
-  .description('Copy a file onto the device')
-  .action(putFile);
+  .command('put <file_or_dirname> [dest_file_or_dirname]')
+  .description('Upload a file or directory onto the device')
+  .action(put);
 
 // Command: edit
 program

@@ -182,24 +182,21 @@ Code library:
 
 * getDeviceInfo (device type, mpy version, etc)
 * put/get
-  * recursively (only upload if changed?) [in progress]
   * via network: switch to webrepl protocol instead of manual up- and download
   * `getFile` via serial improvement - currently it fills the device RAM and probably works badly with large file
-* Document all functions with examples (in https://github.com/metachris/micropython-ctl/blob/master/src/main.ts)
+* More examples in the documentation (in [main.ts](https://github.com/metachris/micropython-ctl/blob/master/src/main.ts))
 
 `mctl`:
 
 * env vars for device: serial / host, password (see also WEBREPL, AMPY env vars)
-* upload everything recursively ('put -r .')
 * wifi status, connect, disconnect
-* put & get with folders: join path parts windows compatible
 
 Tests:
 
 * getFileHash, isFileTheSame
 * `mctl get -r .`, `mctl put -r .`
 * automated browser testing (selenium [[1](https://developer.mozilla.org/en-US/docs/Learn/Tools_and_testing/Cross_browser_testing/Your_own_automation_environment)])
-* Test most important `mctl` commands
+* Test for most important `mctl` commands
 
 Various:
 
