@@ -58,8 +58,8 @@
 	<div class="row">
 		<div class="col-8 col-content">
 			<div class="tsd-panel tsd-typography">
-				<a href="#micropython-ctl-micropython-❤️-typescript" id="micropython-ctl-micropython-❤️-typescript" style="color: inherit; text-decoration: none;">
-					<h1>MicroPython-Ctl: MicroPython ❤️ TypeScript</h1>
+				<a href="#micropython-ctl-typescript-❤️-micropython" id="micropython-ctl-typescript-❤️-micropython" style="color: inherit; text-decoration: none;">
+					<h1>MicroPython-Ctl: TypeScript ❤️ MicroPython</h1>
 				</a>
 				<p>Build things that talk to MicroPython devices: websites/webapps, Node.js programs, Electron applications, VS Code extensions, and more.</p>
 				<p><a href="https://github.com/metachris/micropython-ctl/actions?query=workflow%3A%22Build+and+test%22"><img src="https://github.com/metachris/micropython-ctl/workflows/Build%20and%20test/badge.svg" alt="Build and test status"></a></p>
@@ -227,26 +227,23 @@
 				<ul>
 					<li>getDeviceInfo (device type, mpy version, etc)</li>
 					<li>put/get<ul>
-							<li>recursively (only upload if changed?) [in progress]</li>
 							<li>via network: switch to webrepl protocol instead of manual up- and download</li>
 							<li><code>getFile</code> via serial improvement - currently it fills the device RAM and probably works badly with large file</li>
 						</ul>
 					</li>
-					<li>Document all functions with examples (in <a href="https://github.com/metachris/micropython-ctl/blob/master/src/main.ts">https://github.com/metachris/micropython-ctl/blob/master/src/main.ts</a>)</li>
+					<li>More examples in the documentation (in <a href="https://github.com/metachris/micropython-ctl/blob/master/src/main.ts">main.ts</a>)</li>
 				</ul>
 				<p><code>mctl</code>:</p>
 				<ul>
 					<li>env vars for device: serial / host, password (see also WEBREPL, AMPY env vars)</li>
-					<li>upload everything recursively (&#39;put -r .&#39;)</li>
 					<li>wifi status, connect, disconnect</li>
-					<li>put &amp; get with folders: join path parts windows compatible</li>
 				</ul>
 				<p>Tests:</p>
 				<ul>
 					<li>getFileHash, isFileTheSame</li>
 					<li><code>mctl get -r .</code>, <code>mctl put -r .</code></li>
 					<li>automated browser testing (selenium [<a href="https://developer.mozilla.org/en-US/docs/Learn/Tools_and_testing/Cross_browser_testing/Your_own_automation_environment">1</a>])</li>
-					<li>Test most important <code>mctl</code> commands</li>
+					<li>Test for most important <code>mctl</code> commands</li>
 				</ul>
 				<p>Various:</p>
 				<ul>
