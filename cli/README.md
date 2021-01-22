@@ -72,7 +72,8 @@ mctl get -r / /tmp/
 `mctl mount`
 
 * Mounts the device filesystem into the local filesystem. Highly experimental! Doesn't yet work well with binary files, and Windows. Not recommended for production use. Might result in data loss.
-* macOS, Linux: Works. Uses [fuse-native](https://github.com/fuse-friends/fuse-native)
+* Should work for Python (.py) files on macOS and Linux.
+* macOS, Linux: works, using [fuse-native](https://github.com/fuse-friends/fuse-native)
 * Windows: experimental, might be buggy. Uses [node-fuse-bindings](https://github.com/direktspeed/node-fuse-bindings) and [Dokany](https://github.com/dokan-dev/dokany/wiki/Installation)
 * Keeps the device connection open, which means you cannot connect to it in parallel
 * If you encounter problems or have feedback, please post here: https://github.com/metachris/micropython-ctl/issues/3

@@ -100,7 +100,8 @@ declare const window: WindowWithWebRepl;
 
 /**
  * Main class for a MicroPython device connection.
- * See also
+ *
+ * See also https://github.com/metachris/micropython-ctl
  *
  * ```
  * const micropython = new MicroPythonDevice()
@@ -139,8 +140,8 @@ export class MicroPythonDevice {
    */
   onTerminalData: (data: string) => void  // user callback
 
-  private getInitState(): DeviceState {
-    return {
+  constructor() {
+    this.state = {
       connectionMode: ConnectionMode.NETWORK,
       connectionState: ConnectionState.CLOSED,
 
@@ -171,10 +172,6 @@ export class MicroPythonDevice {
       putFileName: '',
       putFileDest: '',
     }
-  }
-
-  constructor() {
-    this.state = this.getInitState()
   }
 
   /**
