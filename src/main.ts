@@ -6,7 +6,6 @@
  * - Author: chris@linuxuser.at / https://twitter.com/metachris
  */
 import WebSocket from 'isomorphic-ws'
-import crypto from 'crypto';
 import { Buffer } from 'buffer/'
 import { InvalidPassword, CouldNotConnect, ScriptExecutionError } from './errors'
 import { debug, dedent, IS_ELECTRON, IS_NODEJS } from './utils';
@@ -883,6 +882,7 @@ export class MicroPythonDevice {
 
   /**
    * Check whether a file is the same as provided, within a single `runScript` execution.
+   * Does not work in browser.
    *
    * - If filesize is different, then file is different
    * - If filesize equal then compare sha256 hash
@@ -893,6 +893,7 @@ export class MicroPythonDevice {
    */
   public async isFileTheSame(filename: string, data: Buffer) {
     debug('isFileTheSame', filename, data.length)
+    const crypto = require('crypto')
     const localHash = crypto.createHash('sha256').update(data).digest('hex')
     const script = PythonScripts.isFileTheSame(filename, data.length, localHash)
     const output = await this.runScript(script)
