@@ -29,7 +29,7 @@ import { Command } from 'commander';
 import { ScriptExecutionError, MicroPythonDevice, ConnectionMode } from '../src/main';
 import { delayMillis } from '../src/utils';
 import { humanFileSize } from './utils';
-import { getTmpFilename } from '../src/utils-node';
+import { getTmpFilename, globToRegExp } from '../src/utils-node';
 import { mount as mountWithFuse } from './mount-device'
 import { checkAndInstall as checkAndInstallFuse } from './fuse-dependencies'
 import { run as runInternalTests } from '../tests/testsuite'
@@ -124,21 +124,43 @@ const listFilesOnDevice = async (directory = '/', cmdObj) => {
   }
 }
 
-const putFile = async (filename: string, destFilename?: string) => {
-  if (destFilename) {
-    if (destFilename.endsWith('/')) destFilename += filename
-  } else {
-    destFilename = path.basename(filename)
-  }
-  console.log('putFile', filename, '->', destFilename)
+/**
+ * Upload a file
+ *
+ * local:boot.py -> device:boot.py
+ * local:test/foo.py -> device:foo.py
+ *
+ * @param filename filename or glob
+ * @param dest filename or path
+ */
+const putFile = async (filename: string, dest?: string) => {
+  console.log('putFile', filename, '->', dest)
 
-  // Read the file
-  const data = Buffer.from(fs.readFileSync(filename))
+  const upload = async (_filename: string) => {
+    let target = path.basename(_filename)
+    if (dest) {
+      target = dest.endsWith('/') ? dest + target : dest
+    }
+    console.log('put:', _filename, '->', target)
+    const data = Buffer.from(fs.readFileSync(_filename))
+    await micropython.putFile(target, data)
+  }
 
   // Connect and upload
   try {
     await ensureConnectedDevice()
-    await micropython.putFile(destFilename, data)
+    if (filename.indexOf('*') > -1) {
+      // glob
+      const filesDir = path.dirname(filename)
+      const filesRegex = globToRegExp(path.basename(filename))
+      const files = fs.readdirSync(filesDir).filter(dir => filesRegex.test(dir))
+      for (const _filename of files) {
+        await upload(_filename)
+      }
+    } else {
+      // direct filename
+      await upload(filename)
+    }
   } finally {
     await micropython.disconnect()
   }

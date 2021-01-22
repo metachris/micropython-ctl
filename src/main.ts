@@ -99,7 +99,8 @@ export interface FileListEntry { filename: string, size: number, isDir: boolean 
 declare const window: WindowWithWebRepl;
 
 /**
- * The main class for a MicroPython device connection
+ * Main class for a MicroPython device connection.
+ * See also
  *
  * ```
  * const micropython = new MicroPythonDevice()
@@ -593,7 +594,7 @@ export class MicroPythonDevice {
       const chunk = script.substring(0, chunkSize)
       script = script.substr(chunkSize)
       this.sendData(chunk)
-      await delayMillis(chunkDelayMillis)
+      if (chunkDelayMillis && script.length) await delayMillis(chunkDelayMillis)
     }
 
     // debug('runScript: script sent')

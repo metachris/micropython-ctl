@@ -51,6 +51,15 @@ Note: without tty / host+password options, `mctl` will try to connect to the fir
 ### Examples
 
 ```shell
+# List serial devices
+mctl devices
+
+# List files
+mctl ls -r
+
+# Print contents of boot.py
+mctl cat boot.py
+
 # Download all files and directories recursively, into the current directory
 mctl get -r /
 

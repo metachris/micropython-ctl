@@ -1,4 +1,4 @@
-# MicroPython-Ctl: MicroPython ❤️ TypeScript
+# MicroPython-Ctl: TypeScript ❤️ MicroPython
 
 Build things that talk to MicroPython devices: websites/webapps, Node.js programs, Electron applications, VS Code extensions, and more.
 
