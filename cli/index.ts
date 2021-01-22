@@ -165,7 +165,7 @@ const put = async (filename: string, dest?: string) => {
       const stat = fs.statSync(fn)
 
       if (stat.isFile()) {
-        await uploadSingleFile(fn, _dirname + '/')
+        await uploadSingleFile(fn, _dirname === '.' ? '/' : _dirname + '/')
       } else if (stat.isDirectory()) {
         await uploadDirectory(fn)
       }

@@ -2,11 +2,11 @@
 
 With `mctl` you can:
 
-* manipulate files and directories: `mctl ls -r`, ...
-* list all serial devices: `mctl devices`
-* enter the REPL: `mctl repl`
-* mount the device into the local filesystem: `mctl mount`
-* use serial or network connection
+* Manipulate files and directories
+* List all serial devices: `mctl devices`
+* Enter the REPL: `mctl repl`
+* Mount the device into the local filesystem: `mctl mount` (experimental!)
+* Use serial or network connection
 
 Code: [cli/index.ts](https://github.com/metachris/micropython-ctl/blob/master/cli/index.ts)
 
@@ -46,7 +46,7 @@ Commands:
   help [command]                               display help for command
 ```
 
-Note: without tty / host+password options, `mctl` will try to connect to the first found serial device.
+Note: without `--tty` / `--host` + `--password` options, `mctl` will connect to the first serial device.
 
 ### Examples
 
@@ -65,6 +65,15 @@ mctl get -r /
 
 # Download all files and directories recursively, into /tmp/
 mctl get -r / /tmp/
+
+# Upload a file
+mctl put boot.py
+
+# Upload all Python scripts
+mctl put *.py
+
+# Upload everything recursively
+mctl put .
 ```
 
 ### Notes
