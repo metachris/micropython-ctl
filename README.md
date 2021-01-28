@@ -14,7 +14,7 @@ Build things that talk to MicroPython devices: websites/webapps, Node.js program
   * Mount the micropython device into the local filesystem (`mctl mount`, experimental)
 * See all the features in the [documentation](https://metachris.github.io/micropython-ctl/classes/micropythondevice.html), [examples](https://github.com/metachris/micropython-ctl/tree/master/examples) and [`cli/`](https://github.com/metachris/micropython-ctl/blob/master/cli)
 * Typed and fully async (use `await` with any command).
-* Works on Linux, macOS and Windows. Tested with ESP32 & ESP8266.
+* Works on Linux, macOS and Windows. Tested with ESP32, ESP8266, [Raspberry Pi Pico](https://www.raspberrypi.org/documentation/pico/getting-started/).
 * Main code files: [`main.ts`](https://github.com/metachris/micropython-ctl/blob/master/src/main.ts), [`cli/index.ts`](https://github.com/metachris/micropython-ctl/blob/master/cli/index.ts)
 * Links: [Github](https://github.com/metachris/micropython-ctl), [Documentation](https://metachris.github.io/micropython-ctl/), [npm package](https://www.npmjs.com/package/micropython-ctl)
 
@@ -188,6 +188,7 @@ Code library:
 `mctl`:
 
 * env vars for device: serial / host, password (see also WEBREPL, AMPY env vars)
+* get '*.py'
 * wifi status, connect, disconnect
 
 Tests:

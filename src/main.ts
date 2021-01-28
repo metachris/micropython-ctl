@@ -925,10 +925,14 @@ export class MicroPythonDevice {
     debug('getBoardInfo')
     const script = `
       import uos, machine, ubinascii, gc
+      try:
+        unique_id = ubinascii.hexlify(machine.unique_id())
+      except:
+        unique_id = None
       gc.collect()
-      print('uname:', uos.uname())
-      print('unique_id:', ubinascii.hexlify(machine.unique_id()))
       print('mem_free:', gc.mem_free())
+      print('uname:', uos.uname())
+      print('unique_id:', unique_id)
       print('fsinfo:', uos.statvfs('/'))
     `
     const output = await this.runScript(script)
@@ -945,7 +949,8 @@ export class MicroPythonDevice {
           ret[_parts[0]] = _parts[1].substr(1, _parts[1].length - 2)
         })
       } else if (infoType === 'unique_id') {
-        ret.uniqueId = infoData.substr(2, infoData.length - 3)
+        // console.log(infoData)
+        ret.uniqueId = infoData === 'None' ? null : infoData.substr(2, infoData.length - 3)
       } else if (infoType === 'mem_free') {
         ret.memFree = parseInt(infoData, 10)
       } else if (infoType === 'fsinfo') {
