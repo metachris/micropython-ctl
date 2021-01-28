@@ -38,6 +38,9 @@ import { mount as mountWithFuse } from './mount-device'
 import { checkAndInstall as checkAndInstallFuse } from './fuse-dependencies'
 import { run as runInternalTests } from '../tests/testsuite'
 
+// tslint:disable-next-line: no-var-requires
+const pjson = require('../package.json');
+
 // https://github.com/tj/commander.js
 const program = new Command();
 
@@ -676,9 +679,10 @@ program
   .command('version')
   .description('Print the version of mctl')
   .action(() => {
-    const pjson = require('../package.json');
     console.log(`v${pjson.version}`);
   });
+
+program.addHelpText('after', `\nhttps://github.com/metachris/micropython-ctl v${pjson.version}`);
 
 (async () => {
   await program.parseAsync(process.argv);
