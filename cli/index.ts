@@ -218,6 +218,21 @@ const mkdir = async (name: string) => {
   }
 }
 
+const boardInfo = async (cmdObj) => {
+  try {
+    await ensureConnectedDevice()
+    const info = await micropython.getBoardInfo()
+    if (cmdObj.json) {
+      const s = JSON.stringify(info, null, 4)
+      console.log(s)
+    } else {
+      console.log(info)
+    }
+  } finally {
+    await micropython.disconnect()
+  }
+}
+
 const catFile = async (filename: string) => {
   try {
     await ensureConnectedDevice()
@@ -451,7 +466,7 @@ const sha256hash = async (filename) => {
 }
 
 // Mount the device
-const mountCommand = async () => {
+const mountCommand = async (targetPath) => {
   console.log(`${CLR_FG_YELLOW}Mounting devices with FUSE is currently experimental! Please be careful, data might be corrupted. Reading files with binary data does not work, and maybe other things. -> https://github.com/metachris/micropython-ctl/issues/3${CLR_RESET}`)
 
   // Make sure FUSE dependencies are installed
@@ -464,7 +479,7 @@ const mountCommand = async () => {
   micropython.onclose = () => process.kill(process.pid, "SIGINT")
 
   // Mount now
-  await mountWithFuse({ micropythonDevice: micropython })
+  await mountWithFuse({ micropythonDevice: micropython, mountPath: targetPath })
 }
 
 const repl = async () => {
@@ -515,7 +530,8 @@ program.option('-s, --silent', `Hide unnecessary output`)
 // Command: devices
 program
   .command('devices')
-  .description('List serial devices').action(listSerialDevices);
+  .description('List serial devices')
+  .action(listSerialDevices);
 
 // Command: repl
 program
@@ -528,6 +544,13 @@ program
   .command('run <fileOrCommand>')
   .description('Execute a Python file or command')
   .action(run);
+
+// Command: info
+program
+  .command('info')
+  .option('-j, --json', 'Output JSON')
+  .description('Get information about the board (versions, unique id, space, memory)')
+  .action(boardInfo);
 
 // Command: ls
 program
@@ -593,7 +616,7 @@ program
 
 // Command: mount
 program
-  .command('mount')
+  .command('mount [targetPath]')
   .description('Mount a MicroPython device (over serial or network)')
   .action(mountCommand);
 

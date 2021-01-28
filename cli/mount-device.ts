@@ -156,7 +156,7 @@ interface MountOpts {
  * By default mounts the device to ./mnt/ on Linux/macOS, and to M:\ on Windows
  */
 export const mount = async (opts: MountOpts) => {
-  const mountPath = opts.mountPath || isWin ? 'M:\\' : './mnt'
+  const mountPath = opts.mountPath ? opts.mountPath : isWin ? 'M:\\' : './mnt'
 
   // Ensure Fuse is installed and ready
   await checkAndInstallFuse()
@@ -410,7 +410,7 @@ export const mount = async (opts: MountOpts) => {
     })
 
   } else {
-    const fuse = new Fuse('./mnt', fuseOps, {
+    const fuse = new Fuse(mountPath, fuseOps, {
       force: true,
       mkdir: true,
       debug: false,

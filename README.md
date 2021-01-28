@@ -180,7 +180,6 @@ I'm happy about feedback, please reach out:
 
 Code library:
 
-* getDeviceInfo (device type, mpy version, etc)
 * put/get
   * via network: switch to webrepl protocol instead of manual up- and download
   * `getFile` via serial improvement - currently it fills the device RAM and probably works badly with large file
@@ -197,6 +196,7 @@ Tests:
 * `mctl get -r .`, `mctl put -r .`
 * automated browser testing (selenium [[1](https://developer.mozilla.org/en-US/docs/Learn/Tools_and_testing/Cross_browser_testing/Your_own_automation_environment)])
 * Test for most important `mctl` commands
+* Run tests against a local micropython instance in CI (eg by using [utelnetserver](https://github.com/cpopp/MicroTelnetServer) to connect serial-like (webrepl is not available in host builds))
 
 Various:
 

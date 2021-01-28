@@ -899,6 +899,64 @@ export class MicroPythonDevice {
     const output = await this.runScript(script)
     return output === '1'
   }
+
+  /**
+   * Get information about the board.
+   *
+   * ```typescript
+   * const boardInfo = await micropython.getBoardInfo()
+   * console.log(boardInfo)
+   *
+   * {
+   *   sysname: 'esp32',
+   *   nodename: 'esp32',
+   *   release: '1.13.0',
+   *   version: 'v1.13 on 2020-09-02',
+   *   machine: 'ESP32 module with ESP32',
+   *   uniqueId: 'c44f3312f529',
+   *   memFree: 108736,
+   *   fsBlockSize: 4096,
+   *   fsBlocksTotal: 512,
+   *   fsBlocksFree: 438
+   * }
+   * ```
+   */
+  public async getBoardInfo(): Promise<BoardInfo> {
+    debug('getBoardInfo')
+    const script = `
+      import uos, machine, ubinascii, gc
+      gc.collect()
+      print('uname:', uos.uname())
+      print('unique_id:', ubinascii.hexlify(machine.unique_id()))
+      print('mem_free:', gc.mem_free())
+      print('fsinfo:', uos.statvfs('/'))
+    `
+    const output = await this.runScript(script)
+    const ret: any = {}
+
+    for (const line of output.split('\n')) {
+      const infoType = line.split(': ')[0]
+      const infoData = line.replace(/^.*: /, '').trim()
+
+      if (infoType === 'uname') {
+        const parts = infoData.substr(1, infoData.length - 2).split(', ')
+        parts.map(part => {
+          const _parts = part.split('=')
+          ret[_parts[0]] = _parts[1].substr(1, _parts[1].length - 2)
+        })
+      } else if (infoType === 'unique_id') {
+        ret.uniqueId = infoData.substr(2, infoData.length - 3)
+      } else if (infoType === 'mem_free') {
+        ret.memFree = parseInt(infoData, 10)
+      } else if (infoType === 'fsinfo') {
+        const parts = infoData.substr(1, infoData.length - 2).split(', ')
+        ret.fsBlockSize = parseInt(parts[0], 10)
+        ret.fsBlocksTotal = parseInt(parts[2], 10)
+        ret.fsBlocksFree = parseInt(parts[3], 10)
+      }
+    }
+    return ret
+  }
 }
 
 export interface ListFilesOptions {
@@ -926,4 +984,17 @@ export interface ResetOptions {
 
 export interface PutFileOptions {
   checkIfSimilarBeforeUpload?: boolean
+}
+
+export interface BoardInfo {
+  sysname: string
+  nodename: string
+  release: string
+  version: string
+  machine: string
+  uniqueId: string
+  memFree: number
+  fsBlockSize: number
+  fsBlocksTotal: number
+  fsBlocksFree: number
 }
