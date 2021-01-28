@@ -208,7 +208,7 @@ const mkdir = async (name: string) => {
     await micropython.mkdir(name)
   } catch (e) {
     if (e instanceof ScriptExecutionError && e.message.includes('OSError: [Errno 17] EEXIST')) {
-      console.log(`${CLR_FG_RED}mkdir: cannot create directory '${name}': File exists${CLR_RESET}`)
+      logError(`mkdir: cannot create directory '${name}': File exists`)
       return
     }
     console.log('Error:', e)
@@ -262,13 +262,20 @@ const get = async (filenameOrDir: string, targetFilenameOrDir: string) => {
     // . is an alias for: `get -r .` is `get -r /`
     if (filenameOrDir === '.') filenameOrDir = '/'
 
+    // handle glob pattern (eg. '*.py')
+    if (filenameOrDir.startsWith('*.') || filenameOrDir.endsWith('*')) {
+      // TODO
+      console.log('patterns not yet implemented')
+      return
+    }
+
     // filename must have trailing slash
     if (!filenameOrDir.startsWith('/')) filenameOrDir = '/' + filenameOrDir
 
     // check if path exists
     const statResult = await micropython.statPath(filenameOrDir)
     if (!statResult.exists) {
-      console.log(`${CLR_FG_RED}get: cannot access '${filenameOrDir}': No such file or directory${CLR_RESET}`)
+      logError(`get: cannot access '${filenameOrDir}': No such file or directory`)
       return
     }
 
@@ -352,7 +359,7 @@ const rm = async (targetPath: string, cmdObj) => {
     await micropython.remove(targetPath, cmdObj.recursive)
   } catch (e) {
     if (e instanceof ScriptExecutionError && e.message.includes('OSError: [Errno 2] ENOENT')) {
-      console.log(`${CLR_FG_RED}rm: cannot remove '${targetPath}': No such file or directory${CLR_RESET}`)
+      logError(`rm: cannot remove '${targetPath}': No such file or directory`)
       return
     }
     console.error('Error:', e)
@@ -370,7 +377,7 @@ const mv = async (oldPath: string, newPath: string) => {
     await micropython.rename(oldPath, newPath)
   } catch (e) {
     if (e instanceof ScriptExecutionError && e.message.includes('OSError: [Errno 2] ENOENT')) {
-      console.log(`${CLR_FG_RED}mv: cannot rename '${oldPath}': No such file or directory${CLR_RESET}`)
+      logError(`mv: cannot rename '${oldPath}': No such file or directory`)
       return
     }
     console.error('Error:', e)
@@ -567,7 +574,7 @@ program
 // Command: get
 program
   .command('get <file_or_dirname> [out_file_or_dirname]')
-  .description(`Download a file or directory from the device. Download everything with 'get /'.`)
+  .description(`Download a file or directory from the device. Download everything with 'get /'`)
   .action(get);
 
 // Command: put
