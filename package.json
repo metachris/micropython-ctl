@@ -24,7 +24,7 @@
   },
   "dependencies": {
     "buffer": "^6.0.3",
-    "commander": "^6.2.1",
+    "commander": "^7.0.0",
     "isomorphic-ws": "^4.0.1",
     "serialport": "^9.0.3",
     "ws": "^7.4.1"

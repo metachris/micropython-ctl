@@ -57,7 +57,7 @@ const logError = (...msg: any) => {
 }
 
 const logVerbose = (...msg: any) => {
-  if (!program.silent) {
+  if (!(program as any).silent) {
     console.log(...msg)
   }
 }
@@ -68,13 +68,16 @@ const listMicroPythonDevices = async () => {
 }
 
 const ensureConnectedDevice = async () => {
+  const tty = (program as any).tty
+  const host = (program as any).host
+  const password = (program as any).password
   try {
     if (!micropython.isConnected()) {
-      if (program.host) {
-        logVerbose(`Connecting over network to: ${program.host}`)
-        await micropython.connectNetwork(program.host, program.password)
+      if (host) {
+        logVerbose(`Connecting over network to: ${host}`)
+        await micropython.connectNetwork(host, password)
       } else {
-        let device = program.tty
+        let device = tty
 
         // If not specified, detect devices and use first one
         if (!device || device === true) {
@@ -529,7 +532,7 @@ const runTests = async () => {
  * Setup command line commands, using commander.js
  * https://github.com/tj/commander.js
  */
-program.option('-t, --tty [device]', `Connect over serial interface (eg. /dev/tty.SLAB_USBtoUART)`)
+program.option('-t, --tty <device>', `Connect over serial interface (eg. /dev/tty.SLAB_USBtoUART)`)
 program.option('-h, --host <host>', `Connect over network to hostname or IP of device`)
 program.option('-p, --password <password>', `Password for network device`)
 program.option('-s, --silent', `Hide unnecessary output`)
@@ -644,6 +647,9 @@ program
 
 (async () => {
   await program.parseAsync(process.argv);
+
+  // const options = program.parse(process.argv);
+  // console.log(options.tty)
 
   // await ensureConnectedDevice()
   // const data = Buffer.from(fs.readFileSync('boot.py'))

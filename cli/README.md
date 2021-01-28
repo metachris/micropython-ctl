@@ -60,7 +60,7 @@ Note: without `--tty` / `--host` + `--password` options, `mctl` will connect to 
 # List serial devices
 mctl devices
 
-# Get information about the board: versions, id, etc.)
+# Get information about the board: versions, id, etc.
 mctl info
 
 # List files

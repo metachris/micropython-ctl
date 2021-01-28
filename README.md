@@ -1,6 +1,6 @@
 # MicroPython-Ctl: TypeScript ❤️ MicroPython
 
-Build things that talk to MicroPython devices: websites/webapps, Node.js programs, Electron applications, VS Code extensions, and more.
+Talk to MicroPython devices from websites/webapps, Node.js programs, Electron applications, VS Code extensions, and more.
 
 [![Build and test status](https://github.com/metachris/micropython-ctl/workflows/Build%20and%20test/badge.svg)](https://github.com/metachris/micropython-ctl/actions?query=workflow%3A%22Build+and+test%22)
 
@@ -14,7 +14,7 @@ Build things that talk to MicroPython devices: websites/webapps, Node.js program
   * Mount the micropython device into the local filesystem (`mctl mount`, experimental)
 * See all the features in the [documentation](https://metachris.github.io/micropython-ctl/classes/micropythondevice.html), [examples](https://github.com/metachris/micropython-ctl/tree/master/examples) and [`cli/`](https://github.com/metachris/micropython-ctl/blob/master/cli)
 * Typed and fully async (use `await` with any command).
-* Works on Linux, macOS and Windows. Tested with ESP32, ESP8266, [Raspberry Pi Pico](https://www.raspberrypi.org/documentation/pico/getting-started/).
+* Works on Linux, macOS and Windows. Tested with ESP32, ESP8266, [Raspberry Pi Pico](https://www.raspberrypi.org/documentation/pico/getting-started/)
 * Main code files: [`main.ts`](https://github.com/metachris/micropython-ctl/blob/master/src/main.ts), [`cli/index.ts`](https://github.com/metachris/micropython-ctl/blob/master/cli/index.ts)
 * Links: [Github](https://github.com/metachris/micropython-ctl), [Documentation](https://metachris.github.io/micropython-ctl/), [npm package](https://www.npmjs.com/package/micropython-ctl)
 
@@ -47,7 +47,7 @@ micropython.onTerminalData = (data) => process.stdout.write(data)
 micropython.sendData('\x03\x02')  // Ctrl+C and Ctrl+B to enter friendly repl and print version
 ```
 
-See also the [MicroPythonDevice docs](https://metachris.github.io/micropython-ctl/classes/micropythondevice.html).
+See also: [MicroPythonDevice docs](https://metachris.github.io/micropython-ctl/classes/micropythondevice.html)
 
 Note: to connect over the network, you need to enable it on the device first, through the serial REPL: `import webrepl_setup` (see [docs](https://docs.micropython.org/en/latest/esp8266/tutorial/repl.html#webrepl-a-prompt-over-wifi)). Also, make sure you can ping the device first.
 
@@ -57,7 +57,7 @@ Note: to connect over the network, you need to enable it on the device first, th
 * [examples/basic.ts](https://github.com/metachris/micropython-ctl/blob/master/examples/basic.ts) (run with `yarn ts-node examples/basic.ts`)
 * [examples/web-example.html](https://github.com/metachris/micropython-ctl/blob/master/examples/web-example.html) (open the file in a browser, or view it [live here](http://current.at/micropython-ctl/examples/web-example.html))
 * [examples/web-example2-terminal.html](https://github.com/metachris/micropython-ctl/blob/master/examples/web-example2-terminal.html) (open the file in a browser, or view it [live here](http://current.at/micropython-ctl/examples/web-example2-terminal.html))
-* [examples/terminal.ts](https://github.com/metachris/micropython-ctl/blob/master/examples/terminal.ts) (run with `yarn examples/terminal.ts`)
+* [examples/terminal.ts](https://github.com/metachris/micropython-ctl/blob/master/examples/terminal.ts) (run with `yarn ts-node examples/terminal.ts`)
 * [cli/index.ts](https://github.com/metachris/micropython-ctl/blob/master/cli/index.ts) (run with `yarn mctl`)
 
 ## Browser / Webapps
@@ -134,7 +134,7 @@ Find more examples in [`/examples/`](https://github.com/metachris/micropython-ct
 * [examples/basic.ts](https://github.com/metachris/micropython-ctl/blob/master/examples/basic.ts) (run with `yarn ts-node examples/basic.ts`)
 * [examples/web-example.html](https://github.com/metachris/micropython-ctl/blob/master/examples/web-example.html) (open the file in a browser, or view it [live here](http://current.at/micropython-ctl/examples/web-example.html))
 * [examples/web-example2-terminal.html](https://github.com/metachris/micropython-ctl/blob/master/examples/web-example2-terminal.html) (open the file in a browser, or view it [live here](http://current.at/micropython-ctl/examples/web-example2-terminal.html))
-* [examples/terminal.ts](https://github.com/metachris/micropython-ctl/blob/master/examples/terminal.ts) (run with `yarn examples/terminal.ts`)
+* [examples/terminal.ts](https://github.com/metachris/micropython-ctl/blob/master/examples/terminal.ts) (run with `yarn ts-node examples/terminal.ts`)
 * [cli/index.ts](https://github.com/metachris/micropython-ctl/blob/master/cli/index.ts) (run with `yarn mctl`)
 
 
