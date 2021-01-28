@@ -52,7 +52,14 @@ Commands:
   help [command]                                display help for command
 ```
 
-Note: without `--tty` / `--host` + `--password` options, `mctl` will connect to the first serial device.
+
+Device connection logic:
+
+1. `--host` or `--tty` option
+2. `MCTL_TTY` or `AMPY_PORT` env vars -> serial connection
+3. `MCTL_HOST` or `WEBREPL_HOST` env vars -> network connection
+
+For network connection passwords, the env vars `MCTL_PASSWORD` and `WEBREPL_PASSWORD` can be used.
 
 ### Examples
 

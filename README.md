@@ -187,17 +187,15 @@ Code library:
 
 `mctl`:
 
-* env vars for device: serial / host, password (see also WEBREPL, AMPY env vars)
 * get '*.py'
 * wifi status, connect, disconnect
 * device aliases ([like here](https://github.com/micropython/micropython/pull/6375/files#diff-abc52a08e256524f287eeb9711417e389265743c68c47cb8badc575f0aebfd02R69))
 
 Tests:
 
-* getFileHash, isFileTheSame
-* `mctl get -r .`, `mctl put -r .`
+* `getFileHash`, `isFileTheSame`
+* Tests for `mctl` commands: `get -r .`, `put -r .`, ..
 * automated browser testing (selenium [[1](https://developer.mozilla.org/en-US/docs/Learn/Tools_and_testing/Cross_browser_testing/Your_own_automation_environment)])
-* Test for most important `mctl` commands
 * Run tests against a local micropython instance in CI (eg by using [utelnetserver](https://github.com/cpopp/MicroTelnetServer) to connect serial-like (webrepl is not available in host builds))
 
 Various:

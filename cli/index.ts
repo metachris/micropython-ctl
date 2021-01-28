@@ -16,6 +16,10 @@
  *     $ mctl repl
  *     $ mctl mount
  *
+ * Supports env vars:
+ * - serial connection: MCTL_TTY, AMPY_PORT
+ * - network connection: MCTL_HOST, WEBREPL_HOST
+ *
  * Issues & TODO: https://github.com/metachris/micropython-ctl/issues/3
  */
 import * as path from 'path';
@@ -57,7 +61,7 @@ const logError = (...msg: any) => {
 }
 
 const logVerbose = (...msg: any) => {
-  if (!(program as any).silent) {
+  if (!program.opts().silent) {
     console.log(...msg)
   }
 }
@@ -67,33 +71,64 @@ const listMicroPythonDevices = async () => {
   return devices.filter(device => device.manufacturer || device.serialNumber)
 }
 
+/**
+ * Auto-connect priorities:
+ * 1. --host or --tty option
+ * 2. MCTL_TTY or AMPY_PORT -> serial connection
+ * 3. MCTL_HOST or WEBREPL_HOST -> network connection
+ */
 const ensureConnectedDevice = async () => {
-  const tty = (program as any).tty
-  const host = (program as any).host
-  const password = (program as any).password
+  const opts = program.opts()
+  const tty = opts.tty
+  const host = opts.host
+  const password = opts.password
+  const envWebreplHost = process.env.WEBREPL_HOST
+  const envMctlHost = process.env.MCTL_HOST
+  const envMctlTty = process.env.MCTL_TTY
+  const envAmpyPort = process.env.AMPY_PORT
+
+  // console.log(tty, envWebreplHost, opts)
+
+  // Connect via network if host is defined, or if no tty specified then check env vars
+  let connectViaNetwork = false
+  if (host) {
+    connectViaNetwork = true  // if host is specified
+  } else if (!tty && !envMctlTty && !envAmpyPort) {  // serial if tty option or env var
+    if (envMctlHost || envWebreplHost) connectViaNetwork = true
+  }
+
   try {
-    if (!micropython.isConnected()) {
-      if (host) {
-        logVerbose(`Connecting over network to: ${host}`)
-        await micropython.connectNetwork(host, password)
-      } else {
-        let device = tty
+    // Do nothign if already connected
+    if (micropython.isConnected()) return
 
-        // If not specified, detect devices and use first one
-        if (!device || device === true) {
-          const devices = await listMicroPythonDevices()
-          if (devices.length === 0) {
-            console.error('No serial device found')
-            process.exit(1)
-          }
-          device = devices[0].path
-        }
+    // Connect now
+    if (connectViaNetwork) {
+      const _host = host || envMctlHost || envWebreplHost
+      const _pass = password || process.env.MCTL_PASSWORD || process.env.WEBREPL_PASSWORD
+      logVerbose(`Connecting over network to: ${_host}`)
+      if (!_pass) throw new Error('No webrepl password supplied')
+      await micropython.connectNetwork(_host, _pass)
 
-        // Connect now
-        logVerbose(`Connecting over serial to: ${device}`)
-        await micropython.connectSerial(device)
+    } else {
+      const getSerialDevice = async (): Promise<string> => {
+        // 1. -t / --tty option
+        if (tty) return tty
+
+        // 2. MCTL_TTY env var
+        if (envMctlTty) return envMctlTty
+
+        // 2. AMPY_PORT env var
+        if (envAmpyPort) return envAmpyPort
+
+        // 3. Auto-detect devices and use first one
+        const devices = await listMicroPythonDevices()
+        if (devices.length === 0) throw new Error('No serial device found')
+        return devices[0].path
       }
-      // console.log('Connected')
+
+      const device = await getSerialDevice()
+      logVerbose(`Connecting over serial to: ${device}`)
+      await micropython.connectSerial(device)
     }
   } catch (e) {
     logError('Could not connect:', e.toString())

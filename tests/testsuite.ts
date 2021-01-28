@@ -173,16 +173,14 @@ program.option('-p, --password <password>', `Password for network device`);
 
 
 export const run = async () => {
-  await program.parseAsync(process.argv);
+  program.parse(process.argv);
+  const opts = program.opts()
 
-  const tty = (program as any).tty
-  const host = (program as any).host
-  const password = (program as any).password
-  if (host) {
-    if (!password) { return console.error('Password missing') }
-    await runTestsOnNetwork(host, password)
+  if (opts.host) {
+    if (!opts.password) { return console.error('Password missing') }
+    await runTestsOnNetwork(opts.host, opts.password)
   } else {
-    await runTestsOnSerial(tty)
+    await runTestsOnSerial(opts.tty)
   }
 }
 
