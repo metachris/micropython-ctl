@@ -61,7 +61,7 @@
 				<a href="#micropython-ctl-typescript-❤️-micropython" id="micropython-ctl-typescript-❤️-micropython" style="color: inherit; text-decoration: none;">
 					<h1>MicroPython-Ctl: TypeScript ❤️ MicroPython</h1>
 				</a>
-				<p>Build things that talk to MicroPython devices: websites/webapps, Node.js programs, Electron applications, VS Code extensions, and more.</p>
+				<p>Talk to MicroPython devices from websites/webapps, Node.js programs, Electron applications, VS Code extensions, and more.</p>
 				<p><a href="https://github.com/metachris/micropython-ctl/actions?query=workflow%3A%22Build+and+test%22"><img src="https://github.com/metachris/micropython-ctl/workflows/Build%20and%20test/badge.svg" alt="Build and test status"></a></p>
 				<ul>
 					<li>Modern TypeScript library and cli.</li>
@@ -76,7 +76,7 @@
 					</li>
 					<li>See all the features in the <a href="https://metachris.github.io/micropython-ctl/classes/micropythondevice.html">documentation</a>, <a href="https://github.com/metachris/micropython-ctl/tree/master/examples">examples</a> and <a href="https://github.com/metachris/micropython-ctl/blob/master/cli"><code>cli/</code></a></li>
 					<li>Typed and fully async (use <code>await</code> with any command).</li>
-					<li>Works on Linux, macOS and Windows. Tested with ESP32, ESP8266, <a href="https://www.raspberrypi.org/documentation/pico/getting-started/">Raspberry Pi Pico</a>.</li>
+					<li>Works on Linux, macOS and Windows. Tested with ESP32, ESP8266, <a href="https://www.raspberrypi.org/documentation/pico/getting-started/">Raspberry Pi Pico</a></li>
 					<li>Main code files: <a href="https://github.com/metachris/micropython-ctl/blob/master/src/main.ts"><code>main.ts</code></a>, <a href="https://github.com/metachris/micropython-ctl/blob/master/cli/index.ts"><code>cli/index.ts</code></a></li>
 					<li>Links: <a href="https://github.com/metachris/micropython-ctl">Github</a>, <a href="https://metachris.github.io/micropython-ctl/">Documentation</a>, <a href="https://www.npmjs.com/package/micropython-ctl">npm package</a></li>
 				</ul>
@@ -107,14 +107,14 @@
 <span style="color: #001080">micropython</span><span style="color: #000000">.</span><span style="color: #795E26">onTerminalData</span><span style="color: #000000"> = (</span><span style="color: #001080">data</span><span style="color: #000000">) </span><span style="color: #0000FF">=&gt;</span><span style="color: #000000"> </span><span style="color: #001080">process</span><span style="color: #000000">.</span><span style="color: #001080">stdout</span><span style="color: #000000">.</span><span style="color: #795E26">write</span><span style="color: #000000">(</span><span style="color: #001080">data</span><span style="color: #000000">)</span>
 <span style="color: #001080">micropython</span><span style="color: #000000">.</span><span style="color: #795E26">sendData</span><span style="color: #000000">(</span><span style="color: #A31515">&#039;</span><span style="color: #EE0000">\x03\x02</span><span style="color: #A31515">&#039;</span><span style="color: #000000">)  </span><span style="color: #008000">// Ctrl+C and Ctrl+B to enter friendly repl and print version</span>
 </code></pre>
-				<p>See also the <a href="https://metachris.github.io/micropython-ctl/classes/micropythondevice.html">MicroPythonDevice docs</a>.</p>
+				<p>See also: <a href="https://metachris.github.io/micropython-ctl/classes/micropythondevice.html">MicroPythonDevice docs</a></p>
 				<p>Note: to connect over the network, you need to enable it on the device first, through the serial REPL: <code>import webrepl_setup</code> (see <a href="https://docs.micropython.org/en/latest/esp8266/tutorial/repl.html#webrepl-a-prompt-over-wifi">docs</a>). Also, make sure you can ping the device first.</p>
 				<p><strong>Code examples:</strong></p>
 				<ul>
 					<li><a href="https://github.com/metachris/micropython-ctl/blob/master/examples/basic.ts">examples/basic.ts</a> (run with <code>yarn ts-node examples/basic.ts</code>)</li>
 					<li><a href="https://github.com/metachris/micropython-ctl/blob/master/examples/web-example.html">examples/web-example.html</a> (open the file in a browser, or view it <a href="http://current.at/micropython-ctl/examples/web-example.html">live here</a>)</li>
 					<li><a href="https://github.com/metachris/micropython-ctl/blob/master/examples/web-example2-terminal.html">examples/web-example2-terminal.html</a> (open the file in a browser, or view it <a href="http://current.at/micropython-ctl/examples/web-example2-terminal.html">live here</a>)</li>
-					<li><a href="https://github.com/metachris/micropython-ctl/blob/master/examples/terminal.ts">examples/terminal.ts</a> (run with <code>yarn examples/terminal.ts</code>)</li>
+					<li><a href="https://github.com/metachris/micropython-ctl/blob/master/examples/terminal.ts">examples/terminal.ts</a> (run with <code>yarn ts-node examples/terminal.ts</code>)</li>
 					<li><a href="https://github.com/metachris/micropython-ctl/blob/master/cli/index.ts">cli/index.ts</a> (run with <code>yarn mctl</code>)</li>
 				</ul>
 				<a href="#browser--webapps" id="browser--webapps" style="color: inherit; text-decoration: none;">
@@ -182,7 +182,7 @@
 					<li><a href="https://github.com/metachris/micropython-ctl/blob/master/examples/basic.ts">examples/basic.ts</a> (run with <code>yarn ts-node examples/basic.ts</code>)</li>
 					<li><a href="https://github.com/metachris/micropython-ctl/blob/master/examples/web-example.html">examples/web-example.html</a> (open the file in a browser, or view it <a href="http://current.at/micropython-ctl/examples/web-example.html">live here</a>)</li>
 					<li><a href="https://github.com/metachris/micropython-ctl/blob/master/examples/web-example2-terminal.html">examples/web-example2-terminal.html</a> (open the file in a browser, or view it <a href="http://current.at/micropython-ctl/examples/web-example2-terminal.html">live here</a>)</li>
-					<li><a href="https://github.com/metachris/micropython-ctl/blob/master/examples/terminal.ts">examples/terminal.ts</a> (run with <code>yarn examples/terminal.ts</code>)</li>
+					<li><a href="https://github.com/metachris/micropython-ctl/blob/master/examples/terminal.ts">examples/terminal.ts</a> (run with <code>yarn ts-node examples/terminal.ts</code>)</li>
 					<li><a href="https://github.com/metachris/micropython-ctl/blob/master/cli/index.ts">cli/index.ts</a> (run with <code>yarn mctl</code>)</li>
 				</ul>
 				<a href="#building-the-code" id="building-the-code" style="color: inherit; text-decoration: none;">
@@ -234,17 +234,15 @@
 				</ul>
 				<p><code>mctl</code>:</p>
 				<ul>
-					<li>env vars for device: serial / host, password (see also WEBREPL, AMPY env vars)</li>
 					<li>get &#39;*.py&#39;</li>
 					<li>wifi status, connect, disconnect</li>
 					<li>device aliases (<a href="https://github.com/micropython/micropython/pull/6375/files#diff-abc52a08e256524f287eeb9711417e389265743c68c47cb8badc575f0aebfd02R69">like here</a>)</li>
 				</ul>
 				<p>Tests:</p>
 				<ul>
-					<li>getFileHash, isFileTheSame</li>
-					<li><code>mctl get -r .</code>, <code>mctl put -r .</code></li>
+					<li><code>getFileHash</code>, <code>isFileTheSame</code></li>
+					<li>Tests for <code>mctl</code> commands: <code>get -r .</code>, <code>put -r .</code>, ..</li>
 					<li>automated browser testing (selenium [<a href="https://developer.mozilla.org/en-US/docs/Learn/Tools_and_testing/Cross_browser_testing/Your_own_automation_environment">1</a>])</li>
-					<li>Test for most important <code>mctl</code> commands</li>
 					<li>Run tests against a local micropython instance in CI (eg by using <a href="https://github.com/cpopp/MicroTelnetServer">utelnetserver</a> to connect serial-like (webrepl is not available in host builds))</li>
 				</ul>
 				<p>Various:</p>
