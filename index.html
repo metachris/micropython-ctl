@@ -76,7 +76,7 @@
 					</li>
 					<li>See all the features in the <a href="https://metachris.github.io/micropython-ctl/classes/micropythondevice.html">documentation</a>, <a href="https://github.com/metachris/micropython-ctl/tree/master/examples">examples</a> and <a href="https://github.com/metachris/micropython-ctl/blob/master/cli"><code>cli/</code></a></li>
 					<li>Typed and fully async (use <code>await</code> with any command).</li>
-					<li>Works on Linux, macOS and Windows. Tested with ESP32 &amp; ESP8266.</li>
+					<li>Works on Linux, macOS and Windows. Tested with ESP32, ESP8266, <a href="https://www.raspberrypi.org/documentation/pico/getting-started/">Raspberry Pi Pico</a>.</li>
 					<li>Main code files: <a href="https://github.com/metachris/micropython-ctl/blob/master/src/main.ts"><code>main.ts</code></a>, <a href="https://github.com/metachris/micropython-ctl/blob/master/cli/index.ts"><code>cli/index.ts</code></a></li>
 					<li>Links: <a href="https://github.com/metachris/micropython-ctl">Github</a>, <a href="https://metachris.github.io/micropython-ctl/">Documentation</a>, <a href="https://www.npmjs.com/package/micropython-ctl">npm package</a></li>
 				</ul>
@@ -225,7 +225,6 @@
 				</a>
 				<p>Code library:</p>
 				<ul>
-					<li>getDeviceInfo (device type, mpy version, etc)</li>
 					<li>put/get<ul>
 							<li>via network: switch to webrepl protocol instead of manual up- and download</li>
 							<li><code>getFile</code> via serial improvement - currently it fills the device RAM and probably works badly with large file</li>
@@ -236,6 +235,7 @@
 				<p><code>mctl</code>:</p>
 				<ul>
 					<li>env vars for device: serial / host, password (see also WEBREPL, AMPY env vars)</li>
+					<li>get &#39;*.py&#39;</li>
 					<li>wifi status, connect, disconnect</li>
 				</ul>
 				<p>Tests:</p>
@@ -244,6 +244,7 @@
 					<li><code>mctl get -r .</code>, <code>mctl put -r .</code></li>
 					<li>automated browser testing (selenium [<a href="https://developer.mozilla.org/en-US/docs/Learn/Tools_and_testing/Cross_browser_testing/Your_own_automation_environment">1</a>])</li>
 					<li>Test for most important <code>mctl</code> commands</li>
+					<li>Run tests against a local micropython instance in CI (eg by using <a href="https://github.com/cpopp/MicroTelnetServer">utelnetserver</a> to connect serial-like (webrepl is not available in host builds))</li>
 				</ul>
 				<p>Various:</p>
 				<ul>
