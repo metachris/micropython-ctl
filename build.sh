@@ -5,7 +5,7 @@ yarn clean
 # Build Node.js version
 yarn buildNode
 cd dist-node
-ln -s ../package.json
+cp ../package.json .
 cd ..
 
 # Build browser version

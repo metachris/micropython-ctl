@@ -31,6 +31,7 @@ echo "-------------------------------------"
 npm install $PACKAGE
 
 echo "Testing mctl..."
+./node_modules/.bin/mctl version
 ./node_modules/.bin/mctl ls
 ./node_modules/.bin/mctl run-tests
 ./node_modules/.bin/mctl mount || true
@@ -43,6 +44,7 @@ npm install -g $PACKAGE
 
 echo "Testing mctl..."
 which mctl
+mctl version
 mctl ls
 mctl run-tests
 mctl mount || true

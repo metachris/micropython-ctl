@@ -1,3 +1,5 @@
+set FILE=E:\micropython-ctl-v1.7.3.tgz
+
 echo "Uninstall and clear caches..."
 call npm uninstall --global micropython-ctl node-fuse-bindings
 cd C:\Users\IEUser\AppData\Local\Yarn\Cache\v6
@@ -12,9 +14,10 @@ echo "-------------------------------------"
 echo "Testing local installation..."
 echo "-------------------------------------"
 call npm init -y
-call npm install E:\micropython-ctl-v1.7.2.tgz
+call npm install %FILE%
 
 echo "Testing mctl..."
+call ./node_modules/.bin/mctl version
 call ./node_modules/.bin/mctl ls
 call ./node_modules/.bin/mctl run-tests
 call ./node_modules/.bin/mctl mount
@@ -25,9 +28,10 @@ echo "-------------------------------------"
 
 cd ..
 call rm -r C:\x\tests
-call npm install -g E:\micropython-ctl-v1.7.2.tgz
+call npm install -g %FILE%
 
 echo "Testing mctl..."
+call mctl version
 call mctl ls
 call mctl run-tests
 call mctl mount

@@ -12,7 +12,7 @@
   "author": "Chris Hager <chris@linuxuser.at>",
   "license": "MIT",
   "scripts": {
-    "clean": "rm -rf dist dist-node dist-browser build lib",
+    "clean": "rm -rf dist dist-node dist-browser build lib package *.tgz",
     "lint": "tslint -c tslint.json 'src/**/*.ts' 'test/**/*.ts'",
     "build": "./build.sh",
     "buildNode": "tsc -p tsconfig.json",
