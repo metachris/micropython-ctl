@@ -65,7 +65,7 @@
 </html>
 
 <script>
-  let micropythonDevice = null;
+  let micropython = null;
 
   const DIV_STATUS = document.getElementById('status')
   const DIV_OUTPUT = document.getElementById('output')
@@ -88,9 +88,9 @@
     localStorage.setItem('MicroPythonCtl:Password', password)
 
     // Connect
-    micropythonDevice = new MicroPythonCtl.MicroPythonDevice()
+    micropython = new MicroPythonCtl.MicroPythonDevice()
     try {
-      await micropythonDevice.connectNetwork(host, password)
+      await micropython.connectNetwork(host, password)
     } catch (e) {
       DIV_STATUS.innerHTML = `Error: ${e.message}`
       BTN_CONNECT.textContent = 'Connect'
@@ -99,22 +99,24 @@
     DIV_STATUS.innerHTML = BTN_CONNECT.textContent = 'Connected'
 
     // onclose is a function which is called when the connection is closed
-    micropythonDevice.onclose = () => DIV_STATUS.textContent = BTN_CONNECT.textContent = "Disconnected"
+    micropython.onclose = () => DIV_STATUS.textContent = BTN_CONNECT.textContent = "Disconnected"
+
+    // Display board info
+    DIV_OUTPUT.innerHTML += `<p>Getting board info...</p>`
+    const boardInfo = await micropython.getBoardInfo()
+    DIV_OUTPUT.innerHTML += '<pre>' + JSON.stringify(boardInfo, null, 4) + '</pre> <hr>'
 
     // Run a Python script and capture the output
     const script = 'import os; print(os.listdir())'
     DIV_OUTPUT.innerHTML += `<p>Running a Python script: <tt>${script}</tt> ...</p>`
-    const output = await micropythonDevice.runScript(script)
-    DIV_OUTPUT.innerHTML += '<p>output: ' + output + '</p> <hr>'
+    const output = await micropython.runScript(script)
+    DIV_OUTPUT.innerHTML += '<pre>' + output + '</pre> <hr>'
 
     // List all files in the root
     DIV_OUTPUT.innerHTML += '<p>Listing files...</p>'
-    const files = await micropythonDevice.listFiles('/', { recursive: true })
+    const files = await micropython.listFiles('/', { recursive: true })
     console.log('files', files)
-    files.map(file => {
-      if (!file.isDir) {
-        DIV_OUTPUT.innerHTML += `<div style='padding-left:20px;'>${file.filename} (${file.size}b)</div>`
-      }
-    })
+    const s = files.map(file => `${file.size}b\t${file.filename}`).join('\n')
+    DIV_OUTPUT.innerHTML += '<pre>' + s + '</pre> <hr>'
   }
 </script>
