@@ -2,27 +2,28 @@
 
 With `mctl` you can:
 
-* Manipulate files and directories
+* Connect to devices over serial or network (WebREPL)
 * List all serial devices: `mctl devices`
+* Manipulate files and directories
 * Enter the REPL: `mctl repl`
+* Run Python scripts: `mctl run`
 * Mount the device into the local filesystem: `mctl mount` (experimental!)
-* Use serial or network connection
+* More: see `mctl help`
 
 Code: [cli/index.ts](https://github.com/metachris/micropython-ctl/blob/master/cli/index.ts)
 
-### Installation
+## Installation
 
 ```npm install -g micropython-ctl```
 
-### Usage
+## Usage
 
 ```shell
 $ mctl help
 Usage: index [options] [command]
 
 Options:
-  -t, --tty [device]                            Connect over serial interface (eg.
-                                                /dev/tty.SLAB_USBtoUART)
+  -t, --tty <device>                            Connect over serial interface (eg. /dev/tty.SLAB_USBtoUART)
   -h, --host <host>                             Connect over network to hostname or IP of device
   -p, --password <password>                     Password for network device
   -s, --silent                                  Hide unnecessary output
@@ -32,12 +33,10 @@ Commands:
   devices                                       List serial devices
   repl                                          Open a REPL terminal
   run <fileOrCommand>                           Execute a Python file or command
-  info [options]                                Get information about the board (versions, unique
-                                                id, space, memory)
+  info [options]                                Get information about the board (versions, unique id, space, memory)
   ls [options] [directory]                      List files on a device
   cat <filename>                                Print content of a file on the device
-  get <file_or_dirname> [out_file_or_dirname]   Download a file or directory from the device.
-                                                Download everything with 'get /'.
+  get <file_or_dirname> [out_file_or_dirname]   Download a file or directory from the device. Download everything with 'get /'
   put <file_or_dirname> [dest_file_or_dirname]  Upload a file or directory onto the device
   edit <filename>                               Edit a file, and if changed upload afterwards
   mkdir <name>                                  Create a directory
@@ -45,8 +44,7 @@ Commands:
   mv <oldPath> <newPath>                        Rename a file or directory
   sha256 <filename>                             Get the SHA256 hash of a file
   reset [options]                               Reset the MicroPython device
-  mount                                         Mount a MicroPython device (over serial or
-                                                network)
+  mount [targetPath]                            Mount a MicroPython device (over serial or network)
   run-tests                                     Run micropython-ctl tests on a device
   version                                       Print the version of mctl
   help [command]                                display help for command
@@ -61,14 +59,17 @@ Device connection logic:
 
 For network connection passwords, the env vars `MCTL_PASSWORD` and `WEBREPL_PASSWORD` can be used.
 
-### Examples
+## Examples
 
 ```shell
 # List serial devices
 mctl devices
 
-# Get information about the board: versions, id, etc.
+# Get information about the board
 mctl info
+
+# Enter the REPL
+mctl repl
 
 # List files
 mctl ls -r
@@ -95,7 +96,7 @@ mctl put .
 mctl mount
 ```
 
-### Notes
+## Notes
 
 `mctl mount`
 
