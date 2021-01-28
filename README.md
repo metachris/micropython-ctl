@@ -200,6 +200,7 @@ Tests:
 
 Various:
 
+* Webapp examples: drag & drop files to upload
 * Electron example app
 
 Maybe (not sure it's needed, don't rush into implementing):
