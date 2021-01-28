@@ -65,7 +65,7 @@ Note: to connect over the network, you need to enable it on the device first, th
 In websites/webapps, simply include the latest release via CDN (~13kb gzipped):
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/micropython-ctl@1.7.3/dist-browser/main.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/micropython-ctl@1.10.0/dist-browser/main.js"></script>
 ```
 
 Then you can use it like this:

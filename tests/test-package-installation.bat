@@ -1,4 +1,4 @@
-set FILE=E:\micropython-ctl-v1.7.3.tgz
+set FILE=E:\micropython-ctl-v1.10.0.tgz
 
 echo "Uninstall and clear caches..."
 call npm uninstall --global micropython-ctl node-fuse-bindings
