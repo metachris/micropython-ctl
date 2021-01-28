@@ -32,17 +32,21 @@ const runTests = async (micropython: MicroPythonDevice) => {
     await delayMillis(1000)
     // console.log('terminalDataReceived', terminalDataReceived)
     assert(terminalDataReceived.trim().endsWith('>>> foo'))
+    // tslint:disable-next-line: no-empty
     micropython.onTerminalData = (_data: string) => {}
 
-    if (micropython.isSerialDevice()) {
-      // Serial device keeps connection alive on reset
+    console.log('- getBoardInfo()')
+    const boardInfo = await micropython.getBoardInfo()
+
+    if (micropython.isSerialDevice() && boardInfo.sysname === 'esp32') {
+      // Serial device keeps connection alive on reset. Only on ESP32?
       console.log('- testing hard reset')
       let terminalData = ''
       micropython.onTerminalData = (data) => terminalData += data
       await micropython.reset({ broadcastOutputAsTerminalData: true })
-      // await delayMillis(1000)
       assert(terminalData.includes('cpu_start:'))
       assert(terminalData.includes('heap_init:'))
+      // tslint:disable-next-line: no-empty
       micropython.onTerminalData = (_data: string) => {}
     }
 

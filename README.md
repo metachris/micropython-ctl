@@ -190,6 +190,7 @@ Code library:
 * env vars for device: serial / host, password (see also WEBREPL, AMPY env vars)
 * get '*.py'
 * wifi status, connect, disconnect
+* device aliases ([like here](https://github.com/micropython/micropython/pull/6375/files#diff-abc52a08e256524f287eeb9711417e389265743c68c47cb8badc575f0aebfd02R69))
 
 Tests:
 
