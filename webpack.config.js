@@ -17,9 +17,6 @@ module.exports = {
     extensions: [ '.tsx', '.ts', '.js' ],
   },
   externals: ['serialport', 'crypto'],
-  // externals: {
-  //   'serialport': 'serialport'
-  // },
   output: {
     filename: 'main.js',
     path: path.resolve(__dirname, 'dist-browser'),

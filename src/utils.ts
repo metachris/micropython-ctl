@@ -1,14 +1,10 @@
 import { Buffer } from 'buffer/'
 
-export const IS_NODEJS = !!globalThis.process?.release?.name
-export const IS_ELECTRON = typeof (navigator) !== 'undefined' && navigator.userAgent.indexOf('Electron/') > -1
+// export const IS_ELECTRON = typeof (navigator) !== 'undefined' && navigator.userAgent.indexOf('Electron/') > -1
 
-// Enable debug output if Node.js and DEBUG env var, alternatively
-const SHOW_DEBUG_OUTPUT_NODE = IS_NODEJS && !!process.env.DEBUG
-
+// Show debug output when DEBUG variable is set (env or window)
 export const debug = (...args: any) => {
-  // console.log(...args)
-  if (SHOW_DEBUG_OUTPUT_NODE || (typeof window !== 'undefined' && (window as any).DEBUG)) {
+  if (!!process.env.DEBUG || (typeof window !== 'undefined' && (window as any).DEBUG)) {
     console.log(...args)
   }
 }

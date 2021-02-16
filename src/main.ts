@@ -8,7 +8,7 @@
 import WebSocket from 'isomorphic-ws'
 import { Buffer } from 'buffer/'
 import { InvalidPassword, CouldNotConnect, ScriptExecutionError } from './errors'
-import { debug, dedent, IS_ELECTRON, IS_NODEJS } from './utils';
+import { debug, dedent } from './utils';
 import * as PythonScripts from './python-scripts';
 
 export { InvalidPassword, CouldNotConnect, ScriptExecutionError }  // allows easy importing from user scripts
@@ -221,14 +221,11 @@ export class MicroPythonDevice {
     this.state.connectionState = ConnectionState.CONNECTING
     this.clearBuffer()
 
-    if (IS_ELECTRON) {
-      this.state.port = new window.SerialPort(path, { baudRate: 115200 })
-    } else if (IS_NODEJS) {
-      const SerialPort = require('serialport')
-      this.state.port = new SerialPort(path, { baudRate: 115200 })
-    } else {
-      throw new Error('Cannot use connectSerial from a browser')
-    }
+    // Get serialport either through window.SerialPort, or require
+    const SerialPort = typeof window !== 'undefined' && window.SerialPort ? window.SerialPort : require('serialport')
+
+    // Open the serial port
+    this.state.port = new SerialPort(path, { baudRate: 115200 })
 
     // error listener
     this.state.port.on('error', (err: string) => {
@@ -302,7 +299,7 @@ export class MicroPythonDevice {
     if (timeoutSec) {
       this.state.wsConnectTimeout = setTimeout(() => {
         this.state.wsConnectTimeoutTriggered = true
-        this.state.ws?.close()
+        this.state.ws!.close()
       }, timeoutSec * 1000)
     }
 
@@ -541,7 +538,7 @@ export class MicroPythonDevice {
 
   private serialSendData(data: string | Buffer) {
     // debug('serialSendData', data)
-    this.state.port?.write(data)
+    this.state.port.write(data)
   }
 
   private wsSendData(data: string | ArrayBuffer) {
@@ -554,7 +551,7 @@ export class MicroPythonDevice {
 
   public async disconnect() {
     if (this.isSerialDevice()) {
-      await this.state.port?.close()
+      await this.state.port.close()
       this.state.connectionState = ConnectionState.CLOSED
     } else {
       await this.closeWebsocket()

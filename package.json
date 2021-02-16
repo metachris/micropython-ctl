@@ -12,7 +12,7 @@
   "author": "Chris Hager <chris@linuxuser.at>",
   "license": "MIT",
   "scripts": {
-    "clean": "rm -rf dist dist-node dist-browser build lib package *.tgz",
+    "clean": "rm -rf dist dist-node dist-browser build lib package dist-esbuild *.tgz",
     "lint": "tslint -c tslint.json 'src/**/*.ts' 'test/**/*.ts'",
     "build": "./build.sh",
     "buildNode": "tsc -p tsconfig.json",
@@ -20,7 +20,10 @@
     "test": "ts-node tests/testsuite.ts",
     "ts-node": "ts-node",
     "mctl": "ts-node cli/index.ts",
-    "doc": "typedoc"
+    "doc": "typedoc",
+    "esbuild-node": "esbuild src/main.ts --bundle --platform=node --outfile=dist-esbuild/node.js",
+    "esbuild-browser": "esbuild src/main.ts --bundle --sourcemap=external --external:serialport --external:crypto --define:process.env.DEBUG=0 --outfile=dist-esbuild/browser.js",
+    "esbuild": "yarn esbuild-node && yarn esbuild-browser"
   },
   "dependencies": {
     "buffer": "^6.0.3",
@@ -33,6 +36,7 @@
     "@types/node": "^14.14.9",
     "@types/serialport": "^8.0.1",
     "@types/ws": "^7.4.0",
+    "esbuild": "^0.8.46",
     "ts-jest": "^26.4.4",
     "ts-loader": "^8.0.12",
     "ts-node": "^9.0.0",
