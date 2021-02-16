@@ -225,6 +225,8 @@
 				</a>
 				<p>Code library:</p>
 				<ul>
+					<li>⚠ <code>connect</code> should not always cancel running program by sending ctrl+c (eg. for repl, etc)</li>
+					<li>⚠ <code>listFiles</code> should include time last modified</li>
 					<li>put/get<ul>
 							<li>via network: switch to webrepl protocol instead of manual up- and download</li>
 							<li><code>getFile</code> via serial improvement - currently it fills the device RAM and probably works badly with large file</li>
@@ -234,6 +236,10 @@
 				</ul>
 				<p><code>mctl</code>:</p>
 				<ul>
+					<li>⚠ Check for issues when alternating <code>mctl</code> and pymakr</li>
+					<li>⚠ remove directories without <code>-r</code> should give a nice error</li>
+					<li>uploading files that have changed since last upload</li>
+					<li>flash-erase, flash-backup, flash-restore</li>
 					<li><code>get</code> with wildcards: <code>get &#39;*.py&#39;</code></li>
 					<li>wifi status, connect, disconnect</li>
 					<li>device aliases (<a href="https://github.com/micropython/micropython/pull/6375/files#diff-abc52a08e256524f287eeb9711417e389265743c68c47cb8badc575f0aebfd02R69">like here</a>)</li>
