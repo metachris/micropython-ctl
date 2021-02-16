@@ -54,8 +54,10 @@ Commands:
 Device connection logic:
 
 1. `--host` or `--tty` option
-2. `MCTL_TTY` or `AMPY_PORT` env vars -> serial connection
-3. `MCTL_HOST` or `WEBREPL_HOST` env vars -> network connection
+1. `MCTL_TTY` env var: serial connection
+1. `MCTL_HOST` env var: network connection
+1. `AMPY_PORT` env var: serial connection
+1. `WEBREPL_HOST` env var: network connection
 
 For network connection passwords, the env vars `MCTL_PASSWORD` and `WEBREPL_PASSWORD` can be used.
 

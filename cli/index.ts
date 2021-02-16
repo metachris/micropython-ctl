@@ -94,38 +94,27 @@ const ensureConnectedDevice = async () => {
   const doPrint = program.args.indexOf("--json") === -1
 
   // Connect via network if host is defined, or if no tty specified then check env vars
-  let connectViaNetwork = false
-  if (host) {
-    connectViaNetwork = true  // if host is specified
-  } else if (!tty && !envMctlTty && !envAmpyPort) {  // serial if tty option or env var
-    if (envMctlHost || envWebreplHost) connectViaNetwork = true
+  const shouldConnectToSerial = (): boolean => {
+    if (tty) return true
+    if (host) return false
+    if (envMctlTty) return true
+    if (envMctlHost) return false
+    if (envWebreplHost) return false
+    return true
   }
+
+  // let connectViaNetwork = false
 
   try {
     // Do nothign if already connected
     if (micropython.isConnected()) return
 
-    // Connect now
-    if (connectViaNetwork) {
-      const _host = host || envMctlHost || envWebreplHost
-      const _pass = password || process.env.MCTL_PASSWORD || process.env.WEBREPL_PASSWORD
-      if (doPrint) logVerbose(`Connecting over network to: ${_host}`)
-      if (!_pass) throw new Error('No webrepl password supplied')
-      await micropython.connectNetwork(_host, _pass)
-
-    } else {
+    if (shouldConnectToSerial()) {
       const getSerialDevice = async (): Promise<string> => {
-        // 1. -t / --tty option
-        if (tty) return tty
-
-        // 2. MCTL_TTY env var
-        if (envMctlTty) return envMctlTty
-
-        // 2. AMPY_PORT env var
-        if (envAmpyPort) return envAmpyPort
-
-        // 3. Auto-detect devices and use first one
-        const devices = await listMicroPythonDevices()
+        if (tty) return tty  // -t / --tty option
+        if (envMctlTty) return envMctlTty  // MCTL_TTY env var
+        if (envAmpyPort) return envAmpyPort  // AMPY_PORT env var
+        const devices = await listMicroPythonDevices()  // Auto-detect devices and use first one
         if (devices.length === 0) throw new Error('No serial device found')
         return devices[0].path
       }
@@ -133,6 +122,13 @@ const ensureConnectedDevice = async () => {
       const device = await getSerialDevice()
       if (doPrint) logVerbose(`Connecting over serial to: ${device}`)
       await micropython.connectSerial(device)
+
+    } else {
+      const _host = host || envMctlHost || envWebreplHost
+      const _pass = password || process.env.MCTL_PASSWORD || process.env.WEBREPL_PASSWORD
+      if (doPrint) logVerbose(`Connecting over network to: ${_host}`)
+      if (!_pass) throw new Error('No webrepl password supplied')
+      await micropython.connectNetwork(_host, _pass)
     }
   } catch (e) {
     logError('Could not connect:', e.toString())
