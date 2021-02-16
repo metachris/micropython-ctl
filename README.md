@@ -4,14 +4,13 @@ Talk to MicroPython devices from websites/webapps, Node.js programs, Electron ap
 
 [![Build and test status](https://github.com/metachris/micropython-ctl/workflows/Build%20and%20test/badge.svg)](https://github.com/metachris/micropython-ctl/actions?query=workflow%3A%22Build+and+test%22)
 
-* Modern TypeScript library and cli.
-* Connect to devices over serial and network (REPL and WebREPL).
+* Modern TypeScript library and [cli](https://github.com/metachris/micropython-ctl/blob/master/cli)
+* Connect to devices over serial and network (REPL and WebREPL)
 * Functionality:
   * Run Python scripts, await the output
   * Manipulate files and directories
   * Terminal (REPL) interaction
-  * [`mctl`](https://github.com/metachris/micropython-ctl/blob/master/cli) command line utility
-  * Mount the micropython device into the local filesystem (`mctl mount`, experimental)
+  * [`mctl` command line utility](https://github.com/metachris/micropython-ctl/blob/master/cli)
 * See all the features in the [documentation](https://metachris.github.io/micropython-ctl/classes/micropythondevice.html), [examples](https://github.com/metachris/micropython-ctl/tree/master/examples) and [`cli/`](https://github.com/metachris/micropython-ctl/blob/master/cli)
 * Typed and fully async (use `await` with any command).
 * Works on Linux, macOS and Windows. Tested with ESP32, ESP8266, [Raspberry Pi Pico](https://www.raspberrypi.org/documentation/pico/getting-started/)
