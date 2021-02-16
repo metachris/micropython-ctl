@@ -195,7 +195,6 @@ Code library:
 `mctl`:
 
 * ⚠ Check for issues when alternating `mctl` and pymakr
-* ⚠ remove directories without `-r` should give a nice error
 * uploading files that have changed since last upload
 * flash-erase, flash-backup, flash-restore
 * `get` with wildcards: `get '*.py'`

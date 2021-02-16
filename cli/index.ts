@@ -397,13 +397,16 @@ const get = async (filenameOrDir: string, targetFilenameOrDir: string) => {
 
 const rm = async (targetPath: string, cmdObj) => {
   if (!targetPath.startsWith('/')) targetPath = '/' + targetPath
-  logVerbose('rm', targetPath)
+  // logVerbose('rm', targetPath)
 
   try {
     await ensureConnectedDevice()
     await micropython.remove(targetPath, cmdObj.recursive)
   } catch (e) {
-    if (e instanceof ScriptExecutionError && e.message.includes('OSError: [Errno 2] ENOENT')) {
+    if (e instanceof ScriptExecutionError && e.message.includes('OSError: 39')) {
+      logError(`rm: cannot remove '${targetPath}': Is a directory. (use -r to delete recursively)`)
+      return
+    } else if (e instanceof ScriptExecutionError && e.message.includes('OSError: [Errno 2] ENOENT')) {
       logError(`rm: cannot remove '${targetPath}': No such file or directory`)
       return
     }
