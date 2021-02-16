@@ -58,7 +58,6 @@ const runTests = async (micropython: MicroPythonDevice) => {
     // Create test
     await micropython.mkdir(testPath)
     const filesInTestDir1 = await micropython.listFiles(testPath)
-    // console.log(filesInTestDir1)
 
     const b1 = Buffer.from('this is a testfile')
     const b1fn = testPath + '/file1.txt'

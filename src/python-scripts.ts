@@ -44,13 +44,13 @@ def listdir(directory):
     files = os.ilistdir(directory)
     out = []
     for (filename, filetype, inode, size) in files:
-        _stat = os.stat(filename)
+        fn_full = "/" + filename if directory == '/' else directory + '/' + filename
+        _stat = os.stat(fn_full)
         if size == -1:
             size = _stat[6]
         isdir = filetype == 0x4000
-        filename = directory + filename if directory == '/' else directory + '/' + filename
         mtime = _stat[8]
-        out.append((filename, isdir, size, mtime))
+        out.append((fn_full, isdir, size, mtime))
     return sorted(out)
 `
   }
