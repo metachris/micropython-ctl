@@ -1,4 +1,5 @@
 const path = require('path');
+const webpack = require('webpack');
 
 module.exports = {
   mode: 'production',
@@ -17,12 +18,14 @@ module.exports = {
     extensions: [ '.tsx', '.ts', '.js' ],
   },
   externals: ['serialport', 'crypto'],
-  // externals: {
-  //   'serialport': 'serialport'
-  // },
   output: {
     filename: 'main.js',
     path: path.resolve(__dirname, 'dist-browser'),
     library: 'MicroPythonCtl',
   },
+  plugins: [
+    new webpack.DefinePlugin({
+      'process.env.DEBUG': JSON.stringify(process.env.DEBUG)
+    })
+  ]
 };

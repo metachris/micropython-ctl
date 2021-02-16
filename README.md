@@ -146,10 +146,18 @@ $ yarn
 $ yarn build
 $ yarn lint
 $ yarn doc
+
+# Compile and run mctl
+$ yarn mctl
+
+# Run a TypeScript example
 $ yarn ts-node examples/basic.ts
 
 # Run the test suite (needs a micropython device)
 $ yarn test --help
+
+# Experimental: build with esbuild
+$ yarn esbuild
 ```
 
 ---

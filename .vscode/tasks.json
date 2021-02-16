@@ -43,13 +43,13 @@
     },
     {
       "type": "npm",
-      "script": "buildNode",
+      "script": "build-node",
       "group": {
         "kind": "build",
         "isDefault": true
       },
       "problemMatcher": [],
-      "label": "npm: buildNode",
+      "label": "npm: build-node",
       "detail": "tsc -p tsconfig.json"
     }
   ]

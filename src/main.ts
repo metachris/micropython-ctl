@@ -8,7 +8,7 @@
 import WebSocket from 'isomorphic-ws'
 import { Buffer } from 'buffer/'
 import { InvalidPassword, CouldNotConnect, ScriptExecutionError } from './errors'
-import { debug, dedent, IS_ELECTRON, IS_NODEJS } from './utils';
+import { debug, dedent } from './utils';
 import * as PythonScripts from './python-scripts';
 
 export { InvalidPassword, CouldNotConnect, ScriptExecutionError }  // allows easy importing from user scripts
@@ -221,14 +221,11 @@ export class MicroPythonDevice {
     this.state.connectionState = ConnectionState.CONNECTING
     this.clearBuffer()
 
-    if (IS_ELECTRON) {
-      this.state.port = new window.SerialPort(path, { baudRate: 115200 })
-    } else if (IS_NODEJS) {
-      const SerialPort = require('serialport')
-      this.state.port = new SerialPort(path, { baudRate: 115200 })
-    } else {
-      throw new Error('Cannot use connectSerial from a browser')
-    }
+    // Get serialport either through window.SerialPort, or require
+    const SerialPort = typeof window !== 'undefined' && window.SerialPort ? window.SerialPort : require('serialport')
+
+    // Open the serial port
+    this.state.port = new SerialPort(path, { baudRate: 115200 })
 
     // error listener
     this.state.port.on('error', (err: string) => {
@@ -244,7 +241,10 @@ export class MicroPythonDevice {
     // on-open listener
     this.state.port.on('open', () => {
       // debug('serialport onopen')
-      this.setConnected()
+      this.state.connectionState = ConnectionState.OPEN
+      this.state.replMode = ReplMode.TERMINAL
+      this.clearBuffer()
+      if (this.state.replPromiseResolve) this.state.replPromiseResolve('')
     })
 
     // data listener
@@ -261,17 +261,6 @@ export class MicroPythonDevice {
     return this.createReplPromise()
   }
 
-  /**
-   * Set device status to OPEN, init buffers and resolve promise
-   * (used by connectNetwork and connectSerial)
-   */
-  private setConnected() {
-    debug('setConnected')
-    this.state.connectionState = ConnectionState.OPEN
-    this.state.replMode = ReplMode.TERMINAL
-    this.clearBuffer()
-    if (this.state.replPromiseResolve) this.state.replPromiseResolve('')
-  }
 
   /**
    * Connect to a device over the network (requires enabled WebREPL)
@@ -302,14 +291,13 @@ export class MicroPythonDevice {
     if (timeoutSec) {
       this.state.wsConnectTimeout = setTimeout(() => {
         this.state.wsConnectTimeoutTriggered = true
-        this.state.ws?.close()
+        this.state.ws!.close()
       }, timeoutSec * 1000)
     }
 
-    // On connection established, clear the timeout and set status to OPEN
+    // On connection established, clear the timeout and wait for connection data
     this.state.ws.onopen = () => {
       if (this.state.wsConnectTimeout) clearTimeout(this.state.wsConnectTimeout)
-      this.setConnected()
     }
 
     // Handle messages
@@ -388,6 +376,7 @@ export class MicroPythonDevice {
 
   private handleWebsocketMessage(event: WebSocket.MessageEvent) {
     const dataStr = event.data.toString()
+    // console.log(`onWebsocketMessage`, dataStr)
     // console.log(`onWebsocketMessage:${event.data instanceof ArrayBuffer ? ' [ArrayBuffer]' : ''}${data.endsWith('\n') ? ' [End:\\n]' : ''}${data.length < 3 ? ' [char0:' + data.charCodeAt(0) + ']'  : ''}`, data.length, data)
 
     // On closing a ws connection there may be special final bytes (discard)
@@ -404,6 +393,12 @@ export class MicroPythonDevice {
         this.state.ws!.close()  // just to be sure. micropy already closes the connection
         if (this.state.replPromiseReject) this.state.replPromiseReject(new InvalidPassword('REPL password invalid'))
         return
+
+      } else if (dataTrimmed.endsWith('\n>>>')) {
+        this.state.connectionState = ConnectionState.OPEN
+        this.state.replMode = ReplMode.TERMINAL
+        this.clearBuffer()
+        if (this.state.replPromiseResolve) this.state.replPromiseResolve('')
       }
     }
 
@@ -541,7 +536,7 @@ export class MicroPythonDevice {
 
   private serialSendData(data: string | Buffer) {
     // debug('serialSendData', data)
-    this.state.port?.write(data)
+    this.state.port.write(data)
   }
 
   private wsSendData(data: string | ArrayBuffer) {
@@ -554,7 +549,7 @@ export class MicroPythonDevice {
 
   public async disconnect() {
     if (this.isSerialDevice()) {
-      await this.state.port?.close()
+      await this.state.port.close()
       this.state.connectionState = ConnectionState.CLOSED
     } else {
       await this.closeWebsocket()
