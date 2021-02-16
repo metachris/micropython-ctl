@@ -21,10 +21,10 @@ def listdir(directory):
         except OSError:
             # probably a file. run stat() to confirm.
             stat = os.stat(dir_or_file)
-            result.add((dir_or_file, False, stat[6]))
+            result.add((dir_or_file, False, stat[6], stat[8]))
         else:
             # probably a directory, add to result if empty.
-            result.add((dir_or_file, True, 0))
+            result.add((dir_or_file, True, 0, 0))
             if children:
                 # queue the children to be dealt with in next iteration.
                 for child in children:
@@ -44,18 +44,20 @@ def listdir(directory):
     files = os.ilistdir(directory)
     out = []
     for (filename, filetype, inode, size) in files:
+        _stat = os.stat(filename)
         if size == -1:
-            size = os.stat(f)[6]
+            size = _stat[6]
         isdir = filetype == 0x4000
         filename = directory + filename if directory == '/' else directory + '/' + filename
-        out.append((filename, isdir, size))
+        mtime = _stat[8]
+        out.append((filename, isdir, size, mtime))
     return sorted(out)
 `
   }
 
   command += `
-for (filename, isdir, size) in listdir('${finalDir}'):
-    print("%s | %s | %s" % (filename, 'd' if isdir else 'f', size))
+for (filename, isdir, size, mtime) in listdir('${finalDir}'):
+    print("%s | %s | %s | %s" % (filename, 'd' if isdir else 'f', size, mtime))
 #
 `
 

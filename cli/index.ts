@@ -151,6 +151,7 @@ const listFilesOnDevice = async (directory = '/', cmdObj) => {
 
   try {
     const files = await micropython.listFiles(directory, { recursive: cmdObj.recursive })
+    console.log(files)
     files.map(file => console.log(`${humanFileSize(file.size).padStart(5)} ${file.isDir ? CLR_FG_BLUE : ''}${file.filename}${CLR_RESET}`))
 
   } catch (e) {
@@ -551,9 +552,6 @@ const repl = async () => {
     });
 
     console.log('Exit REPL by pressing Ctrl+K')
-
-    // Send Ctrl+B (exit raw repl and show micropython header)
-    micropython.sendData('\x02')
   } catch (e) {
     console.log('Error:', e)
     await micropython.disconnect()

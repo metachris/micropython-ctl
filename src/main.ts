@@ -93,7 +93,12 @@ interface WindowWithWebRepl extends Window {
   webReplState: DeviceState | undefined
 }
 
-export interface FileListEntry { filename: string, size: number, isDir: boolean }
+export interface FileListEntry {
+  filename: string,
+  isDir: boolean
+  size: number,
+  mTime: number,
+}
 
 declare const window: WindowWithWebRepl;
 
@@ -225,7 +230,7 @@ export class MicroPythonDevice {
       throw new Error('Cannot use connectSerial from a browser')
     }
 
-    // Add error listener
+    // error listener
     this.state.port.on('error', (err: string) => {
       if (this.state.replPromiseReject) {
         debug(err)
@@ -236,7 +241,13 @@ export class MicroPythonDevice {
       }
     })
 
-    // Add data listener
+    // on-open listener
+    this.state.port.on('open', () => {
+      // debug('serialport onopen')
+      this.setConnected()
+    })
+
+    // data listener
     this.state.port.on('data', (data: Buffer) => {
       // debug('Data:', data, data.toString())
       this.handleProtocolData(data)
@@ -247,8 +258,20 @@ export class MicroPythonDevice {
       if (this.onclose) this.onclose()
     })
 
-    this.state.port.write('\x03\x02')  // Sending Ctrl+C and Ctrl+B, to receive the info that we are in REPL mode
+    // this.state.port.write('\x03\x02')  // Sending Ctrl+C and Ctrl+B, to receive the info that we are in REPL mode
     return this.createReplPromise()
+  }
+
+  /**
+   * Set device status to OPEN, init buffers and resolve promise
+   * (used by connectNetwork and connectSerial)
+   */
+  private setConnected() {
+    debug('setConnected')
+    this.state.connectionState = ConnectionState.OPEN
+    this.state.replMode = ReplMode.TERMINAL
+    this.clearBuffer()
+    if (this.state.replPromiseResolve) this.state.replPromiseResolve('')
   }
 
   /**
@@ -284,8 +307,11 @@ export class MicroPythonDevice {
       }, timeoutSec * 1000)
     }
 
-    // On connection established, clear the timeout
-    this.state.ws.onopen = () => { if (this.state.wsConnectTimeout) clearTimeout(this.state.wsConnectTimeout) }
+    // On connection established, clear the timeout and set status to OPEN
+    this.state.ws.onopen = () => {
+      if (this.state.wsConnectTimeout) clearTimeout(this.state.wsConnectTimeout)
+      this.setConnected()
+    }
 
     // Handle messages
     this.state.ws.onmessage = (event) => this.handleWebsocketMessage(event)
@@ -424,20 +450,7 @@ export class MicroPythonDevice {
     // Perpare strings for easy access
     const dataStr = this.state.dataRawBuffer.toString()
     const dataTrimmed = dataStr.trim()
-
     // debug('handleProtocolData', data, '=>', dataStr)
-
-    // If connecting, wait until first REPL input prompt
-    if (this.state.connectionState === ConnectionState.CONNECTING) {
-      if (dataStr.trim().endsWith('>>>')) {
-        this.state.connectionState = ConnectionState.OPEN
-        this.state.replMode = ReplMode.TERMINAL
-        this.clearBuffer()
-        debug('connected')
-        if (this.state.replPromiseResolve) this.state.replPromiseResolve('')
-      }
-      return
-    }
 
     // Handle RAW_MODE data (entering, receiving response, receiving error, waiting for end, changing back to friendly repl)
     if (this.state.replMode === ReplMode.SCRIPT_RAW_MODE) {
@@ -732,6 +745,7 @@ export class MicroPythonDevice {
         filename: parts[0],
         size: parseInt(parts[2], 10),
         isDir: parts[1] === 'd',
+        mTime: parseInt(parts[3], 10)
       })
     }
     return ret
