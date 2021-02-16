@@ -63,10 +63,25 @@ For network connection passwords, the env vars `MCTL_PASSWORD` and `WEBREPL_PASS
 
 ## Examples
 
+#### Set target device
+
 ```shell
 # List serial devices
 mctl devices
 
+# By default connect to first serial device
+mctl info
+
+# Connect over specific serial device
+mctl -t /dev/USB0 info
+
+# Connect over network
+mctl -h DEVICE_IP -p WEBREPL_PASSWORD info
+```
+
+#### Get information, REPL, list and read files
+
+```shell
 # Get information about the board
 mctl info
 
@@ -78,7 +93,11 @@ mctl ls -r
 
 # Print contents of boot.py
 mctl cat boot.py
+```
 
+#### Upload and download files
+
+```shell
 # Download all files and directories recursively, into the current directory
 mctl get /
 
@@ -93,7 +112,11 @@ mctl put "*.py"
 
 # Upload everything recursively
 mctl put .
+```
 
+#### Experimental
+
+```shell
 # Mount device onto local filesystem (experimental, only works with python files)
 mctl mount
 ```
