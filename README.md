@@ -180,8 +180,6 @@ I'm happy about feedback, please reach out:
 
 Code library:
 
-* ⚠ `connect` should not always cancel running program by sending ctrl+c (eg. for repl, etc)
-* ⚠ `listFiles` should include time last modified
 * put/get
   * via network: switch to webrepl protocol instead of manual up- and download
   * `getFile` via serial improvement - currently it fills the device RAM and probably works badly with large file
