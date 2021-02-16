@@ -189,8 +189,8 @@ export const mount = async (opts: MountOpts) => {
   let deviceFileList: UpstreamFileListEntry[]
   if (opts.useDummyMicropython) {
     deviceFileList = [
-      { filename: '/', isDir: true, size: 100 },
-      { filename: '/test2', isDir: false, size: 124 }
+      { filename: '/', isDir: true, size: 100, mTime: 16511 },
+      { filename: '/test2', isDir: false, size: 124, mTime: 16511 }
     ]
   } else {
     deviceFileList = await micropython.listFiles('/', { recursive: true })

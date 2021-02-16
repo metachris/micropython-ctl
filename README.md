@@ -187,6 +187,10 @@ Code library:
 
 `mctl`:
 
+* ⚠ Check for issues when alternating `mctl` and pymakr
+* ⚠ remove directories without `-r` should give a nice error
+* uploading files that have changed since last upload
+* flash-erase, flash-backup, flash-restore
 * `get` with wildcards: `get '*.py'`
 * wifi status, connect, disconnect
 * device aliases ([like here](https://github.com/micropython/micropython/pull/6375/files#diff-abc52a08e256524f287eeb9711417e389265743c68c47cb8badc575f0aebfd02R69))

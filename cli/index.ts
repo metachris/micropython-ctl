@@ -90,7 +90,8 @@ const ensureConnectedDevice = async () => {
   const envMctlTty = process.env.MCTL_TTY
   const envAmpyPort = process.env.AMPY_PORT
 
-  // console.log(tty, envWebreplHost, opts)
+  // Disable info output when --json in arguments
+  const doPrint = program.args.indexOf("--json") === -1
 
   // Connect via network if host is defined, or if no tty specified then check env vars
   let connectViaNetwork = false
@@ -108,7 +109,7 @@ const ensureConnectedDevice = async () => {
     if (connectViaNetwork) {
       const _host = host || envMctlHost || envWebreplHost
       const _pass = password || process.env.MCTL_PASSWORD || process.env.WEBREPL_PASSWORD
-      logVerbose(`Connecting over network to: ${_host}`)
+      if (doPrint) logVerbose(`Connecting over network to: ${_host}`)
       if (!_pass) throw new Error('No webrepl password supplied')
       await micropython.connectNetwork(_host, _pass)
 
@@ -130,7 +131,7 @@ const ensureConnectedDevice = async () => {
       }
 
       const device = await getSerialDevice()
-      logVerbose(`Connecting over serial to: ${device}`)
+      if (doPrint) logVerbose(`Connecting over serial to: ${device}`)
       await micropython.connectSerial(device)
     }
   } catch (e) {
@@ -151,7 +152,14 @@ const listFilesOnDevice = async (directory = '/', cmdObj) => {
 
   try {
     const files = await micropython.listFiles(directory, { recursive: cmdObj.recursive })
-    files.map(file => console.log(`${humanFileSize(file.size).padStart(5)} ${file.isDir ? CLR_FG_BLUE : ''}${file.filename}${CLR_RESET}`))
+    if (cmdObj.json) {
+      // Output in JSON
+      const s = JSON.stringify(files, null, 4)
+      console.log(s)
+    } else {
+      // Output for humans
+      files.map(file => console.log(`${humanFileSize(file.size).padStart(5)} ${file.isDir ? CLR_FG_BLUE : ''}${file.filename}${CLR_RESET}`))
+    }
 
   } catch (e) {
     if (e instanceof ScriptExecutionError && e.message.includes('OSError: [Errno 2] ENOENT')) {
@@ -551,9 +559,6 @@ const repl = async () => {
     });
 
     console.log('Exit REPL by pressing Ctrl+K')
-
-    // Send Ctrl+B (exit raw repl and show micropython header)
-    micropython.sendData('\x02')
   } catch (e) {
     console.log('Error:', e)
     await micropython.disconnect()
@@ -604,6 +609,7 @@ program
 program
   .command('ls [directory]')
   .option('-r, --recursive', 'List recursively')
+  .option('-j, --json', 'Output JSON')
   .description('List files on a device').action(listFilesOnDevice);
 
 // Command: cat
