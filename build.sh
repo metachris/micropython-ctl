@@ -3,13 +3,13 @@ set -eu -o pipefail  # Abort on errors, disallow undefined variables
 yarn clean
 
 # Build Node.js version
-yarn buildNode
+yarn build-node
 cd dist-node
 cp ../package.json .
 cd ..
 
 # Build browser version
-yarn buildBrowser
+yarn build-browser
 rm -f dist-browser/main.js.LICENSE.txt
 
 version=`git describe --tags`

@@ -241,7 +241,10 @@ export class MicroPythonDevice {
     // on-open listener
     this.state.port.on('open', () => {
       // debug('serialport onopen')
-      this.setConnected()
+      this.state.connectionState = ConnectionState.OPEN
+      this.state.replMode = ReplMode.TERMINAL
+      this.clearBuffer()
+      if (this.state.replPromiseResolve) this.state.replPromiseResolve('')
     })
 
     // data listener
@@ -258,17 +261,6 @@ export class MicroPythonDevice {
     return this.createReplPromise()
   }
 
-  /**
-   * Set device status to OPEN, init buffers and resolve promise
-   * (used by connectNetwork and connectSerial)
-   */
-  private setConnected() {
-    debug('setConnected')
-    this.state.connectionState = ConnectionState.OPEN
-    this.state.replMode = ReplMode.TERMINAL
-    this.clearBuffer()
-    if (this.state.replPromiseResolve) this.state.replPromiseResolve('')
-  }
 
   /**
    * Connect to a device over the network (requires enabled WebREPL)
@@ -303,10 +295,9 @@ export class MicroPythonDevice {
       }, timeoutSec * 1000)
     }
 
-    // On connection established, clear the timeout and set status to OPEN
+    // On connection established, clear the timeout and wait for connection data
     this.state.ws.onopen = () => {
       if (this.state.wsConnectTimeout) clearTimeout(this.state.wsConnectTimeout)
-      this.setConnected()
     }
 
     // Handle messages
@@ -385,6 +376,7 @@ export class MicroPythonDevice {
 
   private handleWebsocketMessage(event: WebSocket.MessageEvent) {
     const dataStr = event.data.toString()
+    // console.log(`onWebsocketMessage`, dataStr)
     // console.log(`onWebsocketMessage:${event.data instanceof ArrayBuffer ? ' [ArrayBuffer]' : ''}${data.endsWith('\n') ? ' [End:\\n]' : ''}${data.length < 3 ? ' [char0:' + data.charCodeAt(0) + ']'  : ''}`, data.length, data)
 
     // On closing a ws connection there may be special final bytes (discard)
@@ -401,6 +393,12 @@ export class MicroPythonDevice {
         this.state.ws!.close()  // just to be sure. micropy already closes the connection
         if (this.state.replPromiseReject) this.state.replPromiseReject(new InvalidPassword('REPL password invalid'))
         return
+
+      } else if (dataTrimmed.endsWith('\n>>>')) {
+        this.state.connectionState = ConnectionState.OPEN
+        this.state.replMode = ReplMode.TERMINAL
+        this.clearBuffer()
+        if (this.state.replPromiseResolve) this.state.replPromiseResolve('')
       }
     }
 
