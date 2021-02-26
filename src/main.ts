@@ -577,13 +577,14 @@ export class MicroPythonDevice {
    * @throws {ScriptExecutionError} on Python code execution error. Includes the Python traceback.
    */
   public async runScript(script: string, options: RunScriptOptions = {}): Promise<string> {
-    debug('runScript', script)
+    // Prepare script for execution (dedent by default)
+    if (!options.disableDedent) script = dedent(script)
+    if (options.runGcCollectBeforeCommand) script = "import gc; gc.collect();\n" + script
+
+    debug('runScript\n', script)
 
     await this.enterRawRepl()
     debug('runScript: raw mode entered')
-
-    // Prepare script for execution (dedent by default)
-    if (!options.disableDedent) script = dedent(script)
 
     // Send data to raw repl. Note: cannot send too much data at once over the
     // network, else the webrepl can't parse it quick enough and returns an error.
@@ -988,6 +989,8 @@ export interface RunScriptOptions {
 
   /** Whether to resolve the promise before waiting for the result (default: `false`) */
   resolveBeforeResult?: boolean
+
+  runGcCollectBeforeCommand?: boolean
 }
 
 export interface ResetOptions {

@@ -69,9 +69,11 @@ const logVerbose = (...msg: any) => {
   }
 }
 
-const listMicroPythonDevices = async () => {
+const listSerialDevices = async () => {
   const devices = await SerialPort.list();
-  return devices.filter(device => device.manufacturer || device.serialNumber)
+
+  // Apply some filters
+  return devices.filter(device => device.manufacturer || device.serialNumber || device.vendorId)
 }
 
 /**
@@ -103,8 +105,6 @@ const ensureConnectedDevice = async () => {
     return true
   }
 
-  // let connectViaNetwork = false
-
   try {
     // Do nothign if already connected
     if (micropython.isConnected()) return
@@ -114,7 +114,7 @@ const ensureConnectedDevice = async () => {
         if (tty) return tty  // -t / --tty option
         if (envMctlTty) return envMctlTty  // MCTL_TTY env var
         if (envAmpyPort) return envAmpyPort  // AMPY_PORT env var
-        const devices = await listMicroPythonDevices()  // Auto-detect devices and use first one
+        const devices = await listSerialDevices()  // Auto-detect devices and use first one
         if (devices.length === 0) throw new Error('No serial device found')
         return devices[0].path
       }
@@ -137,8 +137,8 @@ const ensureConnectedDevice = async () => {
 }
 
 // mctl devices
-const listSerialDevices = async () => {
-  (await listMicroPythonDevices()).map(device => console.log(device.path, '\t', device.manufacturer))
+const cmdListDevices = async () => {
+  (await listSerialDevices()).map(device => console.log(device.path, '\t', device.manufacturer))
 }
 
 // mctl ls [-r]
@@ -583,7 +583,7 @@ program.option('-s, --silent', `Hide unnecessary output`)
 program
   .command('devices')
   .description('List serial devices')
-  .action(listSerialDevices);
+  .action(cmdListDevices);
 
 // Command: repl
 program

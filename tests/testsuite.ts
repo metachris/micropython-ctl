@@ -10,11 +10,15 @@ import SerialPort from 'serialport';
 import { delayMillis } from '../src/utils';
 import { Command } from 'commander';
 
+const listSerialDevices = async () => {
+  const devices = await SerialPort.list();
+  return devices.filter(device => device.manufacturer || device.serialNumber || device.vendorId)
+}
+
 // Get first serial device
 const getSerialDevice = async () => {
   if (process.env.DEVICE_SERIAL) return process.env.DEVICE_SERIAL
-  const devices = await SerialPort.list();
-  const goodDevices = devices.filter(device => device.manufacturer || device.serialNumber)
+  const goodDevices = await listSerialDevices()
   if (!goodDevices.length) throw new Error('No serial devices found')
   return goodDevices[0].path
 }
