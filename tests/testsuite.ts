@@ -32,6 +32,7 @@ const runTests = async (micropython: MicroPythonDevice) => {
     let terminalDataReceived = ''
     micropython.onTerminalData = (data) => terminalDataReceived += data
     micropython.sendData('\x03\x02')
+    await delayMillis(1000)
     micropython.sendData('foo')
     await delayMillis(1000)
     // console.log('terminalDataReceived', terminalDataReceived)
@@ -48,8 +49,11 @@ const runTests = async (micropython: MicroPythonDevice) => {
       let terminalData = ''
       micropython.onTerminalData = (data) => terminalData += data
       await micropython.reset({ broadcastOutputAsTerminalData: true })
-      assert(terminalData.includes('cpu_start:'))
-      assert(terminalData.includes('heap_init:'))
+      // await delayMillis(2000)
+      // console.log('terminalData', terminalData)
+      const hasV113Info = terminalData.includes('cpu_start:') && terminalData.includes('heap_init:')
+      const hasV114Info = terminalData.includes('load:0x')
+      assert(hasV113Info || hasV114Info)
       // tslint:disable-next-line: no-empty
       micropython.onTerminalData = (_data: string) => {}
     }
@@ -136,7 +140,7 @@ const runTests = async (micropython: MicroPythonDevice) => {
     let isClosed = false
     micropython.onclose = () => isClosed = true
     await micropython.disconnect()
-    await delayMillis(100)
+    await delayMillis(1000)
     assert(isClosed)
     assert(!micropython.isConnected())
 

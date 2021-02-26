@@ -805,7 +805,7 @@ export class MicroPythonDevice {
       if (isAlreadyTheSame) return true
     }
 
-    const promise = this.createReplPromise()
+    this.createReplPromise()
     const dataHex = data.toString('hex')
     const chunkSize = this.isSerialDevice() ? 256 : 64
 
