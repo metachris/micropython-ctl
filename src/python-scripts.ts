@@ -136,12 +136,20 @@ def getHash():
             hasher.update(result)
     return ubinascii.hexlify(hasher.digest())
 
-s = os.stat('${filename}')
-if ${fileSize} != s[6]:
-    print('0')
-else:
-    hash = getHash().decode()
-    print("1" if hash == '${sha256Hash}' else "0")
+def is_same():
+    try:
+        s = os.stat('${filename}')
+    except OSError:
+        print('0')
+        return
+
+    if ${fileSize} != s[6]:
+        print('0')
+    else:
+        hash = getHash().decode()
+        print("1" if hash == '${sha256Hash}' else "0")
+
+is_same()
 #`
 }
 
