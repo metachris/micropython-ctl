@@ -194,6 +194,7 @@ Code library:
 
 `mctl`:
 
+* 'put recursive': only if files changed (build md5 hashes for all files, and upload only if different)
 * ⚠ Check for issues when alternating `mctl` and pymakr
 * uploading files that have changed since last upload
 * flash-erase, flash-backup, flash-restore

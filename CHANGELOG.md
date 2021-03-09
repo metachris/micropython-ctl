@@ -1,3 +1,8 @@
+1.11.2 (2021-03-09)
+-------------------
+* fix for `mctl rm / -r` (threw an error on some devices)
+
+
 1.11.0 (26.2.2021)
 ------------------
 * Establishing a connection doesn't kill running MicroPython process (eg. `mctl repl`, etc.)

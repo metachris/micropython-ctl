@@ -161,7 +161,11 @@ def rmdir(directory):
     for f in os.listdir():
         rmdir(f)
     os.chdir('..')
-    os.rmdir(directory)
+    try:
+      os.rmdir(directory)
+    except OSError:
+      pass
+
 rmdir('${path}')
 `
 }

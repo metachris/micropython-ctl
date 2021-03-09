@@ -493,7 +493,7 @@ const edit = async (filename: string) => {
 }
 
 const reset = async (cmdObj) => {
-  logVerbose('reset')
+  // logVerbose('reset')
 
   await ensureConnectedDevice()
   await micropython.reset({ softReset: !!cmdObj.soft })  // cannot await result because it's restarting and we loose the connection
