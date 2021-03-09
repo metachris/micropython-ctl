@@ -10,6 +10,7 @@ import { Buffer } from 'buffer/'
 import { InvalidPassword, CouldNotConnect, ScriptExecutionError } from './errors'
 import { debug, dedent } from './utils';
 import * as PythonScripts from './python-scripts';
+import { WEBSERVER_PORT } from './settings';
 
 export { InvalidPassword, CouldNotConnect, ScriptExecutionError }  // allows easy importing from user scripts
 
@@ -256,7 +257,7 @@ export class MicroPythonDevice {
 
       // On connection error, try webserver
       if (this.state.connectionState === ConnectionState.CONNECTING && msg.includes('Resource temporarily unavailable')) {
-        const resp = await fetch('http://localhost:3000/api/')
+        const resp = await fetch(`http://localhost:${WEBSERVER_PORT}/api/`)
         // console.log('resp', resp)
         if (resp.status === 200) {
           const respObj = await resp.json()
@@ -631,7 +632,7 @@ export class MicroPythonDevice {
 
     if (this.isProxyConnection()) {
       debug('run over api')
-      const resp = await fetch('http://localhost:3000/api/run-script/', { method: 'POST', body: script })
+      const resp = await fetch(`http://localhost:${WEBSERVER_PORT}/api/run-script/`, { method: 'POST', body: script })
       if (resp.status !== 200) throw new ScriptExecutionError(`Could not run script via api: status=${resp.status}`)
       const c = await resp.text()
       return c

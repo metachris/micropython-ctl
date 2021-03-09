@@ -1,6 +1,7 @@
 import express from 'express'
 import bodyParser from 'body-parser'
 import { MicroPythonDevice } from './main'
+import { WEBSERVER_PORT } from './settings';
 
 const app = express()
 app.use(bodyParser.text());
@@ -26,7 +27,7 @@ app.post('/api/run-script', async (req, res) => {
 
 export const run = async (device: MicroPythonDevice) => {
   _device = device
-  app.listen(3000)
+  app.listen(WEBSERVER_PORT)
 }
 
 if (require.main === module) {
