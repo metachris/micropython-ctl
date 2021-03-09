@@ -68,7 +68,7 @@ type promiseReject = (reason: any) => void;
 export interface DeviceState {
   connectionMode: ConnectionMode
 
-  connectionPath: string | null  // 'serial:/dev/ttyUSB0' or 'webrepl:192.168.1.120'
+  connectionPath: string | null  // 'serial:/dev/ttyUSB0' or 'ws://192.168.1.120:8266'
 
   port: any
   ws: WebSocket | null
@@ -231,7 +231,7 @@ export class MicroPythonDevice {
 
   public async startInternalWebserver() {
     debug('startInternalWebserver...')
-    webserver.run(this)
+    if (webserver) webserver.run(this)
   }
 
   /**
@@ -259,7 +259,7 @@ export class MicroPythonDevice {
     this.state.port.on('error', async (err: string) => {
       const msg = err.toString()
 
-      // On connection error, try webserver
+      // On connection error, try proxy mode (connect to REST API of existing instance)
       if (this.state.connectionState === ConnectionState.CONNECTING && msg.includes('Resource temporarily unavailable')) {
         const resp = await fetch(`http://localhost:${WEBSERVER_PORT}/api/`)
         // console.log('resp', resp)
@@ -311,7 +311,6 @@ export class MicroPythonDevice {
     return this.createReplPromise()
   }
 
-
   /**
    * Connect to a device over the network (requires enabled WebREPL)
    *
@@ -329,12 +328,13 @@ export class MicroPythonDevice {
       return ''
     }
 
-    const uri = `ws://${host}:8266`
+    this.state.connectionPath = `ws://${host}:8266`
+
     // console.log('connect', uri)
     this.state.connectionState = ConnectionState.CONNECTING
     this.state.replPassword = password
 
-    this.state.ws = new WebSocket(uri)
+    this.state.ws = new WebSocket(this.state.connectionPath)
     this.state.ws.binaryType = 'arraybuffer'
 
     // Set the connect timeout
@@ -598,13 +598,16 @@ export class MicroPythonDevice {
   }
 
   public async disconnect() {
-    try { webserver.close() } catch {}
+    if (webserver) webserver.close()
 
-    if (this.isProxyConnection()) return
+    if (this.isProxyConnection()) {
+      this.state.connectionState = ConnectionState.CLOSED
+      return
 
-    if (this.isSerialDevice()) {
+    } else if (this.isSerialDevice()) {
       await this.state.port.close()
       this.state.connectionState = ConnectionState.CLOSED
+
     } else {
       await this.closeWebsocket()
     }
