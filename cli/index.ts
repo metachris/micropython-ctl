@@ -184,8 +184,9 @@ const listFilesOnDevice = async (directory = '/', cmdObj) => {
  * @param filename filename, glob or directory name
  * @param dest filename or path
  */
-const put = async (filename: string, dest?: string) => {
+const put = async (filename: string, dest?: string, cmdObj?: any) => {
   logVerbose('put', filename, '->', dest)
+  const { changedOnly } = cmdObj
 
   // helper to perform individual upload
   const uploadSingleFile = async (_filename: string, _dest = dest) => {
@@ -195,7 +196,7 @@ const put = async (filename: string, dest?: string) => {
     }
     console.log('put:', _filename, '->', target)
     const data = Buffer.from(fs.readFileSync(_filename))
-    await micropython.putFile(target, data)
+    await micropython.putFile(target, data, { checkIfSimilarBeforeUpload: changedOnly })
   }
 
   const uploadDirectory = async (_dirname: string) => {
@@ -630,6 +631,7 @@ program
 // Command: put
 program
   .command('put <file_or_dirname> [dest_file_or_dirname]')
+  .option('-c, --changed-only', 'Upload only if changed (useful for large files, but needs to calculate hash)')
   .description('Upload a file or directory onto the device')
   .action(put);
 

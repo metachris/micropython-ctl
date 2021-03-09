@@ -1,3 +1,8 @@
+next
+----
+* `mctl put <filename> --changed-only`: flag to check hash and upload only if changed (useful for large files, downside it needs to calculate the hash before uploading)
+
+
 1.11.2 (2021-03-09)
 -------------------
 * fix for `mctl rm / -r` (threw an error on some devices)

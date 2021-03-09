@@ -1065,7 +1065,7 @@ export interface ResetOptions {
 }
 
 export interface PutFileOptions {
-  checkIfSimilarBeforeUpload?: boolean
+  checkIfSimilarBeforeUpload?: boolean  // if true, checks if hash is similar, and only upload if not
 }
 
 export interface BoardInfo {
