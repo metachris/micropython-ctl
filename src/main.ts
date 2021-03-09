@@ -13,11 +13,19 @@ import * as PythonScripts from './python-scripts';
 
 export { InvalidPassword, CouldNotConnect, ScriptExecutionError }  // allows easy importing from user scripts
 
+let fetch: any;
+try {
+  // tslint:disable-next-line: no-var-requires
+  fetch = require('node-fetch')
+// tslint:disable-next-line: no-empty
+} catch {}
+
 const delayMillis = (delayMs: number) => new Promise(resolve => setTimeout(resolve, delayMs));
 
 export enum ConnectionMode {
   SERIAL = "SERIAL",
   NETWORK = "NETWORK",
+  PROXY = 'PROXY',  // Commands are proxied over an existing connection (eg useful for running commands through an existing repl)
 }
 
 export enum ConnectionState {
@@ -54,6 +62,8 @@ type promiseReject = (reason: any) => void;
 
 export interface DeviceState {
   connectionMode: ConnectionMode
+
+  connectionPath: string | null  // 'serial:/dev/ttyUSB0' or 'webrepl:192.168.1.120'
 
   port: any
   ws: WebSocket | null
@@ -149,6 +159,8 @@ export class MicroPythonDevice {
       connectionMode: ConnectionMode.NETWORK,
       connectionState: ConnectionState.CLOSED,
 
+      connectionPath: null,
+
       port: null,
       ws: null,
       wsConnectTimeout: undefined,
@@ -189,6 +201,10 @@ export class MicroPythonDevice {
     return this.state.connectionMode === ConnectionMode.SERIAL
   }
 
+  isProxyConnection() {
+    return this.state.connectionMode === ConnectionMode.PROXY
+  }
+
   isTerminalMode() {
     return this.state.replMode === ReplMode.TERMINAL
   }
@@ -208,6 +224,11 @@ export class MicroPythonDevice {
     return this.state.replPromise
   }
 
+  public async startInternalWebserver() {
+    const webserver = require('./webserver')
+    webserver.run(this)
+  }
+
   /**
    * Connect to a device over the serial interface
    *
@@ -216,6 +237,8 @@ export class MicroPythonDevice {
    */
   public async connectSerial(path: string) {
     debug('connectSerial', path)
+    this.state.connectionPath = `serial:${path}`
+
     // Connect to serial device
     this.state.connectionMode = ConnectionMode.SERIAL
     this.state.connectionState = ConnectionState.CONNECTING
@@ -228,10 +251,30 @@ export class MicroPythonDevice {
     this.state.port = new SerialPort(path, { baudRate: 115200 })
 
     // error listener
-    this.state.port.on('error', (err: string) => {
+    this.state.port.on('error', async (err: string) => {
+      const msg = err.toString()
+
+      // On connection error, try webserver
+      if (this.state.connectionState === ConnectionState.CONNECTING && msg.includes('Resource temporarily unavailable')) {
+        const resp = await fetch('http://localhost:3000/api/')
+        // console.log('resp', resp)
+        if (resp.status === 200) {
+          const respObj = await resp.json()
+          // console.log(respObj)
+          if (respObj.deviceId === this.state.connectionPath) {
+            this.state.connectionMode = ConnectionMode.PROXY
+            this.state.connectionState = ConnectionState.OPEN
+            this.state.replMode = ReplMode.TERMINAL
+            this.clearBuffer()
+            if (this.state.replPromiseResolve) this.state.replPromiseResolve('')
+            return
+          }
+        }
+      }
+
       if (this.state.replPromiseReject) {
         debug(err)
-        const e = this.state.connectionState === ConnectionState.CONNECTING ? new CouldNotConnect(err.toString()) : err
+        const e = this.state.connectionState === ConnectionState.CONNECTING ? new CouldNotConnect(msg) : err
         this.state.replPromiseReject(e)
       } else {
         throw err
@@ -245,6 +288,7 @@ export class MicroPythonDevice {
       this.state.replMode = ReplMode.TERMINAL
       this.clearBuffer()
       if (this.state.replPromiseResolve) this.state.replPromiseResolve('')
+      this.startInternalWebserver()
     })
 
     // data listener
@@ -548,6 +592,8 @@ export class MicroPythonDevice {
   }
 
   public async disconnect() {
+    if (this.isProxyConnection()) return
+
     if (this.isSerialDevice()) {
       await this.state.port.close()
       this.state.connectionState = ConnectionState.CLOSED
@@ -581,7 +627,15 @@ export class MicroPythonDevice {
     if (!options.disableDedent) script = dedent(script)
     if (options.runGcCollectBeforeCommand) script = "import gc; gc.collect();\n" + script
 
-    debug('runScript\n', script)
+    debug(`runScript\n${script}`)
+
+    if (this.isProxyConnection()) {
+      debug('run over api')
+      const resp = await fetch('http://localhost:3000/api/run-script/', { method: 'POST', body: script })
+      if (resp.status !== 200) throw new ScriptExecutionError(`Could not run script via api: status=${resp.status}`)
+      const c = await resp.text()
+      return c
+    }
 
     await this.enterRawRepl()
     debug('runScript: raw mode entered')
@@ -807,7 +861,8 @@ export class MicroPythonDevice {
 
     this.createReplPromise()
     const dataHex = data.toString('hex')
-    const chunkSize = this.isSerialDevice() ? 256 : 64
+    // const chunkSize = this.isSerialDevice() ? 256 : 64
+    const chunkSize = this.isProxyConnection() ? 5000 : this.isSerialDevice() ? 3000 : 64
 
     const script1 = `import ubinascii; f = open('${targetFilename}', 'wb')`
     await this.runScript(script1, { stayInRawRepl: true }) // keeps raw repl open for next instruction

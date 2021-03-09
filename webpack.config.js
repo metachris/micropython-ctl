@@ -17,7 +17,7 @@ module.exports = {
   resolve: {
     extensions: [ '.tsx', '.ts', '.js' ],
   },
-  externals: ['serialport', 'crypto'],
+  externals: ['serialport', 'crypto', 'express', 'body-parser'],
   output: {
     filename: 'main.js',
     path: path.resolve(__dirname, 'dist-browser'),

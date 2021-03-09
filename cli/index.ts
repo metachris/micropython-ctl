@@ -130,6 +130,10 @@ const ensureConnectedDevice = async () => {
       if (!_pass) throw new Error('No webrepl password supplied')
       await micropython.connectNetwork(_host, _pass)
     }
+
+    if (micropython.isProxyConnection()) {
+      logVerbose('Connected to an already running instance over REST API at localhost:3000/api/')
+    }
   } catch (e) {
     logError('Could not connect:', e.toString())
     process.exit(1)
