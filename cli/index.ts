@@ -82,7 +82,7 @@ const listSerialDevices = async () => {
  * 2. MCTL_TTY or AMPY_PORT -> serial connection
  * 3. MCTL_HOST or WEBREPL_HOST -> network connection
  */
-const ensureConnectedDevice = async () => {
+const ensureConnectedDevice = async (startWebserver = false) => {
   const opts = program.opts()
   const tty = opts.tty
   const host = opts.host
@@ -121,7 +121,7 @@ const ensureConnectedDevice = async () => {
 
       const device = await getSerialDevice()
       if (doPrint) logVerbose(`Connecting over serial to: ${device}`)
-      await micropython.connectSerial(device)
+      await micropython.connectSerial(device, startWebserver)
 
     } else {
       const _host = host || envMctlHost || envWebreplHost
@@ -543,7 +543,7 @@ const mountCommand = async (targetPath) => {
 
 const repl = async () => {
   try {
-    await ensureConnectedDevice()
+    await ensureConnectedDevice(true)
 
     micropython.onclose = () => process.exit(0)
     micropython.onTerminalData = (data) => process.stdout.write(data)

@@ -5,6 +5,7 @@ import { WEBSERVER_PORT } from './settings';
 
 const app = express()
 app.use(bodyParser.text());
+let server;
 
 let _device: MicroPythonDevice | null = null
 
@@ -25,9 +26,13 @@ app.post('/api/run-script', async (req, res) => {
   res.send(scriptResponse)
 })
 
+export const close = async () => {
+  server?.close()
+}
+
 export const run = async (device: MicroPythonDevice) => {
   _device = device
-  app.listen(WEBSERVER_PORT)
+  server = app.listen(WEBSERVER_PORT)
 }
 
 if (require.main === module) {

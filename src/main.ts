@@ -14,11 +14,15 @@ import { WEBSERVER_PORT } from './settings';
 
 export { InvalidPassword, CouldNotConnect, ScriptExecutionError }  // allows easy importing from user scripts
 
+// Importing the following modules only if possible (won't be if run in browser)
 let fetch: any;
+let webserver: any;
 try {
   // tslint:disable-next-line: no-var-requires
   fetch = require('node-fetch')
-// tslint:disable-next-line: no-empty
+  // tslint:disable-next-line: no-var-requires
+  webserver = require('./webserver')
+  // tslint:disable-next-line: no-empty
 } catch {}
 
 const delayMillis = (delayMs: number) => new Promise(resolve => setTimeout(resolve, delayMs));
@@ -226,7 +230,7 @@ export class MicroPythonDevice {
   }
 
   public async startInternalWebserver() {
-    const webserver = require('./webserver')
+    debug('startInternalWebserver...')
     webserver.run(this)
   }
 
@@ -236,7 +240,7 @@ export class MicroPythonDevice {
    * @param path Serial interface (eg. `/dev/ttyUSB0`, `/dev/tty.SLAB_USBtoUART`, ...)
    * @throws {CouldNotConnect} Connection failed
    */
-  public async connectSerial(path: string) {
+  public async connectSerial(path: string, startWebserver = false) {
     debug('connectSerial', path)
     this.state.connectionPath = `serial:${path}`
 
@@ -289,7 +293,8 @@ export class MicroPythonDevice {
       this.state.replMode = ReplMode.TERMINAL
       this.clearBuffer()
       if (this.state.replPromiseResolve) this.state.replPromiseResolve('')
-      this.startInternalWebserver()
+
+      if (startWebserver) this.startInternalWebserver()
     })
 
     // data listener
@@ -593,6 +598,8 @@ export class MicroPythonDevice {
   }
 
   public async disconnect() {
+    try { webserver.close() } catch {}
+
     if (this.isProxyConnection()) return
 
     if (this.isSerialDevice()) {
