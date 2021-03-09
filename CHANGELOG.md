@@ -1,4 +1,4 @@
-next
+beta
 ----
 * `mctl put <filename> --changed-only`: flag to check hash and upload only if changed (useful for large files, downside it needs to calculate the hash before uploading)
 * `mctl repl` opens a webserver to allow other `mctl` processes to run scripts reusing that session
