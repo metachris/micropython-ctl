@@ -21,7 +21,7 @@ app.get('/api', (_req, res) => {
 })
 
 app.post('/api/run-script', async (req, res) => {
-  console.log('runscript', req.body)
+  // console.log('runscript', req.body)
   if (!req.body) { return res.status(400).send({ success: false, error: 'no script in request body' })}
 
   try {

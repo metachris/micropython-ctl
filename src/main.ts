@@ -12,7 +12,7 @@ import { debug, dedent } from './utils';
 import * as PythonScripts from './python-scripts';
 import { WEBSERVER_PORT } from './settings';
 
-export { InvalidPassword, CouldNotConnect, ScriptExecutionError }  // allows easy importing from user scripts
+export { InvalidPassword, CouldNotConnect, ScriptExecutionError, WEBSERVER_PORT }  // allows easy importing from user scripts
 
 // Importing the following modules only if possible (won't be if run in browser)
 let fetch: any;
@@ -229,6 +229,7 @@ export class MicroPythonDevice {
     return this.state.replPromise
   }
 
+  /** The internal webserver is used to proxy runScript commands over an existing connection */
   public async startInternalWebserver() {
     debug('startInternalWebserver...')
     if (webserver) webserver.run(this)
@@ -240,7 +241,7 @@ export class MicroPythonDevice {
    * @param path Serial interface (eg. `/dev/ttyUSB0`, `/dev/tty.SLAB_USBtoUART`, ...)
    * @throws {CouldNotConnect} Connection failed
    */
-  public async connectSerial(path: string, startWebserver = false) {
+  public async connectSerial(path: string) {
     debug('connectSerial', path)
     this.state.connectionPath = `serial:${path}`
 
@@ -257,10 +258,8 @@ export class MicroPythonDevice {
 
     // error listener
     this.state.port.on('error', async (err: string) => {
-      const msg = err.toString()
-
-      // On connection error, try proxy mode (connect to REST API of existing instance)
-      if (this.state.connectionState === ConnectionState.CONNECTING && msg.includes('Resource temporarily unavailable')) {
+      // On connection-error: try proxy mode (connect to REST API of an existing instance)
+      if (this.state.connectionState === ConnectionState.CONNECTING && err.toString().includes('Resource temporarily unavailable')) {
         const resp = await fetch(`http://localhost:${WEBSERVER_PORT}/api/`)
         // console.log('resp', resp)
         if (resp.status === 200) {
@@ -279,7 +278,7 @@ export class MicroPythonDevice {
 
       if (this.state.replPromiseReject) {
         debug(err)
-        const e = this.state.connectionState === ConnectionState.CONNECTING ? new CouldNotConnect(msg) : err
+        const e = this.state.connectionState === ConnectionState.CONNECTING ? new CouldNotConnect(err.toString()) : err
         this.state.replPromiseReject(e)
       } else {
         throw err
@@ -293,8 +292,6 @@ export class MicroPythonDevice {
       this.state.replMode = ReplMode.TERMINAL
       this.clearBuffer()
       if (this.state.replPromiseResolve) this.state.replPromiseResolve('')
-
-      if (startWebserver) this.startInternalWebserver()
     })
 
     // data listener
@@ -542,9 +539,9 @@ export class MicroPythonDevice {
 
             if (this.state.errorBuffer.length > 0 && this.state.replPromiseReject) {
               // Handle error result. Also needs to exit raw repl.
+              this.state.replPromiseReject(new ScriptExecutionError(this.state.errorBuffer))
               this.clearBuffer()
               await this.exitRawRepl()
-              this.state.replPromiseReject(new ScriptExecutionError(this.state.errorBuffer))
 
             } else if (this.state.replPromiseResolve) {
               this.state.replPromiseResolve(this.state.inputBuffer)

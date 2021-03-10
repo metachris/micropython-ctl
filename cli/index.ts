@@ -30,7 +30,7 @@ import readline from 'readline'
 import { Buffer } from 'buffer/'
 import SerialPort from 'serialport';
 import { Command } from 'commander';
-import { ScriptExecutionError, MicroPythonDevice, ConnectionMode } from '../src/main';
+import { ScriptExecutionError, MicroPythonDevice, WEBSERVER_PORT } from '../src/main';
 import { delayMillis } from '../src/utils';
 import { humanFileSize } from './utils';
 import { getTmpFilename, globToRegExp } from '../src/utils-node';
@@ -76,13 +76,18 @@ const listSerialDevices = async () => {
   return devices.filter(device => device.manufacturer || device.serialNumber || device.vendorId)
 }
 
+interface EnsureConnectedDeviceOptions {
+  startWebserver?: boolean
+  // canUseProxy?: boolean
+}
+
 /**
  * Auto-connect priorities:
  * 1. --host or --tty option
  * 2. MCTL_TTY or AMPY_PORT -> serial connection
  * 3. MCTL_HOST or WEBREPL_HOST -> network connection
  */
-const ensureConnectedDevice = async (startWebserver = false) => {
+const ensureConnectedDevice = async (options?: EnsureConnectedDeviceOptions) => {
   const opts = program.opts()
   const tty = opts.tty
   const host = opts.host
@@ -121,7 +126,8 @@ const ensureConnectedDevice = async (startWebserver = false) => {
 
       const device = await getSerialDevice()
       if (doPrint) logVerbose(`Connecting over serial to: ${device}`)
-      await micropython.connectSerial(device, startWebserver)
+      await micropython.connectSerial(device)
+      if (options?.startWebserver) micropython.startInternalWebserver()
 
     } else {
       const _host = host || envMctlHost || envWebreplHost
@@ -132,7 +138,7 @@ const ensureConnectedDevice = async (startWebserver = false) => {
     }
 
     if (micropython.isProxyConnection()) {
-      logVerbose('Connected to an already running instance over REST API at localhost:3000/api/')
+      logVerbose(`Reusing an existing instance via http://localhost:${WEBSERVER_PORT}/api/`)
     }
   } catch (e) {
     logError('Could not connect:', e.toString())
@@ -544,7 +550,7 @@ const mountCommand = async (targetPath) => {
 
 const repl = async () => {
   try {
-    await ensureConnectedDevice(true)
+    await ensureConnectedDevice({ startWebserver: true })
 
     micropython.onclose = () => process.exit(0)
     micropython.onTerminalData = (data) => process.stdout.write(data)

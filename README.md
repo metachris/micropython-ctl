@@ -187,9 +187,10 @@ I'm happy about feedback, please reach out:
 
 Code library:
 
-* Improve webserver/node-fetch import (currently require in try..catch to not fail in browser): https://github.com/metachris/micropython-ctl/blob/proxy-mode/src/main.ts#L17
+* Benchmark putFile vs. ampy, rshell, webrepl, pymakr
 * webserver for runscript
   * putFile calls `runScript` multiple times with `stayInRawRepl` option
+* Improve webserver/node-fetch import (currently require in try..catch to not fail in browser): https://github.com/metachris/micropython-ctl/blob/proxy-mode/src/main.ts#L17
 * [WebSerial](https://web.dev/serial/) integration, to allow browser version to connect to serial (see [MDN docs](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/serial))
 * put/get
   * via network: switch to webrepl protocol instead of manual up- and download
@@ -276,6 +277,7 @@ yarn publish --tag beta
 git push && git push --tags
 ```
 
+Perhaps update the `mctl` npm package too (using `cli/package.json`).
 
 Update live web examples with code from Github `master` branch:
 
