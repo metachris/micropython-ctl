@@ -232,11 +232,12 @@
 				</a>
 				<p>Code library:</p>
 				<ul>
-					<li>Improve webserver/node-fetch import (currently require in try..catch to not fail in browser): <a href="https://github.com/metachris/micropython-ctl/blob/proxy-mode/src/main.ts#L17">https://github.com/metachris/micropython-ctl/blob/proxy-mode/src/main.ts#L17</a></li>
+					<li>Benchmark putFile vs. ampy, rshell, webrepl, pymakr</li>
 					<li>webserver for runscript<ul>
 							<li>putFile calls <code>runScript</code> multiple times with <code>stayInRawRepl</code> option</li>
 						</ul>
 					</li>
+					<li>Improve webserver/node-fetch import (currently require in try..catch to not fail in browser): <a href="https://github.com/metachris/micropython-ctl/blob/proxy-mode/src/main.ts#L17">https://github.com/metachris/micropython-ctl/blob/proxy-mode/src/main.ts#L17</a></li>
 					<li><a href="https://web.dev/serial/">WebSerial</a> integration, to allow browser version to connect to serial (see <a href="https://developer.mozilla.org/en-US/docs/Web/API/Navigator/serial">MDN docs</a>)</li>
 					<li>put/get<ul>
 							<li>via network: switch to webrepl protocol instead of manual up- and download</li>
@@ -330,6 +331,7 @@
 <span style="color: #008000"># push to git</span>
 <span style="color: #000000">git push &amp;&amp; git push --tags</span>
 </code></pre>
+				<p>Perhaps update the <code>mctl</code> npm package too (using <code>cli/package.json</code>).</p>
 				<p>Update live web examples with code from Github <code>master</code> branch:</p>
 				<pre><code><span style="color: #001080">ssh</span><span style="color: #000000"> </span><span style="color: #001080">nova</span><span style="color: #000000"> </span><span style="color: #A31515">&quot;cd /server/websites/current.at/micropython-ctl &amp;&amp; git pull&quot;</span>
 </code></pre>
