@@ -187,6 +187,10 @@ I'm happy about feedback, please reach out:
 
 Code library:
 
+* Improve webserver/node-fetch import (currently require in try..catch to not fail in browser): https://github.com/metachris/micropython-ctl/blob/proxy-mode/src/main.ts#L17
+* webserver for runscript
+  * putFile calls `runScript` multiple times with `stayInRawRepl` option
+* [WebSerial](https://web.dev/serial/) integration, to allow browser version to connect to serial (see [MDN docs](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/serial))
 * put/get
   * via network: switch to webrepl protocol instead of manual up- and download
   * `getFile` via serial improvement - currently it fills the device RAM and probably works badly with large file
@@ -194,7 +198,7 @@ Code library:
 
 `mctl`:
 
-* sync: only if files changed (build md5 hashes for all files, and upload only if different)
+* `sync`: upload/delete files as needed (build hashes for all files, and upload only if different, delete if absent locally)
 * ⚠ Check for issues when alternating `mctl` and pymakr
 * uploading files that have changed since last upload
 * flash-erase, flash-backup, flash-restore
@@ -262,8 +266,11 @@ yarn version
 yarn pack && tar -xvf micropython-ctl-v* && ll package/
 rm -rf package/ micropython-ctl-v*
 
-# publish
+# publish 'latest'
 yarn publish
+
+# or publish 'beta'
+yarn publish --tag beta
 
 # push to git
 git push && git push --tags

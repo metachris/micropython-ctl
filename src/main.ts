@@ -474,7 +474,7 @@ export class MicroPythonDevice {
   /**
    * Handle incoming data
    */
-  private handleProtocolData(data: Buffer) {
+  private async handleProtocolData(data: Buffer) {
     // debug('handleProtocolData:', data)
 
     // Special protocol modes: GET_VER, GET_FILE, PUT_FILE
@@ -541,7 +541,11 @@ export class MicroPythonDevice {
             this.state.rawReplState = RawReplState.WAITING_FOR_INPUT
 
             if (this.state.errorBuffer.length > 0 && this.state.replPromiseReject) {
+              // Handle error result. Also needs to exit raw repl.
+              this.clearBuffer()
+              await this.exitRawRepl()
               this.state.replPromiseReject(new ScriptExecutionError(this.state.errorBuffer))
+
             } else if (this.state.replPromiseResolve) {
               this.state.replPromiseResolve(this.state.inputBuffer)
             }
@@ -643,9 +647,16 @@ export class MicroPythonDevice {
     if (this.isProxyConnection()) {
       debug('run over api')
       const resp = await fetch(`http://localhost:${WEBSERVER_PORT}/api/run-script/`, { method: 'POST', body: script })
-      if (resp.status !== 200) throw new ScriptExecutionError(`Could not run script via api: status=${resp.status}`)
-      const c = await resp.text()
-      return c
+      const content = await resp.text()
+
+      if (resp.status === 512) {
+        // ScriptExecutionError
+        throw new ScriptExecutionError(content)
+
+      } else if (resp.status !== 200) {
+        throw new ScriptExecutionError(`Could not run script via api: status=${resp.status} ${content}`)
+      }
+      return content
     }
 
     await this.enterRawRepl()
@@ -724,6 +735,7 @@ export class MicroPythonDevice {
 
   private async exitRawRepl() {
     // console.log('exitRawRepl')
+    if (this.state.replMode !== ReplMode.SCRIPT_RAW_MODE) return
     this.state.rawReplState = RawReplState.CHANGING_TO_FRIENDLY_REPL
     const promise = this.createReplPromise()
     this.sendData('\r\x02')

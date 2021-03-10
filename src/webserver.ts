@@ -2,6 +2,7 @@ import express from 'express'
 import bodyParser from 'body-parser'
 import { MicroPythonDevice } from './main'
 import { WEBSERVER_PORT } from './settings';
+import { ScriptExecutionError } from './errors';
 
 const app = express()
 app.use(bodyParser.text());
@@ -22,8 +23,17 @@ app.get('/api', (_req, res) => {
 app.post('/api/run-script', async (req, res) => {
   console.log('runscript', req.body)
   if (!req.body) { return res.status(400).send({ success: false, error: 'no script in request body' })}
-  const scriptResponse = await _device!.runScript(req.body)
-  res.send(scriptResponse)
+
+  try {
+    const scriptResponse = await _device!.runScript(req.body)
+    return res.send(scriptResponse)
+  } catch (e) {
+    if (e instanceof ScriptExecutionError) {
+      return res.status(512).send(e.message)
+    } else {
+      return res.status(500).send(e.message)
+    }
+  }
 })
 
 export const close = async () => {

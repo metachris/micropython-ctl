@@ -4,8 +4,8 @@ With `mctl` you can:
 
 * Connect to devices over serial or network (WebREPL)
 * List all serial devices: `mctl devices`
-* Manipulate files and directories
 * Enter the REPL: `mctl repl`
+* Manipulate files and directories: `mctl ls`, `mctl rm`, `mctl put`, `mctl get`
 * Run Python scripts: `mctl run`
 * Mount the device into the local filesystem: `mctl mount` (experimental!)
 * More: see `mctl help`
@@ -14,7 +14,9 @@ Code: [cli/index.ts](https://github.com/metachris/micropython-ctl/blob/master/cl
 
 ## Installation
 
-```npm install -g micropython-ctl```
+`mctl` is included in the `micropython-ctl` npm package, and can be installed globally like this:
+
+```npm install -g mctl```
 
 ## Usage
 
