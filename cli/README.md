@@ -5,8 +5,11 @@ With `mctl` you can:
 * Connect to devices over serial or network (WebREPL)
 * List all serial devices: `mctl devices`
 * Enter the REPL: `mctl repl`
-* Manipulate files and directories: `mctl ls`, `mctl rm`, `mctl put`, `mctl get`
-* Run Python scripts: `mctl run`
+* Manipulate files and directories: `mctl ls`, `mctl rm`, `mctl put`, `mctl get`, `mctl mkdir`
+* Synchronize a folder onto the device: `mctl sync` (only uploads changed files)
+* Edit a file and upload if changed: `mctl edit <filename>`
+* Reset the device: `mctl reset`
+* Run Python scripts: `mctl run <script_or_file>`
 * Mount the device into the local filesystem: `mctl mount` (experimental!)
 * More: see `mctl help`
 

@@ -1,9 +1,11 @@
 beta
 ----
 * `mctl sync`: synchronize a directory onto the device. checks file hashes and only uploads changed ones, deletes removed one.
+* `listFiles` can now include sha256 hash
 * `mctl put`: `--changed-only` flag to check hash and upload only if changed (useful for large files, downside it needs to calculate the hash before uploading)
 * `mctl repl` opens a webserver allowing other `mctl` processes to reuse that session for running scripts
-* connect bugfix (switch to readUntil)
+* connect bugfix (implemented `readUntil`)
+* big runScript speed improvements! (tests run in 10s, before 16s)
 
 
 1.11.2 (2021-03-09)
