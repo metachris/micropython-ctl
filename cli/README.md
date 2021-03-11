@@ -10,6 +10,7 @@ With `mctl` you can:
 * Edit a file and upload if changed: `mctl edit <filename>`
 * Reset the device: `mctl reset`
 * Run Python scripts: `mctl run <script_or_file>`
+* Reuse a `mctl repl` connection to run `mctl` commands in another terminal at the same time
 * Mount the device into the local filesystem: `mctl mount` (experimental!)
 * More: see `mctl help`
 
@@ -17,7 +18,7 @@ Code: [cli/index.ts](https://github.com/metachris/micropython-ctl/blob/master/cl
 
 ## Installation
 
-`mctl` is included in the `micropython-ctl` npm package, and can be installed globally like this:
+`mctl` is included in the `micropython-ctl` npm package. As a helper you can also install `mctl` directly:
 
 ```npm install -g mctl```
 
