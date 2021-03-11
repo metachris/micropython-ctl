@@ -113,6 +113,7 @@ export interface FileListEntry {
   isDir: boolean
   size: number,
   mTime: number,
+  sha256?: string
 }
 
 declare const window: WindowWithWebRepl;
@@ -803,20 +804,22 @@ export class MicroPythonDevice {
 
   public async listFiles(directory: string = '/', options: ListFilesOptions = {}): Promise<FileListEntry[]> {
     const recursive = !!options.recursive
+    const includeSha256 = !!options.includeSha256
 
     debug(`listFiles: ${directory}, ${recursive}`)
-    const output = await this.runScript(PythonScripts.ls({ directory, recursive }))
+    const output = await this.runScript(PythonScripts.ls({ directory, recursive, includeSha256 }))
     const lines = output.split('\n')
 
     const ret: FileListEntry[] = []
     for (const line of lines) {
-      const parts = line.split(' | ')
+      const parts = line.trim().split(' | ')
       if (parts[0] === '') continue
       ret.push({
         filename: parts[0],
         size: parseInt(parts[2], 10),
         isDir: parts[1] === 'd',
-        mTime: parseInt(parts[3], 10)
+        mTime: parseInt(parts[3], 10),
+        sha256: parts[4]
       })
     }
     return ret
@@ -1052,6 +1055,7 @@ export class MicroPythonDevice {
 
 export interface ListFilesOptions {
   recursive?: boolean
+  includeSha256?: boolean
 }
 
 export interface RunScriptOptions {

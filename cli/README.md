@@ -91,7 +91,11 @@ mctl info
 mctl repl
 
 # List files
-mctl ls -r
+mctl ls  # list all files in /
+mctl ls foo/  # list all files in /foo/
+mctl ls -r  # recursively list all files and directories
+mctl ls -r --json  # output as json
+mctl ls -r --include-hash --json  # output as json, include sha256 hash of each file
 
 # Print contents of boot.py
 mctl cat boot.py
@@ -114,6 +118,35 @@ mctl put "*.py"
 
 # Upload everything recursively
 mctl put .
+```
+
+#### Example Output
+
+`ls -r --json --include-hash`:
+
+```json
+[
+    {
+        "filename": "/",
+        "size": 0,
+        "isDir": true,
+        "mTime": 0
+    },
+    {
+        "filename": "/boot.py",
+        "size": 139,
+        "isDir": false,
+        "mTime": 0,
+        "sha256": "16f5b4bcb120e9a032242b47967e649a0cc577b41939e81ef7d4b4da181bd17f"
+    },
+    {
+        "filename": "/main.py",
+        "size": 1810,
+        "isDir": false,
+        "mTime": 14,
+        "sha256": "936d92994d0b86eb0e60efd053e12d009d718af3894d7f5c16303b1d7c526306"
+    }
+]
 ```
 
 #### Experimental

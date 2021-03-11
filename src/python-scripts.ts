@@ -1,6 +1,6 @@
 // https://github.com/scientifichackers/ampy/blob/master/ampy/files.py#L88
-export const ls = (args = { directory: "/", recursive: false }) => {
-  const { directory, recursive } = args
+export const ls = (args = { directory: "/", recursive: false, includeSha256: false }) => {
+  const { directory, recursive, includeSha256 } = args
   const finalDir = directory.startsWith("/") ? directory : "/" + directory
 
   let command = `
@@ -9,6 +9,36 @@ try:
 except ImportError:
     import uos as os
 `
+
+  if (includeSha256) {
+    command += `
+import sys
+import ubinascii
+import uhashlib
+def get_file_stats(filename):
+    stat = os.stat(filename)
+    size = stat[6]
+    mtime = stat[8]
+
+    hasher = uhashlib.sha256()
+    with open(filename, 'rb') as infile:
+        while True:
+            result = infile.read(32)
+            if result == b'':
+                break
+            hasher.update(result)
+    sha256 = ubinascii.hexlify(hasher.digest())
+    return (size, mtime, sha256.decode())
+`
+  } else {
+    command += `
+def get_file_stats(filename):
+    stat = os.stat(filename)
+    size = stat[6]
+    mtime = stat[8]
+    return (size, mtime, '')
+`
+  }
 
   if (recursive) {
     command += `
@@ -20,11 +50,11 @@ def listdir(directory):
             children = os.listdir(dir_or_file)
         except OSError:
             # probably a file. run stat() to confirm.
-            stat = os.stat(dir_or_file)
-            result.add((dir_or_file, False, stat[6], stat[8]))
+            file_stats = get_file_stats(dir_or_file)
+            result.add((dir_or_file, False) + file_stats)
         else:
             # probably a directory, add to result if empty.
-            result.add((dir_or_file, True, 0, 0))
+            result.add((dir_or_file, True, 0, 0, ''))
             if children:
                 # queue the children to be dealt with in next iteration.
                 for child in children:
@@ -43,21 +73,18 @@ def listdir(directory):
 def listdir(directory):
     files = os.ilistdir(directory)
     out = []
-    for (filename, filetype, inode, size) in files:
+    for (filename, filetype, inode, _) in files:
         fn_full = "/" + filename if directory == '/' else directory + '/' + filename
-        _stat = os.stat(fn_full)
-        if size == -1:
-            size = _stat[6]
+        file_stats = get_file_stats(fn_full)
         isdir = filetype == 0x4000
-        mtime = _stat[8]
-        out.append((fn_full, isdir, size, mtime))
+        out.append((fn_full, isdir) + file_stats)
     return sorted(out)
 `
   }
 
   command += `
-for (filename, isdir, size, mtime) in listdir('${finalDir}'):
-    print("%s | %s | %s | %s" % (filename, 'd' if isdir else 'f', size, mtime))
+for (filename, isdir, size, mtime, sha256) in listdir('${finalDir}'):
+    print("%s | %s | %s | %s | %s" % (filename, 'd' if isdir else 'f', size, mtime, sha256))
 #
 `
 

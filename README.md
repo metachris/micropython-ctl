@@ -209,7 +209,7 @@ Code library:
 
 Tests:
 
-* `getFileHash`, `isFileTheSame`
+* `getFileHash`, `isFileTheSame`, `listFiles` with and without hash
 * Tests for `mctl` commands: `get -r .`, `put -r .`, ..
 * automated browser testing (selenium [[1](https://developer.mozilla.org/en-US/docs/Learn/Tools_and_testing/Cross_browser_testing/Your_own_automation_environment)])
 * Run tests against a local micropython instance in CI (eg by using [utelnetserver](https://github.com/cpopp/MicroTelnetServer) to connect serial-like (webrepl is not available in host builds))

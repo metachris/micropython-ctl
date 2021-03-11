@@ -153,11 +153,11 @@ const cmdListDevices = async () => {
 
 // mctl ls [-r]
 const listFilesOnDevice = async (directory = '/', cmdObj) => {
-  // console.log('listFilesOnDevice', directory)
+  // console.log('listFilesOnDevice', directory, cmdObj)
   await ensureConnectedDevice()
 
   try {
-    const files = await micropython.listFiles(directory, { recursive: cmdObj.recursive })
+    const files = await micropython.listFiles(directory, { recursive: cmdObj.recursive, includeSha256: !!cmdObj.includeHash })
     if (cmdObj.json) {
       // Output in JSON
       const s = JSON.stringify(files, null, 4)
@@ -620,7 +620,9 @@ program
   .command('ls [directory]')
   .option('-r, --recursive', 'List recursively')
   .option('-j, --json', 'Output JSON')
-  .description('List files on a device').action(listFilesOnDevice);
+  .option('--include-hash', 'Include sha256 hash of each file')
+  .description('List files on a device')
+  .action(listFilesOnDevice);
 
 // Command: cat
 program
