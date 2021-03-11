@@ -642,8 +642,10 @@ export class MicroPythonDevice {
     debug(`runScript\n${script}`)
 
     if (this.isProxyConnection()) {
-      debug('run over api')
-      const resp = await fetch(`http://localhost:${WEBSERVER_PORT}/api/run-script/`, { method: 'POST', body: script })
+      let url = `http://localhost:${WEBSERVER_PORT}/api/run-script/`
+      if (options.stayInRawRepl) url += `?stayInRawRepl=1`
+      debug('run over api', url)
+      const resp = await fetch(url, { method: 'POST', body: script })
       const content = await resp.text()
 
       if (resp.status === 512) {

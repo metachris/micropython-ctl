@@ -1,6 +1,6 @@
 import express from 'express'
 import bodyParser from 'body-parser'
-import { MicroPythonDevice } from './main'
+import { MicroPythonDevice, RunScriptOptions } from './main'
 import { WEBSERVER_PORT } from './settings';
 import { ScriptExecutionError } from './errors';
 
@@ -21,11 +21,15 @@ app.get('/api', (_req, res) => {
 })
 
 app.post('/api/run-script', async (req, res) => {
-  // console.log('runscript', req.body)
+  // console.log('runscript', req.query)
   if (!req.body) { return res.status(400).send({ success: false, error: 'no script in request body' })}
 
+  const options: RunScriptOptions = {
+    stayInRawRepl: req.query.stayInRawRepl
+  }
+
   try {
-    const scriptResponse = await _device!.runScript(req.body)
+    const scriptResponse = await _device!.runScript(req.body, options)
     return res.send(scriptResponse)
   } catch (e) {
     if (e instanceof ScriptExecutionError) {
