@@ -9,6 +9,13 @@ export const debug = (...args: any) => {
   }
 }
 
+// deepdebug, set DEBUG=2
+export const debug2 = (...args: any) => {
+  if (process.env.DEBUG === '2' || (typeof window !== 'undefined' && (window as any).DEBUG === '2')) {
+    console.log(...args)
+  }
+}
+
 export const delayMillis = (delayMs: number) => new Promise(resolve => setTimeout(resolve, delayMs));
 
 /**

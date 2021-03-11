@@ -512,8 +512,24 @@ const reset = async (cmdObj) => {
   process.exit(0)
 }
 
+const sync = async () => {
+  // logVerbose('sync')
+
+  try {
+    await ensureConnectedDevice()
+    console.log('Getting file list...')
+    const files = await micropython.listFiles('/', { recursive: true, includeSha256: true })
+    console.log(files)
+  } catch (e) {
+    console.error('Error:', e)
+    process.exit(1)
+  } finally {
+    await micropython.disconnect()
+  }
+}
+
 const sha256hash = async (filename) => {
-  logVerbose('sha256hash', filename)
+  // logVerbose('sha256hash', filename)
 
   try {
     await ensureConnectedDevice()
@@ -680,6 +696,12 @@ program
   .option('--soft', 'soft-reset instead of hard-reset')
   .description('Reset the MicroPython device')
   .action(reset);
+
+// Command: sync
+program
+  .command('sync')
+  .description('Sync a local directory onto the device (upload new/changes files, delete missing)')
+  .action(sync);
 
 // Command: mount
 program

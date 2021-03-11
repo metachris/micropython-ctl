@@ -8,7 +8,7 @@
 import WebSocket from 'isomorphic-ws'
 import { Buffer } from 'buffer/'
 import { InvalidPassword, CouldNotConnect, ScriptExecutionError } from './errors'
-import { debug, dedent } from './utils';
+import { debug, debug2, dedent } from './utils';
 import * as PythonScripts from './python-scripts';
 import { WEBSERVER_PORT } from './settings';
 
@@ -49,11 +49,10 @@ export enum ReplMode {
 }
 
 export enum RawReplState {
-  ENTERING = 'ENTERING',
-  WAITING_FOR_INPUT = 'WAITING_FOR_INPUT',
+  WAITING_FOR_SCRIPT = 'WAITING_FOR_SCRIPT',
   SCRIPT_SENT = 'SCRIPT_SENT',
   SCRIPT_RECEIVING_RESPONSE = 'SCRIPT_RECEIVING_RESPONSE',
-  CHANGING_TO_FRIENDLY_REPL = 'CHANGING_TO_FRIENDLY_REPL',
+  SCRIPT_EXECUTED = 'SCRIPT_EXECUTED',
 }
 
 enum RawReplReceivingResponseSubState {
@@ -92,6 +91,15 @@ export interface DeviceState {
   broadcastCommandOutputAsTerminalData: boolean
 
   dataRawBuffer: Buffer
+
+  // Helpers for readUntil(..)
+  isReadingUntil: boolean
+  readUntilData: Buffer
+  readUntilBuffer: Buffer
+  readUntilTimeout: any
+  readUntilPromise: Promise<string> | null;  // helper to await command executions
+  readUntilPromiseResolve: promiseResolve | null
+  readUntilPromiseReject: promiseReject | null
 
   lastRunScriptTimeNeeded: number
   receivingResponseSubState: RawReplReceivingResponseSubState
@@ -181,11 +189,19 @@ export class MicroPythonDevice {
       broadcastCommandOutputAsTerminalData: false,
       dataRawBuffer: new Buffer(0),
 
+      isReadingUntil: false,
+      readUntilData: new Buffer(0),
+      readUntilBuffer: new Buffer(0),
+      readUntilPromise: null,
+      readUntilPromiseResolve: null,
+      readUntilPromiseReject: null,
+      readUntilTimeout: null,
+
       replPromise: null,
       replPromiseResolve: null,
       replPromiseReject: null,
 
-      rawReplState: RawReplState.WAITING_FOR_INPUT,
+      rawReplState: RawReplState.WAITING_FOR_SCRIPT,
       lastRunScriptTimeNeeded: -1,
       receivingResponseSubState: RawReplReceivingResponseSubState.SCRIPT_RECEIVING_ERROR,
 
@@ -470,14 +486,48 @@ export class MicroPythonDevice {
   }
 
   /**
+   * Returns a promise that is resolved if `data` is received within `timeout` seconds,
+   * otherwise rejected
+   */
+  private async readUntil(data: Buffer | string, timeout = 10) {
+    this.state.readUntilData = Buffer.isBuffer(data) ? data : Buffer.from(data)
+    this.state.readUntilBuffer = new Buffer(0)
+    this.state.isReadingUntil = true
+
+    // Create promise
+    this.state.readUntilPromise = new Promise((resolve, reject) => {
+      this.state.readUntilPromiseResolve = resolve
+      this.state.readUntilPromiseReject = reject
+    })
+
+    // Set cancel timeout
+    this.state.readUntilTimeout = setTimeout(() => {
+      if (this.state.isReadingUntil && this.state.readUntilPromiseReject) this.state.readUntilPromiseReject(`Error: timeout in readUntil '${data}'`)
+    }, timeout * 1000)
+
+    // Return the promise
+    return this.state.readUntilPromise
+  }
+
+  /**
    * Handle incoming data
    */
   private async handleProtocolData(data: Buffer) {
-    // debug('handleProtocolData:', data)
+    // debug2('handleProtocolData:', data)
 
     // Special protocol modes: GET_VER, GET_FILE, PUT_FILE
     if (this.state.replMode === ReplMode.GETVER_WAITING_RESPONSE) {
       return this.handlProtocolSpecialCommandsOutput(data)
+    }
+
+    if (this.state.isReadingUntil) {
+      this.state.readUntilBuffer = Buffer.concat([this.state.readUntilBuffer, data])
+      if (this.state.readUntilBuffer.includes(this.state.readUntilData)) {
+        debug2('Resolving readingUntilPromise')
+        clearTimeout(this.state.readUntilTimeout)
+        this.state.isReadingUntil = false
+        this.state.readUntilPromiseResolve!('')
+      }
     }
 
     // If in terminal mode, just pass terminal on to user defined handler
@@ -492,17 +542,10 @@ export class MicroPythonDevice {
     // Perpare strings for easy access
     const dataStr = this.state.dataRawBuffer.toString()
     const dataTrimmed = dataStr.trim()
-    // debug('handleProtocolData', data, '=>', dataStr)
+    debug2('handleProtocolData', data, '=>', dataStr)
 
-    // Handle RAW_MODE data (entering, receiving response, receiving error, waiting for end, changing back to friendly repl)
+    // Handle RAW_MODE data (receiving response, receiving error, waiting for end, changing back to friendly repl)
     if (this.state.replMode === ReplMode.SCRIPT_RAW_MODE) {
-      if (this.state.rawReplState === RawReplState.ENTERING && dataTrimmed.endsWith(`raw REPL; CTRL-B to exit\r\n>`)) {
-        this.state.replMode = ReplMode.SCRIPT_RAW_MODE
-        this.clearBuffer()
-        if (this.state.replPromiseResolve) this.state.replPromiseResolve('')
-        return
-      }
-
       if (this.state.rawReplState === RawReplState.SCRIPT_SENT) {
         // After script is sent, we wait for OK, then stdout_output, then \x04, then stderr_output
         // OK[ok_output]\x04[error_output][x04]>
@@ -536,17 +579,18 @@ export class MicroPythonDevice {
             this.state.inputBuffer = this.state.inputBuffer.trim()
             this.state.errorBuffer = this.state.errorBuffer.trim()
             // console.log('END', this.state.inputBuffer, this.state.errorBuffer)
-            this.state.rawReplState = RawReplState.WAITING_FOR_INPUT
+            this.state.rawReplState = RawReplState.SCRIPT_EXECUTED
+            await this.exitRawRepl()
 
             if (this.state.errorBuffer.length > 0 && this.state.replPromiseReject) {
               // Handle error result. Also needs to exit raw repl.
               this.state.replPromiseReject(new ScriptExecutionError(this.state.errorBuffer))
-              this.clearBuffer()
-              await this.exitRawRepl()
 
             } else if (this.state.replPromiseResolve) {
               this.state.replPromiseResolve(this.state.inputBuffer)
             }
+
+            this.clearBuffer()
 
           } else {
             // Incoming data (stdout or stderr output). Just add to buffer
@@ -560,15 +604,6 @@ export class MicroPythonDevice {
               this.state.errorBuffer += char
             }
           }
-        }
-
-      } else if (this.state.rawReplState === RawReplState.CHANGING_TO_FRIENDLY_REPL) {
-        // After executing a command, we change back to friendly repl (via exitRawRepl())
-        if (dataTrimmed.endsWith('>>>')) {
-          // debug('__ back in friendly repl mode')
-          this.state.rawReplState = RawReplState.WAITING_FOR_INPUT
-          this.state.replMode = ReplMode.TERMINAL
-          if (this.state.replPromiseResolve) this.state.replPromiseResolve('')
         }
       }
     }
@@ -693,53 +728,45 @@ export class MicroPythonDevice {
 
     // wait for script execution
     const scriptOutput = await promise
-    debug(scriptOutput)
+    debug('output', scriptOutput)
 
     const millisRuntime = Math.round(Date.now() - millisStart)
     debug(`runScript: script done (${millisRuntime / 1000}sec)`)
     this.state.lastRunScriptTimeNeeded = millisRuntime
 
-    if (options.stayInRawRepl) {
-      // Stay in raw repl; clear the buffer now
-      this.clearBuffer()
-    } else {
-      // Exit raw repl mode, re-enter friendly repl
-      await this.exitRawRepl()
-    }
+    // await this.exitRawRepl()
 
     return scriptOutput
   }
 
   private async enterRawRepl() {
     // see also https://github.com/scientifichackers/ampy/blob/master/ampy/pyboard.py#L175
-    // Prepare state for mode switch
-    debug('enterRawRepl')
+    // debug('enterRawRepl')
     if (this.state.replMode === ReplMode.SCRIPT_RAW_MODE) {
       return debug('enterRawRepl: already in raw repl mode')
     }
 
     this.state.replMode = ReplMode.SCRIPT_RAW_MODE
-    this.state.rawReplState = RawReplState.ENTERING
 
-    const promise = this.createReplPromise()
     // Send ctrl-C twice to interrupt any running program
-    this.sendData('\r\x03')
-    await delayMillis(100) // wait 0.1sec
-    this.sendData('\x03')
-    await delayMillis(100) // wait 0.1sec
-    this.sendData('\x01')  // ctrl+A
-    await delayMillis(100) // wait 0.1sec
+    this.sendData('\r\x03\x03')
+    // await delayMillis(100) // wait 0.1sec
 
-    return promise
+    await this.readUntil('>>>')
+
+    this.sendData('\x01')  // ctrl+A
+    await this.readUntil('raw REPL; CTRL-B to exit\r\n>')
+
+    this.clearBuffer()
+    this.state.rawReplState = RawReplState.WAITING_FOR_SCRIPT
   }
 
   private async exitRawRepl() {
-    // console.log('exitRawRepl')
+    // debug('exitRawRepl')
     if (this.state.replMode !== ReplMode.SCRIPT_RAW_MODE) return
-    this.state.rawReplState = RawReplState.CHANGING_TO_FRIENDLY_REPL
-    const promise = this.createReplPromise()
     this.sendData('\r\x02')
-    return promise
+    await this.readUntil('>>>')
+    this.state.replMode = ReplMode.TERMINAL
   }
 
   /**
