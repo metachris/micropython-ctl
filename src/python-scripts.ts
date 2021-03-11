@@ -75,9 +75,12 @@ def listdir(directory):
     out = []
     for (filename, filetype, inode, _) in files:
         fn_full = "/" + filename if directory == '/' else directory + '/' + filename
-        file_stats = get_file_stats(fn_full)
         isdir = filetype == 0x4000
-        out.append((fn_full, isdir) + file_stats)
+        if isdir:
+            out.append((fn_full, isdir, 0, 0, ''))
+        else:
+            file_stats = get_file_stats(fn_full)
+            out.append((fn_full, isdir) + file_stats)
     return sorted(out)
 `
   }

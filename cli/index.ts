@@ -30,7 +30,7 @@ import readline from 'readline'
 import { Buffer } from 'buffer/'
 import SerialPort from 'serialport';
 import { Command } from 'commander';
-import { ScriptExecutionError, MicroPythonDevice, WEBSERVER_PORT } from '../src/main';
+import { ScriptExecutionError, MicroPythonDevice, WEBSERVER_PORT, FileListEntry } from '../src/main';
 import { delayMillis } from '../src/utils';
 import { humanFileSize } from './utils';
 import { getTmpFilename, globToRegExp } from '../src/utils-node';
@@ -158,7 +158,7 @@ const listFilesOnDevice = async (directory = '/', cmdObj) => {
 
   try {
     const files = await micropython.listFiles(directory, { recursive: cmdObj.recursive, includeSha256: !!cmdObj.includeHash })
-    if (cmdObj.json) {
+    if (cmdObj.json || cmdObj.includeHash) {
       // Output in JSON
       const s = JSON.stringify(files, null, 4)
       console.log(s)
@@ -512,14 +512,90 @@ const reset = async (cmdObj) => {
   process.exit(0)
 }
 
-const sync = async () => {
-  // logVerbose('sync')
-
+const sync = async (directory = './') => {
+  console.log('sync', directory)
   try {
     await ensureConnectedDevice()
-    console.log('Getting file list...')
-    const files = await micropython.listFiles('/', { recursive: true, includeSha256: true })
-    console.log(files)
+    console.log('Getting file list from device...')
+    const filesOnDevice = await micropython.listFiles('/', { recursive: true, includeSha256: true })
+    const filesOnDeviceByFilename: { [fn: string]: FileListEntry } = {}
+    for (const entry of filesOnDevice.reverse()) {
+      if (entry.filename === '/') continue
+      filesOnDeviceByFilename[entry.filename] = entry
+    }
+
+    // console.log(filesOnDeviceByFilename)
+
+    // console.log('Building local file list...')
+    interface FileEntry {
+      filename: string
+      isDir: boolean
+      sha256: string | null
+    }
+    const getFilesInDir = (_dirname) => {
+      const ret: FileEntry[] = []
+
+      for (const _filename of fs.readdirSync(_dirname)) {
+        const fn = path.join(_dirname, _filename)
+        const stat = fs.statSync(fn)
+
+        if (stat.isFile()) {
+          const fileContent = fs.readFileSync(fn)
+          const localHash = crypto.createHash('sha256').update(fileContent).digest('hex')
+          ret.push({ filename: fn, isDir: false, sha256: localHash })
+        } else if (stat.isDirectory()) {
+          ret.push({ filename: fn, isDir: true, sha256: null })
+          const subFiles = getFilesInDir(fn)
+          ret.push(...subFiles)
+        }
+      }
+
+      return ret
+    }
+    const filesLocal = getFilesInDir(directory)
+    // console.log(filesLocal)
+    const filesLocalHashes = {}
+    for (const entry of filesLocal) {
+      filesLocalHashes[entry.filename] = entry
+    }
+
+    // console.log("Computing actions...")
+    // Find files to delete (exist on device but not local)
+    for (const fn in filesOnDeviceByFilename) {
+      if (Object.prototype.hasOwnProperty.call(filesOnDeviceByFilename, fn)) {
+        const fullFn = path.join(directory, fn)
+        if (!filesLocalHashes[fullFn]) {
+          console.log(`delete ${fn} because not existing locally`)
+          await micropython.remove(fn)
+        }
+      }
+    }
+
+    // Find files to upload or update
+    for (const entry of filesLocal) {
+      const rawFn = '/' + entry.filename.substr(directory.length)
+      if (filesOnDeviceByFilename[rawFn]) {
+        if (entry.isDir && filesOnDeviceByFilename[rawFn].isDir) continue
+        const hashOnDevice = filesOnDeviceByFilename[rawFn].sha256
+        if (hashOnDevice !== entry.sha256) {
+          console.log(`upload ${rawFn}`)
+          await micropython.remove(rawFn)
+          const data = Buffer.from(fs.readFileSync(entry.filename))
+          await micropython.putFile(rawFn, data)
+        }
+      } else {
+        if (entry.isDir) {
+          console.log(`create directory ${rawFn}`)
+          await micropython.mkdir(rawFn)
+        } else {
+          console.log(`upload ${rawFn}`)
+          const data = Buffer.from(fs.readFileSync(entry.filename))
+          await micropython.putFile(rawFn, data)
+        }
+      }
+    }
+
+
   } catch (e) {
     console.error('Error:', e)
     process.exit(1)
@@ -699,8 +775,8 @@ program
 
 // Command: sync
 program
-  .command('sync')
-  .description('Sync a local directory onto the device (upload new/changes files, delete missing)')
+  .command('sync [directory]')
+  .description('Sync a local directory onto the device root (upload new/changes files, delete missing)')
   .action(sync);
 
 // Command: mount
