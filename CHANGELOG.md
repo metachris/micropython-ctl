@@ -1,7 +1,9 @@
 beta
 ----
+* `mctl sync`: synchronize a directory onto the device. checks file hashes and only uploads changed ones, deletes removed one.
 * `mctl put`: `--changed-only` flag to check hash and upload only if changed (useful for large files, downside it needs to calculate the hash before uploading)
 * `mctl repl` opens a webserver allowing other `mctl` processes to reuse that session for running scripts
+* connect bugfix (switch to readUntil)
 
 
 1.11.2 (2021-03-09)

@@ -573,7 +573,9 @@ const sync = async (directory = './') => {
 
     // Find files to upload or update
     for (const entry of filesLocal) {
-      const rawFn = '/' + entry.filename.substr(directory.length)
+      let rawFn = entry.filename.substr(directory.length)  // remove local path prefix
+      if (!rawFn.startsWith('/')) rawFn = '/' + rawFn
+
       if (filesOnDeviceByFilename[rawFn]) {
         if (entry.isDir && filesOnDeviceByFilename[rawFn].isDir) continue
         const hashOnDevice = filesOnDeviceByFilename[rawFn].sha256
@@ -735,6 +737,12 @@ program
   .description('Upload a file or directory onto the device')
   .action(put);
 
+// Command: sync
+program
+  .command('sync [directory]')
+  .description('Sync a local directory onto the device root (upload new/changes files, delete missing)')
+  .action(sync);
+
 // Command: edit
 program
   .command('edit <filename>')
@@ -772,12 +780,6 @@ program
   .option('--soft', 'soft-reset instead of hard-reset')
   .description('Reset the MicroPython device')
   .action(reset);
-
-// Command: sync
-program
-  .command('sync [directory]')
-  .description('Sync a local directory onto the device root (upload new/changes files, delete missing)')
-  .action(sync);
 
 // Command: mount
 program

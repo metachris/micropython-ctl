@@ -25,31 +25,32 @@ $ mctl help
 Usage: index [options] [command]
 
 Options:
-  -t, --tty <device>                            Connect over serial interface (eg. /dev/tty.SLAB_USBtoUART)
-  -h, --host <host>                             Connect over network to hostname or IP of device
-  -p, --password <password>                     Password for network device
-  -s, --silent                                  Hide unnecessary output
-  --help                                        display help for command
+  -t, --tty <device>                                      Connect over serial interface (eg. /dev/tty.SLAB_USBtoUART)
+  -h, --host <host>                                       Connect over network to hostname or IP of device
+  -p, --password <password>                               Password for network device
+  -s, --silent                                            Hide unnecessary output
+  --help                                                  display help for command
 
 Commands:
-  devices                                       List serial devices
-  repl                                          Open a REPL terminal
-  run <fileOrCommand>                           Execute a Python file or command
-  info [options]                                Get information about the board (versions, unique id, space, memory)
-  ls [options] [directory]                      List files on a device
-  cat <filename>                                Print content of a file on the device
-  get <file_or_dirname> [out_file_or_dirname]   Download a file or directory from the device. Download everything with 'get /'
-  put <file_or_dirname> [dest_file_or_dirname]  Upload a file or directory onto the device
-  edit <filename>                               Edit a file, and if changed upload afterwards
-  mkdir <name>                                  Create a directory
-  rm [options] <path>                           Delete a file or directory
-  mv <oldPath> <newPath>                        Rename a file or directory
-  sha256 <filename>                             Get the SHA256 hash of a file
-  reset [options]                               Reset the MicroPython device
-  mount [targetPath]                            Mount a MicroPython device (over serial or network)
-  run-tests                                     Run micropython-ctl tests on a device
-  version                                       Print the version of mctl
-  help [command]                                display help for command
+  devices                                                 List serial devices
+  repl                                                    Open a REPL terminal
+  run <fileOrCommand>                                     Execute a Python file or command
+  info [options]                                          Get information about the board (versions, unique id, space, memory)
+  ls [options] [directory]                                List files on a device
+  cat <filename>                                          Print content of a file on the device
+  get <file_or_dirname> [out_file_or_dirname]             Download a file or directory from the device. Download everything with 'get /'
+  put [options] <file_or_dirname> [dest_file_or_dirname]  Upload a file or directory onto the device
+  sync [directory]                                        Sync a local directory onto the device root (upload new/changes files, delete missing)
+  edit <filename>                                         Edit a file, and if changed upload afterwards
+  mkdir <name>                                            Create a directory
+  rm [options] <path>                                     Delete a file or directory
+  mv <oldPath> <newPath>                                  Rename a file or directory
+  sha256 <filename>                                       Get the SHA256 hash of a file
+  reset [options]                                         Reset the MicroPython device
+  mount [targetPath]                                      Mount a MicroPython device (over serial or network)
+  run-tests                                               Run micropython-ctl tests on a device
+  version                                                 Print the version of mctl
+  help [command]                                          display help for command
 ```
 
 
