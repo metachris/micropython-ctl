@@ -1,6 +1,6 @@
 # MicroPython-Ctl: TypeScript ❤️ MicroPython
 
-Talk to MicroPython devices from websites/webapps, Node.js programs, Electron applications, VS Code extensions, and more.
+Talk to MicroPython devices from websites/webapps, Node.js programs, Electron applications, VS Code extensions, the terminal, and more.
 
 [![Build and test status](https://github.com/metachris/micropython-ctl/workflows/Build%20and%20test/badge.svg)](https://github.com/metachris/micropython-ctl/actions?query=workflow%3A%22Build+and+test%22)
 

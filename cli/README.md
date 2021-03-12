@@ -1,7 +1,5 @@
 # `mctl`: Command-line Interface for MicroPython Devices
 
-With `mctl` you can:
-
 * Connect to devices over serial or network (WebREPL)
 * List all serial devices: `mctl devices`
 * Enter the REPL: `mctl repl`
