@@ -1,6 +1,6 @@
 {
   "name": "micropython-ctl",
-  "version": "1.11.2",
+  "version": "1.13.0-beta3",
   "description": "Async TypeScript MicroPython interface (for serial and network connections, REPL & WebREPL)",
   "repository": "https://github.com/metachris/micropython-ctl",
   "browser": "./dist-browser/main.js",
@@ -26,9 +26,12 @@
     "esbuild": "yarn esbuild-node && yarn esbuild-browser"
   },
   "dependencies": {
+    "body-parser": "^1.19.0",
     "buffer": "^6.0.3",
     "commander": "^7.0.0",
+    "express": "^4.17.1",
     "isomorphic-ws": "^4.0.1",
+    "node-fetch": "^2.6.1",
     "serialport": "^9.0.3",
     "ws": "^7.4.1"
   },

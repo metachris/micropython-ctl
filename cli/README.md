@@ -4,9 +4,13 @@ With `mctl` you can:
 
 * Connect to devices over serial or network (WebREPL)
 * List all serial devices: `mctl devices`
-* Manipulate files and directories
 * Enter the REPL: `mctl repl`
-* Run Python scripts: `mctl run`
+* Manipulate files and directories: `mctl ls`, `mctl rm`, `mctl put`, `mctl get`, `mctl mkdir`
+* Synchronize a folder onto the device: `mctl sync` (only uploads changed files)
+* Edit a file and upload if changed: `mctl edit <filename>`
+* Reset the device: `mctl reset`
+* Run Python scripts: `mctl run <script_or_file>`
+* Reuse a `mctl repl` connection to run `mctl` commands in another terminal at the same time
 * Mount the device into the local filesystem: `mctl mount` (experimental!)
 * More: see `mctl help`
 
@@ -14,7 +18,9 @@ Code: [cli/index.ts](https://github.com/metachris/micropython-ctl/blob/master/cl
 
 ## Installation
 
-```npm install -g micropython-ctl```
+`mctl` is included in the `micropython-ctl` npm package. As a helper you can also install `mctl` directly:
+
+```npm install -g mctl```
 
 ## Usage
 
@@ -23,31 +29,32 @@ $ mctl help
 Usage: index [options] [command]
 
 Options:
-  -t, --tty <device>                            Connect over serial interface (eg. /dev/tty.SLAB_USBtoUART)
-  -h, --host <host>                             Connect over network to hostname or IP of device
-  -p, --password <password>                     Password for network device
-  -s, --silent                                  Hide unnecessary output
-  --help                                        display help for command
+  -t, --tty <device>                                      Connect over serial interface (eg. /dev/tty.SLAB_USBtoUART)
+  -h, --host <host>                                       Connect over network to hostname or IP of device
+  -p, --password <password>                               Password for network device
+  -s, --silent                                            Hide unnecessary output
+  --help                                                  display help for command
 
 Commands:
-  devices                                       List serial devices
-  repl                                          Open a REPL terminal
-  run <fileOrCommand>                           Execute a Python file or command
-  info [options]                                Get information about the board (versions, unique id, space, memory)
-  ls [options] [directory]                      List files on a device
-  cat <filename>                                Print content of a file on the device
-  get <file_or_dirname> [out_file_or_dirname]   Download a file or directory from the device. Download everything with 'get /'
-  put <file_or_dirname> [dest_file_or_dirname]  Upload a file or directory onto the device
-  edit <filename>                               Edit a file, and if changed upload afterwards
-  mkdir <name>                                  Create a directory
-  rm [options] <path>                           Delete a file or directory
-  mv <oldPath> <newPath>                        Rename a file or directory
-  sha256 <filename>                             Get the SHA256 hash of a file
-  reset [options]                               Reset the MicroPython device
-  mount [targetPath]                            Mount a MicroPython device (over serial or network)
-  run-tests                                     Run micropython-ctl tests on a device
-  version                                       Print the version of mctl
-  help [command]                                display help for command
+  devices                                                 List serial devices
+  repl                                                    Open a REPL terminal
+  run <fileOrCommand>                                     Execute a Python file or command
+  info [options]                                          Get information about the board (versions, unique id, space, memory)
+  ls [options] [directory]                                List files on a device
+  cat <filename>                                          Print content of a file on the device
+  get <file_or_dirname> [out_file_or_dirname]             Download a file or directory from the device. Download everything with 'get /'
+  put [options] <file_or_dirname> [dest_file_or_dirname]  Upload a file or directory onto the device
+  sync [directory]                                        Sync a local directory onto the device root (upload new/changes files, delete missing)
+  edit <filename>                                         Edit a file, and if changed upload afterwards
+  mkdir <name>                                            Create a directory
+  rm [options] <path>                                     Delete a file or directory
+  mv <oldPath> <newPath>                                  Rename a file or directory
+  sha256 <filename>                                       Get the SHA256 hash of a file
+  reset [options]                                         Reset the MicroPython device
+  mount [targetPath]                                      Mount a MicroPython device (over serial or network)
+  run-tests                                               Run micropython-ctl tests on a device
+  version                                                 Print the version of mctl
+  help [command]                                          display help for command
 ```
 
 
@@ -89,7 +96,11 @@ mctl info
 mctl repl
 
 # List files
-mctl ls -r
+mctl ls  # list all files in /
+mctl ls foo/  # list all files in /foo/
+mctl ls -r  # recursively list all files and directories
+mctl ls -r --json  # output as json
+mctl ls -r --include-hash --json  # output as json, include sha256 hash of each file
 
 # Print contents of boot.py
 mctl cat boot.py
@@ -112,6 +123,35 @@ mctl put "*.py"
 
 # Upload everything recursively
 mctl put .
+```
+
+#### Example Output
+
+`ls -r --json --include-hash`:
+
+```json
+[
+    {
+        "filename": "/",
+        "size": 0,
+        "isDir": true,
+        "mTime": 0
+    },
+    {
+        "filename": "/boot.py",
+        "size": 139,
+        "isDir": false,
+        "mTime": 0,
+        "sha256": "16f5b4bcb120e9a032242b47967e649a0cc577b41939e81ef7d4b4da181bd17f"
+    },
+    {
+        "filename": "/main.py",
+        "size": 1810,
+        "isDir": false,
+        "mTime": 14,
+        "sha256": "936d92994d0b86eb0e60efd053e12d009d718af3894d7f5c16303b1d7c526306"
+    }
+]
 ```
 
 #### Experimental

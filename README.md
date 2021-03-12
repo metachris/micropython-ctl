@@ -187,6 +187,10 @@ I'm happy about feedback, please reach out:
 
 Code library:
 
+* Benchmark putFile vs. ampy, rshell, webrepl, pymakr
+* Support new raw-paste mode: https://github.com/micropython/micropython/blob/master/docs/reference/repl.rst#raw-mode-and-raw-paste-mode (only in master, should be part of MicroPython 1.14)
+* [WebSerial](https://web.dev/serial/) integration, to allow browser version to connect to serial (see [MDN docs](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/serial))
+* Improve webserver/node-fetch import (currently require in try..catch to not fail in browser): https://github.com/metachris/micropython-ctl/blob/proxy-mode/src/main.ts#L17
 * put/get
   * via network: switch to webrepl protocol instead of manual up- and download
   * `getFile` via serial improvement - currently it fills the device RAM and probably works badly with large file
@@ -194,9 +198,7 @@ Code library:
 
 `mctl`:
 
-* 'put recursive': only if files changed (build md5 hashes for all files, and upload only if different)
 * ⚠ Check for issues when alternating `mctl` and pymakr
-* uploading files that have changed since last upload
 * flash-erase, flash-backup, flash-restore
 * `get` with wildcards: `get '*.py'`
 * wifi status, connect, disconnect
@@ -204,7 +206,7 @@ Code library:
 
 Tests:
 
-* `getFileHash`, `isFileTheSame`
+* `getFileHash`, `isFileTheSame`, `listFiles` with and without hash
 * Tests for `mctl` commands: `get -r .`, `put -r .`, ..
 * automated browser testing (selenium [[1](https://developer.mozilla.org/en-US/docs/Learn/Tools_and_testing/Cross_browser_testing/Your_own_automation_environment)])
 * Run tests against a local micropython instance in CI (eg by using [utelnetserver](https://github.com/cpopp/MicroTelnetServer) to connect serial-like (webrepl is not available in host builds))
@@ -213,18 +215,12 @@ Various:
 
 * Webapp examples: drag & drop files to upload
 * Electron example app
+* Vue.js example with hot-reload
 
 Maybe (not sure it's needed, don't rush into implementing):
 
-* mount related
-  * mount: testing
-  * mount + repl
-  * reuse one instance (eg. in mount mode) to execute other commands
-  * `mctl mount` issues ([see here](https://github.com/metachris/micropython-ctl/issues/3))
-* Vue.js example with attaching the MicroPythonDevice instance to window, so one instance can live across code hot reloads :) (almost done)
 * A slim version for the browser with minimal footprint (only core code, no listfiles etc.)
-* Support new raw-paste mode: https://github.com/micropython/micropython/blob/master/docs/reference/repl.rst#raw-mode-and-raw-paste-mode (only in master, should be part of MicroPython 1.14)
-* Rename ScriptExecutionError to RuntimeError?
+* mount related: testing, mount + repl, enable proxy webserver
 
 ---
 
@@ -262,13 +258,17 @@ yarn version
 yarn pack && tar -xvf micropython-ctl-v* && ll package/
 rm -rf package/ micropython-ctl-v*
 
-# publish
+# publish 'latest'
 yarn publish
+
+# or publish 'beta'
+yarn publish --tag beta
 
 # push to git
 git push && git push --tags
 ```
 
+Perhaps update the `mctl` npm package too (using `cli/package.json`).
 
 Update live web examples with code from Github `master` branch:
 
