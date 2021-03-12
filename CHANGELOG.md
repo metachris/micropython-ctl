@@ -3,6 +3,10 @@ beta (1.14.0)
 * ...
 
 
+1.13.1 (2021-03-12)
+-------------------
+* Proxy mode also works with webrepl/network connection
+
 1.13.0 (2021-03-12)
 -------------------
 * `mctl sync`: synchronize a directory onto the device. checks file hashes and only uploads changed ones, deletes removed one.
