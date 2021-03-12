@@ -1,9 +1,9 @@
-beta (1.13.2)
+beta (1.13.3)
 -------------
 * ...
 
 
-1.13.1 (2021-03-12)
+1.13.2 (2021-03-12)
 -------------------
 * Proxy mode also works with webrepl/network connection
 
