@@ -1,4 +1,4 @@
-# mctl - command line interface for MicroPython devices
+# `mctl`: Command-line Interface for MicroPython Devices
 
 With `mctl` you can:
 
@@ -123,6 +123,15 @@ mctl put "*.py"
 
 # Upload everything recursively
 mctl put .
+
+# Synchronize current local directory onto the device (upload only changed files, remove deleted files)
+mctl sync
+
+# Synchronize specific current local directory onto the device
+mctl sync <directory>
+
+# Edit a file and upload only if changed
+mctl edit boot.py
 ```
 
 #### Example Output

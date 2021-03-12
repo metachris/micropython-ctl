@@ -1,3 +1,8 @@
+beta (1.14.0)
+-------------
+* ...
+
+
 1.13.0 (2021-03-12)
 -------------------
 * `mctl sync`: synchronize a directory onto the device. checks file hashes and only uploads changed ones, deletes removed one.
