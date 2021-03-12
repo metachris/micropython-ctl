@@ -573,26 +573,27 @@ const sync = async (directory = './') => {
 
     // Find files to upload or update
     for (const entry of filesLocal) {
-      let rawFn = entry.filename.substr(directory.length)  // remove local path prefix
-      if (!rawFn.startsWith('/')) rawFn = '/' + rawFn
+      let targetFn = directory === './' ? entry.filename : entry.filename.substr(directory.length)  // remove local path prefix
+      if (!targetFn.startsWith('/')) targetFn = '/' + targetFn
+      // console.log(entry, targetFn)
 
-      if (filesOnDeviceByFilename[rawFn]) {
-        if (entry.isDir && filesOnDeviceByFilename[rawFn].isDir) continue
-        const hashOnDevice = filesOnDeviceByFilename[rawFn].sha256
+      if (filesOnDeviceByFilename[targetFn]) {
+        if (entry.isDir && filesOnDeviceByFilename[targetFn].isDir) continue
+        const hashOnDevice = filesOnDeviceByFilename[targetFn].sha256
         if (hashOnDevice !== entry.sha256) {
-          console.log(`upload ${rawFn}`)
-          await micropython.remove(rawFn)
+          console.log(`upload ${targetFn}`)
+          await micropython.remove(targetFn)
           const data = Buffer.from(fs.readFileSync(entry.filename))
-          await micropython.putFile(rawFn, data)
+          await micropython.putFile(targetFn, data)
         }
       } else {
         if (entry.isDir) {
-          console.log(`create directory ${rawFn}`)
-          await micropython.mkdir(rawFn)
+          console.log(`create directory ${targetFn}`)
+          await micropython.mkdir(targetFn)
         } else {
-          console.log(`upload ${rawFn}`)
+          console.log(`upload ${entry.filename} -> ${targetFn}`)
           const data = Buffer.from(fs.readFileSync(entry.filename))
-          await micropython.putFile(rawFn, data)
+          await micropython.putFile(targetFn, data)
         }
       }
     }

@@ -752,7 +752,13 @@ export class MicroPythonDevice {
     this.sendData('\r\x03\x03')
     // await delayMillis(100) // wait 0.1sec
 
-    await this.readUntil('>>>')
+    try {
+      await this.readUntil('>>>', 5)
+    } catch {
+      // Might be stuck in raw repl. Try to exit into friendly repl with Ctrl+B
+      this.sendData('\r\x03\x02')
+      await this.readUntil('>>>', 5)
+    }
 
     this.sendData('\x01')  // ctrl+A
     await this.readUntil('raw REPL; CTRL-B to exit\r\n>')
