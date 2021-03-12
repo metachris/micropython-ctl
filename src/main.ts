@@ -252,6 +252,24 @@ export class MicroPythonDevice {
     if (webserver) webserver.run(this)
   }
 
+  private async connectProxy() {
+    this.state.connectionMode = ConnectionMode.PROXY
+
+    const resp = await fetch(`http://localhost:${WEBSERVER_PORT}/api/`)
+    if (resp.status === 200) {
+      const respObj = await resp.json()
+      // console.log(respObj)
+      if (respObj.deviceId === this.state.connectionPath) {
+        this.state.connectionState = ConnectionState.OPEN
+        this.state.replMode = ReplMode.TERMINAL
+        this.clearBuffer()
+        if (this.state.replPromiseResolve) this.state.replPromiseResolve('')
+        return true
+      }
+    }
+    return false
+  }
+
   /**
    * Connect to a device over the serial interface
    *
@@ -277,20 +295,8 @@ export class MicroPythonDevice {
     this.state.port.on('error', async (err: string) => {
       // On connection-error: try proxy mode (connect to REST API of an existing instance)
       if (this.state.connectionState === ConnectionState.CONNECTING && err.toString().includes('Resource temporarily unavailable')) {
-        const resp = await fetch(`http://localhost:${WEBSERVER_PORT}/api/`)
-        // console.log('resp', resp)
-        if (resp.status === 200) {
-          const respObj = await resp.json()
-          // console.log(respObj)
-          if (respObj.deviceId === this.state.connectionPath) {
-            this.state.connectionMode = ConnectionMode.PROXY
-            this.state.connectionState = ConnectionState.OPEN
-            this.state.replMode = ReplMode.TERMINAL
-            this.clearBuffer()
-            if (this.state.replPromiseResolve) this.state.replPromiseResolve('')
-            return
-          }
-        }
+        const connectedToProxy = await this.connectProxy()
+        if (connectedToProxy) return
       }
 
       if (this.state.replPromiseReject) {
@@ -368,10 +374,15 @@ export class MicroPythonDevice {
     this.state.ws.onmessage = (event) => this.handleWebsocketMessage(event)
 
     // Handle errors
-    this.state.ws.onerror = (err) => {
+    this.state.ws.onerror = async (err) => {
       if (this.state.wsConnectTimeoutTriggered) {
         if (this.state.replPromiseReject) this.state.replPromiseReject(new CouldNotConnect("Connect timeout"))
         return
+      }
+
+      if (this.state.connectionState === ConnectionState.CONNECTING) {
+        const connectedToProxy = await this.connectProxy()
+        if (connectedToProxy) return
       }
 
       const e = this.state.connectionState === ConnectionState.CONNECTING ? new CouldNotConnect(err.message) : err
@@ -380,6 +391,11 @@ export class MicroPythonDevice {
 
     this.state.ws.onclose = () => {
       // console.log(`WebSocket onclose`)
+
+      // do nothing if we try to connect to proxy
+      if (this.state.connectionMode === ConnectionMode.PROXY && this.state.connectionState === ConnectionState.CONNECTING) return
+
+      // call close handlers after a successful connection
       this.state.connectionState = ConnectionState.CLOSED
       if (this.state.replPromiseResolve) this.state.replPromiseResolve('') // release the 'close' async event
       if (this.onclose) this.onclose()

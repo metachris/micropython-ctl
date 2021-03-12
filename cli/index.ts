@@ -37,6 +37,7 @@ import { getTmpFilename, globToRegExp } from '../src/utils-node';
 import { mount as mountWithFuse } from './mount-device'
 import { checkAndInstall as checkAndInstallFuse } from './fuse-dependencies'
 import { run as runInternalTests } from '../tests/testsuite'
+import { SlowBuffer } from 'buffer';
 
 // tslint:disable-next-line: no-var-requires
 const pjson = require('../package.json');
@@ -127,7 +128,6 @@ const ensureConnectedDevice = async (options?: EnsureConnectedDeviceOptions) => 
       const device = await getSerialDevice()
       if (doPrint) logVerbose(`Connecting over serial to: ${device}`)
       await micropython.connectSerial(device)
-      if (options?.startWebserver) micropython.startInternalWebserver()
 
     } else {
       const _host = host || envMctlHost || envWebreplHost
@@ -136,6 +136,9 @@ const ensureConnectedDevice = async (options?: EnsureConnectedDeviceOptions) => 
       if (!_pass) throw new Error('No webrepl password supplied')
       await micropython.connectNetwork(_host, _pass)
     }
+
+    // Start proxy webserver
+    if (options?.startWebserver) micropython.startInternalWebserver()
 
     if (micropython.isProxyConnection()) {
       logVerbose(`Reusing an existing instance via http://localhost:${WEBSERVER_PORT}/api/`)
