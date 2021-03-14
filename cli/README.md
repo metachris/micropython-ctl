@@ -16,9 +16,9 @@ Code: [cli/index.ts](https://github.com/metachris/micropython-ctl/blob/master/cl
 
 ## Installation
 
-`mctl` is included in the `micropython-ctl` npm package. As a helper you can also install `mctl` directly:
+`mctl` is included in the `micropython-ctl` npm package:
 
-```npm install -g mctl```
+```npm install -g micropython-ctl```
 
 ## Usage
 
