@@ -516,10 +516,11 @@ const reset = async (cmdObj) => {
 }
 
 const sync = async (directory = './') => {
-  console.log('sync', directory)
+  // console.log('sync', directory)
   try {
     await ensureConnectedDevice()
     console.log('Getting file list from device...')
+    await micropython.gcCollect()
     const filesOnDevice = await micropython.listFiles('/', { recursive: true, includeSha256: true })
     const filesOnDeviceByFilename: { [fn: string]: FileListEntry } = {}
     for (const entry of filesOnDevice.reverse()) {

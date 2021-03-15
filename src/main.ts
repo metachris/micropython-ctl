@@ -939,7 +939,7 @@ export class MicroPythonDevice {
     const chunkSize = this.isProxyConnection() ? 5000 : this.isSerialDevice() ? 3000 : 64
 
     const script1 = `import ubinascii; f = open('${targetFilename}', 'wb')`
-    await this.runScript(script1, { stayInRawRepl: true }) // keeps raw repl open for next instruction
+    await this.runScript(script1, { stayInRawRepl: true, runGcCollectBeforeCommand: true }) // keeps raw repl open for next instruction
 
     for (let index = 0; index < dataHex.length; index += chunkSize) {
       const chunk = dataHex.substr(index, chunkSize)
@@ -1099,6 +1099,10 @@ export class MicroPythonDevice {
       }
     }
     return ret
+  }
+
+  public async gcCollect() {
+    await this.runScript('import gc; gc.collect();')
   }
 }
 
