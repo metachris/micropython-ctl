@@ -1,6 +1,6 @@
 {
   "name": "mctl",
-  "version": "1.13.3-beta1",
+  "version": "1.13.3-beta2",
   "description": "mctl: MicroPython-Ctl command line utility",
   "repository": "https://github.com/metachris/micropython-ctl/tree/master/cli",
   "author": "Chris Hager <chris@linuxuser.at>",

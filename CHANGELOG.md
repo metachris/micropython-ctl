@@ -1,6 +1,8 @@
 beta (1.13.3)
 -------------
-* ...
+* `putFile`: run gc.collect by default
+* added `main.gcCollect()`
+* should help with out-of-memory issues with larger file uploads (mctl sync)
 
 
 1.13.2 (2021-03-12)
