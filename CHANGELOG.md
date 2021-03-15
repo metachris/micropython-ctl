@@ -1,4 +1,4 @@
-beta (1.13.3)
+beta (1.13.4)
 -------------
 * `putFile`: run gc.collect by default
 * added `main.gcCollect()`
