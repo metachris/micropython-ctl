@@ -198,6 +198,7 @@ Code library:
 
 `mctl`:
 
+* `mctl reset` error: `Error: timeout in readUntil '>>>'`
 * ⚠ Check for issues when alternating `mctl` and pymakr
 * flash-erase, flash-backup, flash-restore
 * `get` with wildcards: `get '*.py'`

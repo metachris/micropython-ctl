@@ -565,7 +565,7 @@ export class MicroPythonDevice {
       if (this.state.rawReplState === RawReplState.SCRIPT_SENT) {
         // After script is sent, we wait for OK, then stdout_output, then \x04, then stderr_output
         // OK[ok_output]\x04[error_output][x04]>
-        if (dataStr === 'OK') {
+        if (dataTrimmed.startsWith('OK')) {
           // debug('ok received, start collecting input')
           this.clearBuffer()
           this.state.rawReplState = RawReplState.SCRIPT_RECEIVING_RESPONSE

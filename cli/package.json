@@ -1,6 +1,6 @@
 {
   "name": "mctl",
-  "version": "1.13.5-beta1",
+  "version": "1.13.8-beta1",
   "description": "mctl: MicroPython-Ctl command line utility",
   "repository": "https://github.com/metachris/micropython-ctl/tree/master/cli",
   "author": "Chris Hager <chris@linuxuser.at>",
@@ -9,6 +9,6 @@
     "micropython-ctl": "beta"
   },
   "bin": {
-    "mctl": "./node_modules/.bin/mctl"
+    "mctl": "./node_modules/micropython-ctl/dist-node/cli/index.js"
   }
 }

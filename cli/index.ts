@@ -511,7 +511,6 @@ const reset = async (cmdObj) => {
 
   await ensureConnectedDevice()
   await micropython.reset({ softReset: !!cmdObj.soft })  // cannot await result because it's restarting and we loose the connection
-  await delayMillis(500)
   process.exit(0)
 }
 
@@ -782,6 +781,7 @@ program
 // Command: reset
 program
   .command('reset')
+  .alias('reboot')
   .option('--soft', 'soft-reset instead of hard-reset')
   .description('Reset the MicroPython device')
   .action(reset);
