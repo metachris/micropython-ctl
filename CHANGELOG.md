@@ -1,6 +1,14 @@
-1.13.5-beta1 (dev)
+1.13.8-beta1 (dev)
 ------------------
-* ...
+
+https://github.com/metachris/micropython-ctl/pull/8
+
+* cli: guess /dev/tty device by ending of `-t` argument
+  * searches for files that start with `/dev/tty` and end with the argument
+  * eg. `mctl ls -t USB0` uses `/dev/ttyUSB0`
+  * so does `mctl ls -t 0`
+* end repl fix
+* more debug output
 
 
 1.13.4 (2020-03-15)

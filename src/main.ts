@@ -566,7 +566,7 @@ export class MicroPythonDevice {
         // After script is sent, we wait for OK, then stdout_output, then \x04, then stderr_output
         // OK[ok_output]\x04[error_output][x04]>
         if (dataTrimmed.startsWith('OK')) {
-          // debug('ok received, start collecting input')
+          debug2('- ok received, start collecting input')
           this.clearBuffer()
           this.state.rawReplState = RawReplState.SCRIPT_RECEIVING_RESPONSE
           this.state.receivingResponseSubState = RawReplReceivingResponseSubState.SCRIPT_RECEIVING_OUTPUT
@@ -579,17 +579,18 @@ export class MicroPythonDevice {
 
         // iterate over received bytes
         for (const entry of data) {
-          // debug(entry)
+          debug2('- process entry:', entry)
 
           // There are 3 special markers: switching from output to error, from error to waiting for end, and
           if (entry === 0x04 && this.state.receivingResponseSubState === RawReplReceivingResponseSubState.SCRIPT_RECEIVING_OUTPUT) {
-            // debug('switch to error mode')
+            debug2('- switching error part')
             this.state.receivingResponseSubState = RawReplReceivingResponseSubState.SCRIPT_RECEIVING_ERROR
           } else if (entry === 0x04 && this.state.receivingResponseSubState === RawReplReceivingResponseSubState.SCRIPT_RECEIVING_ERROR) {
-            // debug('switch to end mode')
+            debug2('- switching to end mode')
             this.state.receivingResponseSubState = RawReplReceivingResponseSubState.SCRIPT_WAITING_FOR_END
           } else if (entry === 62 && this.state.receivingResponseSubState === RawReplReceivingResponseSubState.SCRIPT_WAITING_FOR_END) {
             // ALL DONE, now trim the buffers and resolve the promises
+            debug2('- raw repl interaction finished')
             // debug('all done!!!')
 
             this.state.inputBuffer = this.state.inputBuffer.trim()
