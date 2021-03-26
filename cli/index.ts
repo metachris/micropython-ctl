@@ -37,7 +37,6 @@ import { getTmpFilename, globToRegExp } from '../src/utils-node';
 import { mount as mountWithFuse } from './mount-device'
 import { checkAndInstall as checkAndInstallFuse } from './fuse-dependencies'
 import { run as runInternalTests } from '../tests/testsuite'
-import { SlowBuffer } from 'buffer';
 
 // tslint:disable-next-line: no-var-requires
 const pjson = require('../package.json');
@@ -90,7 +89,7 @@ interface EnsureConnectedDeviceOptions {
  */
 const ensureConnectedDevice = async (options?: EnsureConnectedDeviceOptions) => {
   const opts = program.opts()
-  const tty = opts.tty
+  const tty = opts.tty as string
   const host = opts.host
   const password = opts.password
   const envWebreplHost = process.env.WEBREPL_HOST
@@ -117,7 +116,14 @@ const ensureConnectedDevice = async (options?: EnsureConnectedDeviceOptions) => 
 
     if (shouldConnectToSerial()) {
       const getSerialDevice = async (): Promise<string> => {
-        if (tty) return tty  // -t / --tty option
+        if (tty) {
+          if (tty.startsWith('/')) return tty
+          if (fs.existsSync('/dev/')) {
+            const ttyInDev = fs.readdirSync('/dev/').filter(e => e.startsWith('tty') && e.endsWith(tty))
+            if (ttyInDev.length) return '/dev/' + ttyInDev[0]
+          }
+          return tty  // -t / --tty option
+        }
         if (envMctlTty) return envMctlTty  // MCTL_TTY env var
         if (envAmpyPort) return envAmpyPort  // AMPY_PORT env var
         const devices = await listSerialDevices()  // Auto-detect devices and use first one
@@ -194,7 +200,7 @@ const listFilesOnDevice = async (directory = '/', cmdObj) => {
  * @param dest filename or path
  */
 const put = async (filename: string, dest?: string, cmdObj?: any) => {
-  logVerbose('put', filename, '->', dest)
+  // logVerbose('put', filename, '->', dest)
   const { changedOnly } = cmdObj
 
   // helper to perform individual upload
@@ -259,7 +265,7 @@ const put = async (filename: string, dest?: string, cmdObj?: any) => {
 }
 
 const mkdir = async (name: string) => {
-  logVerbose('mkdir', name)
+  // logVerbose('mkdir', name)
 
   await ensureConnectedDevice()
 
@@ -432,7 +438,7 @@ const rm = async (targetPath: string, cmdObj) => {
 }
 
 const mv = async (oldPath: string, newPath: string) => {
-  logVerbose('mv', oldPath, newPath)
+  // logVerbose('mv', oldPath, newPath)
 
   try {
     await ensureConnectedDevice()
@@ -450,9 +456,9 @@ const mv = async (oldPath: string, newPath: string) => {
 }
 
 const run = async (fileOrCommand: string) => {
-  logVerbose('run', fileOrCommand)
+  // logVerbose('run', fileOrCommand)
   const script = fs.existsSync(fileOrCommand) ? fs.readFileSync(fileOrCommand).toString() : fileOrCommand
-  logVerbose(script)
+  // logVerbose(script)
 
   try {
     await ensureConnectedDevice()
@@ -467,7 +473,7 @@ const run = async (fileOrCommand: string) => {
 }
 
 const edit = async (filename: string) => {
-  logVerbose('edit', filename)
+  // logVerbose('edit', filename)
   const baseFilename = filename.replace(/^.*[\\\/]/, '')
   const tmpFilename = getTmpFilename(baseFilename)
 
@@ -511,7 +517,6 @@ const reset = async (cmdObj) => {
 
   await ensureConnectedDevice()
   await micropython.reset({ softReset: !!cmdObj.soft })  // cannot await result because it's restarting and we loose the connection
-  await delayMillis(500)
   process.exit(0)
 }
 
@@ -782,6 +787,7 @@ program
 // Command: reset
 program
   .command('reset')
+  .alias('reboot')
   .option('--soft', 'soft-reset instead of hard-reset')
   .description('Reset the MicroPython device')
   .action(reset);
