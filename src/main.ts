@@ -255,17 +255,21 @@ export class MicroPythonDevice {
   private async connectProxy() {
     this.state.connectionMode = ConnectionMode.PROXY
 
-    const resp = await fetch(`http://localhost:${WEBSERVER_PORT}/api/`)
-    if (resp.status === 200) {
-      const respObj = await resp.json()
-      // console.log(respObj)
-      if (respObj.deviceId === this.state.connectionPath) {
-        this.state.connectionState = ConnectionState.OPEN
-        this.state.replMode = ReplMode.TERMINAL
-        this.clearBuffer()
-        if (this.state.replPromiseResolve) this.state.replPromiseResolve('')
-        return true
+    try {
+      const resp = await fetch(`http://localhost:${WEBSERVER_PORT}/api/`)
+      if (resp.status === 200) {
+        const respObj = await resp.json()
+        // console.log(respObj)
+        if (respObj.deviceId === this.state.connectionPath) {
+          this.state.connectionState = ConnectionState.OPEN
+          this.state.replMode = ReplMode.TERMINAL
+          this.clearBuffer()
+          if (this.state.replPromiseResolve) this.state.replPromiseResolve('')
+          return true
+        }
       }
+    } catch (e) {
+      debug(e)
     }
     return false
   }
