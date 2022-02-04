@@ -32,7 +32,7 @@
     "express": "^4.17.1",
     "isomorphic-ws": "^4.0.1",
     "node-fetch": "^2.6.1",
-    "serialport": "^9.0.3",
+    "serialport": "^10.1.0",
     "ws": "^7.4.1"
   },
   "devDependencies": {
