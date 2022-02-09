@@ -290,10 +290,10 @@ export class MicroPythonDevice {
     this.clearBuffer()
 
     // Get serialport either through window.SerialPort, or require
-    const SerialPort = typeof window !== 'undefined' && window.SerialPort ? window.SerialPort : require('serialport')
+    const SerialPort = typeof window !== 'undefined' && window.SerialPort ? window.SerialPort : require('serialport').SerialPort
 
     // Open the serial port
-    this.state.port = new SerialPort(path, { baudRate: 115200 })
+    this.state.port = new SerialPort({ path, baudRate: 115200 })
 
     // error listener
     this.state.port.on('error', async (err: string) => {
