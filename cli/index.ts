@@ -663,8 +663,9 @@ const repl = async () => {
     readline.emitKeypressEvents(process.stdin);
     process.stdin.setRawMode(true);
     process.stdin.on('keypress', async (_str, key) => {
-      // Quit on Ctrl+K
+      // Quit on Ctrl+K or Ctrl+X
       if (key.name === 'k' && key.ctrl) process.exit(0)
+      if (key.name === 'x' && key.ctrl) process.exit(0)
 
       // Send anything to the device, if connected
       if (micropython.isConnected() && micropython.isTerminalMode()) {
@@ -672,7 +673,7 @@ const repl = async () => {
       }
     });
 
-    console.log('Exit REPL by pressing Ctrl+K')
+    console.log('Exit REPL by pressing Ctrl+K or Ctrl+X')
   } catch (e) {
     console.log('Error:', e)
     await micropython.disconnect()
