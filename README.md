@@ -1,3 +1,5 @@
+## Fork of https://github.com/metachris/micropython-ctl with serialport v10 support
+
 # MicroPython-Ctl: TypeScript ❤️ MicroPython
 
 Talk to MicroPython devices from websites/webapps, Node.js programs, Electron applications, VS Code extensions, the terminal, and more.
