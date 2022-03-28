@@ -6,7 +6,7 @@
  * - Author: chris@linuxuser.at / https://twitter.com/metachris
  */
 import WebSocket from 'isomorphic-ws'
-import { Buffer } from 'buffer/'
+import { Buffer } from 'buffer'
 import { InvalidPassword, CouldNotConnect, ScriptExecutionError } from './errors'
 import { debug, debug2, dedent } from './utils';
 import * as PythonScripts from './python-scripts';
