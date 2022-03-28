@@ -6,7 +6,7 @@ import { MicroPythonDevice } from '../src/main';
 import assert from 'assert'
 import crypto from 'crypto';
 import { Buffer } from 'buffer/'
-import SerialPort from 'serialport';
+import { SerialPort } from 'serialport';
 import { delayMillis } from '../src/utils';
 import { Command } from 'commander';
 
