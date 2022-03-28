@@ -187,11 +187,11 @@ export class MicroPythonDevice {
       inputBuffer: '',
       errorBuffer: '',
       broadcastCommandOutputAsTerminalData: false,
-      dataRawBuffer: new Buffer(0),
+      dataRawBuffer: Buffer.alloc(0),
 
       isReadingUntil: false,
-      readUntilData: new Buffer(0),
-      readUntilBuffer: new Buffer(0),
+      readUntilData: Buffer.alloc(0),
+      readUntilBuffer: Buffer.alloc(0),
       readUntilPromise: null,
       readUntilPromiseResolve: null,
       readUntilPromiseReject: null,
@@ -502,7 +502,7 @@ export class MicroPythonDevice {
   private clearBuffer() {
     this.state.inputBuffer = ''
     this.state.errorBuffer = ''
-    this.state.dataRawBuffer = new Buffer(0)
+    this.state.dataRawBuffer = Buffer.alloc(0)
   }
 
   /**
@@ -511,7 +511,7 @@ export class MicroPythonDevice {
    */
   private async readUntil(data: Buffer | string, timeout = 10) {
     this.state.readUntilData = Buffer.isBuffer(data) ? data : Buffer.from(data)
-    this.state.readUntilBuffer = new Buffer(0)
+    this.state.readUntilBuffer = Buffer.alloc(0)
     this.state.isReadingUntil = true
 
     // Create promise
