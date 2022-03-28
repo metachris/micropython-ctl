@@ -1,3 +1,16 @@
+# Changelog
+
+All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+
+### [1.13.8](https://github.com/metachris/micropython-ctl/compare/v1.13.4...v1.13.8) (2022-02-10)
+
+
+### Bug Fixes
+
+* add ctrl+x for exit (ctrl+k taken in vscode) ([5b7bc4b](https://github.com/metachris/micropython-ctl/commit/5b7bc4bcf456b450ae8c89e6f7bde99324a8a090))
+* bump + fix for serialport ([179cff7](https://github.com/metachris/micropython-ctl/commit/179cff7ab3e465374b1e81cc8c46d3bb89a238a5))
+* serialport bad version ([e8a61a4](https://github.com/metachris/micropython-ctl/commit/e8a61a41b8ca8a1514382836a71b3359449ea98e))
+
 1.13.8-beta1 (dev)
 ------------------
 
